@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Dashboard – NurulQuran Companion</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#047857',
+              light: '#059669',
+              dark: '#064e3b',
+              deep: '#022c22',
+            },
+            gold: {
+              DEFAULT: '#d97706',
+              light: '#f59e0b',
+              dark: '#b45309',
+            },
+            islamic: {
+              bg: '#f8faf9',
+              'dark-bg': '#03130c',
+              'dark-card': '#082216',
+              'dark-border': '#113824',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom Styles Link -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-islamic-bg dark:bg-islamic-dark-bg text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- 1. STICKY NAVBAR -->
+  <header class="sticky top-0 z-40 w-full border-b border-emerald-500/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between gap-4">
+        
+        <!-- Logo -->
+        <div class="flex items-center gap-2">
+          <a href="index.html" class="flex items-center gap-2 group">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-md group-hover:scale-105 transition-transform duration-200">
+              <svg class="w-5 h-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </div>
+            <span class="text-xl font-bold bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-600 dark:from-emerald-400 dark:via-emerald-500 dark:to-amber-500 bg-clip-text text-transparent">
+              NurulQuran
+            </span>
+          </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-6">
+          <a href="index.html" class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Home</a>
+          <a href="index.html#quran" class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Quran Companion</a>
+          <a href="index.html#learn" class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Learning Modules</a>
+          <a href="dashboard.html" class="text-sm font-semibold text-emerald-700 dark:text-emerald-400 font-bold transition-colors">Dashboard</a>
+        </nav>
+
+        <!-- Auth Buttons -->
+        <div class="hidden md:flex items-center gap-4">
+          <div id="auth-loading" class="w-8 h-8 rounded-full border-2 border-emerald-500/30 border-t-emerald-600 animate-spin"></div>
+          
+          <div id="auth-logged-in" class="hidden flex items-center gap-4">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10">
+              <div id="user-avatar" class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800/40">
+                U
+              </div>
+              <span id="user-name" class="text-sm font-medium text-slate-700 dark:text-slate-200 max-w-[120px] truncate">
+                Brother/Sister
+              </span>
+            </div>
+            <button id="btn-signout" class="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 dark:border-slate-800 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 rounded-xl text-sm font-semibold transition-all">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Toggle -->
+        <div class="flex md:hidden">
+          <button onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-650 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-100 dark:border-slate-800/60 bg-white dark:bg-slate-900 px-4 py-3 space-y-3 shadow-lg">
+      <a href="index.html" class="block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40">Home</a>
+      <a href="index.html#quran" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40">Quran Companion</a>
+      <a href="index.html#learn" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40">Learning Modules</a>
+      <a href="dashboard.html" class="block px-3 py-2 rounded-xl text-base font-bold bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400">Dashboard</a>
+      <hr class="border-slate-100 dark:border-slate-800 my-1">
+      <div id="mobile-auth-logged-in" class="space-y-2">
+        <div class="flex items-center gap-3 px-3 py-2">
+          <div id="mobile-user-avatar" class="flex items-center justify-center w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800/40">
+            U
+          </div>
+          <div>
+            <div id="mobile-user-name" class="text-sm font-semibold text-slate-800 dark:text-slate-100">Brother/Sister</div>
+            <div id="mobile-user-email" class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">email@domain.com</div>
+          </div>
+        </div>
+        <button id="mobile-btn-signout" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200/25 text-red-600 dark:text-red-400 hover:bg-red-100 rounded-xl text-sm font-semibold">
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. ACCESS LOCK SCREEN OVERLAY -->
+  <div id="lock-screen" class="hidden flex-grow flex flex-col items-center justify-center p-6 min-h-[70vh]">
+    <div class="w-full max-w-md p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-center shadow-xl space-y-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <div class="space-y-2">
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Private Companion Dashboard</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+          Create an account or sign in to track your reading streaks, memorization milestones, 
+          local prayer times, and learning modules progress.
+        </p>
+      </div>
+      <a href="index.html?auth=login" class="block w-full py-3 bg-gradient-to-r from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white text-center rounded-xl font-semibold shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all">
+        Sign In / Sign Up
+      </a>
+    </div>
+  </div>
+
+  <!-- 4. DASHBOARD CONTAINER (Visible to Authenticated Users) -->
+  <main id="dashboard-content" class="hidden flex-grow py-8 bg-islamic-bg dark:bg-islamic-dark-bg transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      
+      <!-- Welcome Banner -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 md:p-8 rounded-3xl bg-gradient-to-r from-emerald-950 to-emerald-850 text-white shadow-lg relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+        <div class="space-y-1 relative z-10">
+          <h1 class="text-2xl md:text-3xl font-bold">
+            Assalamu Alaikum, <span id="dash-greeting-name">Brother/Sister</span>
+          </h1>
+          <p class="text-sm text-emerald-200">
+            Welcome back to your companion dashboard. Keep growing in knowledge and faith.
+          </p>
+        </div>
+        <div id="dash-datetime" class="text-right text-xs md:text-sm font-semibold text-amber-300 bg-emerald-900/40 px-4 py-2 rounded-2xl border border-emerald-800/35 self-start md:self-center relative z-10">
+          Loading Date & Time...
+        </div>
+      </div>
+
+      <!-- Dashboard Layout Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Side Cards (8 Cols) -->
+        <div class="lg:col-span-8 space-y-8">
+          
+          <!-- Quick Stats Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            
+            <!-- Streak -->
+            <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                <svg class="w-6 h-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-slate-800 dark:text-white">5 Days</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">Reading Streak</div>
+              </div>
+            </div>
+
+            <!-- Memorized -->
+            <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-slate-800 dark:text-white">12 Surahs</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">Memorized (Hifz)</div>
+              </div>
+            </div>
+
+            <!-- Lessons -->
+            <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-slate-800 dark:text-white">2 Modules</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">Courses Completed</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Active Enrolled Module progress bar -->
+          <div class="p-6 md:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.485V5.132a2 2 0 011.082-1.789l6-3a2 2 0 011.836 0l6 3a2 2 0 011.082 1.789v10.353a2 2 0 01-1.082 1.789L15 20M9 20a2 2 0 004 0m-4 0V11m0 9h4" /></svg>
+                Active Learning Module
+              </h3>
+              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer">
+                All Courses
+              </span>
+            </div>
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div class="space-y-1">
+                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase">
+                  Level 1 - Beginner
+                </div>
+                <h4 class="text-base font-bold text-slate-800 dark:text-white">
+                  Introduction to Tajweed Rules
+                </h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  Next Lesson: Makharij al-Huroof (Articulation Points of Letters)
+                </p>
+              </div>
+              
+              <div class="w-full md:w-48 space-y-1.5">
+                <div class="flex justify-between text-xs font-bold">
+                  <span class="text-slate-500">Progress</span>
+                  <span class="text-emerald-600 dark:text-emerald-400">65%</span>
+                </div>
+                <div class="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div class="h-full bg-emerald-600 dark:bg-emerald-505 rounded-full" style="width: 65%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <a href="index.html#learn" class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">
+                Resume Course →
+              </a>
+            </div>
+          </div>
+
+          <!-- Last Read & Bookmarks Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Last Read Card -->
+            <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
+              <div class="space-y-4">
+                <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <svg class="w-4.5 h-4.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                  Last Read Verse
+                </h3>
+                <div class="p-4 rounded-2xl bg-amber-505/5 border border-amber-500/10 text-center space-y-3">
+                  <div class="text-xs text-amber-600 dark:text-amber-400 font-semibold">
+                    Surah Al-Kahf (18:10)
+                  </div>
+                  <div class="quran-text text-xl font-bold text-slate-800 dark:text-slate-200">
+                    إِذْ أَوَى الْفِتْيَةُ إِلَى الْكَهْفِ
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 italic">
+                    &ldquo;When the youths retreated to the cave...&rdquo;
+                  </p>
+                </div>
+              </div>
+              <a href="index.html#quran" class="w-full py-2 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold text-center border border-slate-200/50 dark:border-slate-800 transition-colors">
+                Continue Reading
+              </a>
+            </div>
+
+            <!-- Bookmarks -->
+            <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
+              <div class="space-y-4">
+                <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <svg class="w-4.5 h-4.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                  Bookmarked Surahs
+                </h3>
+                <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  <a href="index.html#quran" class="py-2.5 flex items-center justify-between text-xs hover:text-emerald-600 transition-colors group">
+                    <span class="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600">Surah Al-Kahf</span>
+                    <span class="text-slate-400 dark:text-slate-500">Verse 1-10</span>
+                  </a>
+                  <a href="index.html#quran" class="py-2.5 flex items-center justify-between text-xs hover:text-emerald-600 transition-colors group">
+                    <span class="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600">Surah Yaseen</span>
+                    <span class="text-slate-400 dark:text-slate-500">Verse 1-83</span>
+                  </a>
+                  <a href="index.html#quran" class="py-2.5 flex items-center justify-between text-xs hover:text-emerald-600 transition-colors group">
+                    <span class="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600">Surah Al-Mulk</span>
+                    <span class="text-slate-400 dark:text-slate-500">Verse 1-30</span>
+                  </a>
+                </div>
+              </div>
+              <a href="index.html#quran" class="w-full py-2 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold text-center border border-slate-200/50 dark:border-slate-800 transition-colors">
+                Manage Bookmarks
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Right Side Widgets (4 Cols) -->
+        <div class="lg:col-span-4 space-y-8">
+          
+          <!-- Local Prayer Times widget -->
+          <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <svg class="w-4.5 h-4.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Prayer Times
+              </h3>
+              <span class="text-[10px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded uppercase">Local</span>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Fajr -->
+              <div class="p-3.5 rounded-2xl flex items-center justify-between border bg-slate-50/50 dark:bg-slate-800/10 border-transparent text-slate-400 opacity-60">
+                <span class="text-xs font-bold uppercase tracking-wider">Fajr</span>
+                <div class="flex items-center gap-3">
+                  <span class="text-sm font-semibold">04:12 AM</span>
+                  <span class="text-emerald-600">✓</span>
+                </div>
+              </div>
+              <!-- Dhuhr -->
+              <div class="p-3.5 rounded-2xl flex items-center justify-between border bg-slate-50/50 dark:bg-slate-800/10 border-transparent text-slate-400 opacity-60">
+                <span class="text-xs font-bold uppercase tracking-wider">Dhuhr</span>
+                <div class="flex items-center gap-3">
+                  <span class="text-sm font-semibold">12:28 PM</span>
+                  <span class="text-emerald-600">✓</span>
+                </div>
+              </div>
+              <!-- Asr -->
+              <div class="p-3.5 rounded-2xl flex items-center justify-between border bg-emerald-500/15 border-emerald-500/70 text-slate-800 dark:text-white shadow-sm">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider">Asr</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-ping"></span>
+                </div>
+                <span class="text-sm font-semibold">04:54 PM</span>
+              </div>
+              <!-- Maghrib -->
+              <div class="p-3.5 rounded-2xl flex items-center justify-between border bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+                <span class="text-xs font-bold uppercase tracking-wider">Maghrib</span>
+                <span class="text-sm font-semibold">07:18 PM</span>
+              </div>
+              <!-- Isha -->
+              <div class="p-3.5 rounded-2xl flex items-center justify-between border bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+                <span class="text-xs font-bold uppercase tracking-wider">Isha</span>
+                <span class="text-sm font-semibold">08:44 PM</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Details Card -->
+          <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+            <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <svg class="w-4.5 h-4.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              Profile Details
+            </h3>
+            
+            <div class="space-y-4">
+              <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+                <div id="dash-user-avatar" class="flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-100 dark:border-emerald-900/30">
+                  U
+                </div>
+                <div class="space-y-0.5 overflow-hidden">
+                  <div id="dash-user-displayname" class="font-bold text-sm text-slate-800 dark:text-white truncate">Brother/Sister</div>
+                  <div id="dash-user-email" class="text-xs text-slate-400 dark:text-slate-500 truncate">email@domain.com</div>
+                </div>
+              </div>
+
+              <div class="space-y-2.5 text-xs text-slate-500 dark:text-slate-400">
+                <div class="flex justify-between gap-2">
+                  <span>Account ID:</span>
+                  <span id="dash-user-uid" class="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[150px]">firebase-uid-string</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Verification Status:</span>
+                  <span id="dash-user-verified" class="font-semibold text-emerald-600 dark:text-emerald-400">Verified</span>
+                </div>
+              </div>
+
+              <button id="btn-dash-signout" class="w-full mt-2 py-2.5 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                <svg class="w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Sign Out of NurulQuran
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 5. FOOTER -->
+  <footer class="border-t border-emerald-500/10 bg-white dark:bg-slate-950 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        &copy; 2026 NurulQuran. All rights reserved.
+      </p>
+      <div class="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-550">
+        <span>Made as a complete Islamic learning companion.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Import Firebase configuration & app scripts -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+      }
+    }
+  </script>
+  
+  <script type="module" src="app.js"></script>
+  
+  <script>
+    // Live Clock Update
+    function updateClock() {
+      const el = document.getElementById('dash-datetime');
+      if (!el) return;
+      
+      const now = new Date();
+      el.textContent = now.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }) + " - " + now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+    
+    updateClock();
+    setInterval(updateClock, 60000);
+
+    // Mobile Hamburger
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>

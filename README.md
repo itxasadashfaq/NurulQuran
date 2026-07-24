@@ -1,130 +1,78 @@
 # NurulQuran – A Complete Islamic Learning & Quran Companion Platform
 
-NurulQuran is a premium, modern web application designed for Quran study, memorization, daily prayer tracking, and structured Islamic learning modules. This codebase represents the complete foundation built under **Module 1 (Planning & Project Foundation)**.
+NurulQuran is a premium, modern companion platform for Quran study, prayer tracking, and structured Islamic learning modules. This codebase represents the simplified version of **Module 1 (Planning & Project Foundation)**.
+
+By leveraging a decoupled design, this setup separates the frontend and backend into clear, vanilla files that work immediately with VS Code's **Go Live (Live Server)** extension without compilation overhead.
 
 ---
 
-## 🌟 Key Features (Module 1)
-
-*   **Premium Islamic Aesthetic:** Designed with a curated color system (deep emerald greens, gold/amber accents, slate grays, and soft white/dark modes) featuring custom fonts (Amiri for Arabic scripture, Inter for UI), custom scrollbars, and fluid hover animations.
-*   **Responsive Navigation & Layout:** Interactive navbar (sticky with glassmorphism, collapsible hamburger menu for mobile) and clean structural layout including header, footer, and main viewport sizing.
-*   **Firebase Authentication UI & Integration:** Client-side integration of Firebase Auth (Login & Signup modal) with real-time UI state tracking (personalized greetings, profiles, and conditional dashboard routing).
-*   **Mongoose-cached MongoDB Sync:** Serverless Next.js API route (`/api/auth/sync`) that automatically synchronizes/upserts Firebase authenticated profiles to MongoDB to prevent session data loss.
-*   **Responsive Homepage:** An engaging landing page showcasing core modules, a *Daily Verse* container with custom Quranic styling, and an active *Prayer Times* widget.
-*   **Personal Companion Dashboard:** Access-restricted dashboard featuring reading habits/streaks, active learning module completion trackers, last read references, bookmark widgets, local prayer times lists, profile metrics, and sign out controls.
-
----
-
-## 📂 Project Folder Structure
-
-The project follows a standard modular Next.js (App Router) structure:
+## 📂 Simplified Folder Structure
 
 ```text
 ZYNAX SOLUTION PROJECT/
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── auth/
-│   │   │       └── sync/
-│   │   │           └── route.js       # Syncs Firebase users to MongoDB
-│   │   │   
-│   │   ├── dashboard/
-│   │   │   └── page.js                # Private user dashboard page
-│   │   │   
-│   │   ├── favicon.ico
-│   │   ├── globals.css                # Tailwind CSS v4, animations & fonts
-│   │   ├── layout.js                  # App Shell, fonts, context wrapper
-│   │   └── page.js                    # Responsive homepage
-│   │
-│   ├── components/
-│   │   ├── AuthModal.js               # Login/Signup forms using Firebase Auth
-│   │   ├── Footer.js                  # Multi-column footer
-│   │   └── Navbar.js                  # Sticky glassmorphic navigation header
-│   │
-│   ├── lib/
-│   │   ├── AuthContext.js             # Context provider for client session states
-│   │   ├── firebase.js                # Firebase Client initialization
-│   │   └── mongodb.js                 # Cached serverless Mongoose connection
-│   │
-│   └── models/
-│       └── User.js                    # MongoDB User schema model
+├── index.html          # Responsive homepage, navbar, footer & auth modal
+├── dashboard.html      # Protected user dashboard (streaks, progress, prayers)
+├── styles.css          # Vanilla theme variables, fonts, glassmorphism & animations
+├── app.js              # Client-side JavaScript (Firebase Auth, UI controllers)
 │
-├── public/                            # Static assets
-├── .env.example                       # Environmental variables blueprint
-├── .gitignore
-├── eslint.config.mjs                  # ESLint configuration
-├── jsconfig.json                      # Path aliases config (@/*)
-├── next.config.mjs                    # Next.js configurations
-├── package.json                       # Scripts & dependency packages
-├── postcss.config.mjs
-└── README.md                          # Project documentation
+├── server.js           # Lightweight Node.js/Express backend (serves configs, syncs MongoDB)
+├── package.json        # Backend scripts & dependency packages
+├── .env.example        # Blueprint configuration parameters
+└── README.md           # Simple startup documentation
 ```
 
 ---
 
 ## 🛠️ Technology Stack
 
-1.  **Core Framework:** Next.js 16 (App Router)
-2.  **Logic & Templating:** React 19 / JavaScript ES6+
-3.  **Styling & Theme:** Tailwind CSS v4 (configured via `@theme` in CSS)
-4.  **Authentication:** Firebase Authentication (Client SDK)
-5.  **Database Connection:** MongoDB Atlas / Mongoose ORM
-6.  **Icons:** Lucide React
+1.  **Frontend Layout:** HTML5 Semantic Structure & Tailwind CSS v3 via CDN
+2.  **Frontend Logic:** Vanilla ES6 Javascript (using modules map)
+3.  **Authentication:** Firebase Auth (v10 JS Client SDK loaded via GStatic)
+4.  **Backend Server:** Node.js + Express
+5.  **Database Sync:** MongoDB Atlas + Mongoose ORM
 
 ---
 
-## ⚙️ Setup & Configuration
+## ⚙️ Setup & Local Startup Guide
 
-Follow these steps to run the platform locally:
+Follow these 3 simple steps to get the project running locally:
 
-### 1. Prerequisites
-*   Node.js v18 or later installed.
-*   A Firebase project created in the [Firebase Console](https://console.firebase.google.com/).
-*   A MongoDB connection URI (from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or a local database).
+### 1. Configure Environmental Variables
+Copy the `.env.example` file and create a new file named `.env.local` or `.env` in the root folder, then populate your credentials:
 
-### 2. Environment Setup
-Create a `.env.local` file in the root directory (based on `.env.example`):
-
-```bash
+```env
 # Firebase Client Credentials
-NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+FIREBASE_API_KEY=your_firebase_api_key
+FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
 
-# MongoDB Server Connection URI
+# MongoDB Server connection string
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/nurulquran?retryWrites=true&w=majority
 ```
 
 > [!IMPORTANT]
-> Make sure to enable **Email/Password Provider** in your Firebase Console under **Authentication > Sign-in method** for signup/login to work.
-
-### 3. Local Development
-Install the dependencies and start the development server:
-
-```bash
-# Install additional components (if needed, otherwise package-lock.json is ready)
-npm install
-
-# Start Next.js development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
-
-### 4. Build Production Bundle
-To compile and optimize the app for production:
-
-```bash
-npm run build
-```
+> Make sure to enable the **Email/Password** provider in your Firebase project console under **Authentication > Sign-in method** for authentication to function.
 
 ---
 
-## 📅 Roadmap: Upcoming Modules
+### 2. Start the Backend Server
+Install the lightweight node modules and start the backend Express server:
 
-*   **Module 2 (Interactive Quran Core):** Digital Quran reading pane, word-by-word analysis, Audio player widget, bookmark listings, search engine.
-*   **Module 3 (Learning Platform & Quizzes):** Interactive courses, video/text lectures, Tajweed rules parser, progress dashboard quizzes, certification models.
-*   **Module 4 (Hifz Memorization Tracker):** Memorization tracker interface, spacing repetition, speech recitation evaluator, streaks & badge awards.
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Run backend Express server
+npm start
+```
+The server will start listening on port `5000` (http://localhost:5000) and automatically establish a connection with MongoDB.
+
+---
+
+### 3. Open the Frontend Platform
+Open VS Code, click the **Go Live** button in the bottom right corner (from the Live Server extension) or double-click the `index.html` file to run the web application. 
+
+It will automatically serve the page on **`http://127.0.0.1:5500/index.html`**, load Firebase Auth, and interface with your Express backend at port `5000`!
