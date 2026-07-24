@@ -2,234 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NurulQuran – Project Foundation & Entry Portal</title>
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;450;600;700&display=swap" rel="stylesheet">
-  
+  <meta http-equiv="refresh" content="0; url=http://localhost:3000">
+  <title>Redirecting to NurulQuran...</title>
+  <script>
+    window.location.href = "http://localhost:3000";
+  </script>
   <style>
-    :root {
-      --primary: #047857;
-      --primary-dark: #064e3b;
-      --gold: #d97706;
-      --gold-light: #f59e0b;
-      --bg: #03130c;
-      --text: #f1f5f9;
-      --card-bg: rgba(8, 34, 22, 0.75);
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 2rem 1rem;
-      background-image: radial-gradient(var(--primary-dark) 1.5px, transparent 1.5px);
-      background-size: 32px 32px;
-      overflow-x: hidden;
+      height: 100vh;
+      margin: 0;
+      background-color: #03130c;
+      color: #f1f5f9;
     }
-
-    .container {
-      max-width: 650px;
-      width: 100%;
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(4, 120, 87, 0.25);
-      border-radius: 24px;
-      padding: 2.5rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      text-align: center;
-      position: relative;
-    }
-
-    .container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
-      background: linear-gradient(90deg, var(--primary), var(--gold), var(--primary-dark));
-      border-radius: 24px 24px 0 0;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(217, 119, 6, 0.15);
-      border: 1px solid rgba(217, 119, 6, 0.3);
-      color: var(--gold-light);
-      padding: 0.4rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      letter-spacing: 0.05em;
-    }
-
-    h1 {
-      font-size: 2.25rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #fff 30%, var(--gold-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    p.description {
-      color: #94a3b8;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      margin-bottom: 2rem;
-    }
-
-    .dev-card {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 1.25rem;
-      margin-bottom: 2rem;
-      text-align: left;
-    }
-
-    .dev-card h3 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--gold);
-      margin-bottom: 0.75rem;
-      font-weight: 700;
-    }
-
-    .dev-card ul {
-      list-style: none;
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      display: grid;
-      grid-template-cols: 1fr 1fr;
-      gap: 0.5rem;
-    }
-
-    .dev-card li {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .dev-card li::before {
-      content: '✓';
-      color: var(--primary);
-      font-weight: bold;
-    }
-
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      width: 100%;
-      padding: 0.85rem 1.5rem;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s ease-in-out;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #059669);
-      color: #fff;
-      border: none;
-      box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(4, 120, 87, 0.4);
-      filter: brightness(1.1);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: #e2e8f0;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .footer {
-      margin-top: 2rem;
-      font-size: 0.75rem;
-      color: #64748b;
+    a {
+      color: #34d399;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <div class="badge">
-      <span>✦ MODULE 1 COMPLETED</span>
-    </div>
-    
-    <h1>NurulQuran Portal</h1>
-    <p class="description">
-      NurulQuran is built as a complete fullstack Next.js 16 Web Application. 
-      This static portal serves as a convenient entryway to launch your development server and manage local codebases.
-    </p>
-
-    <div class="dev-card">
-      <h3>Active Architecture Components</h3>
-      <ul>
-        <li>Next.js 16 App Router</li>
-        <li>Tailwind CSS v4 styling</li>
-        <li>Firebase Auth system</li>
-        <li>MongoDB connection API</li>
-        <li>Responsive Homepage</li>
-        <li>Companion Dashboard</li>
-      </ul>
-    </div>
-
-    <div class="button-group">
-      <a href="http://localhost:3000" target="_blank" class="btn btn-primary">
-        Launch Local Platform (localhost:3000)
-      </a>
-      <a href="./README.md" class="btn btn-secondary">
-        Read Installation Instructions
-      </a>
-    </div>
-
-    <div class="footer">
-      &copy; 2026 NurulQuran – Complete Islamic Learning & Quran Companion Platform.
-    </div>
+  <div>
+    <p>Redirecting you to the NurulQuran home page at <a href="http://localhost:3000">http://localhost:3000</a>...</p>
   </div>
-
 </body>
 </html>
