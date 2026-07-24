@@ -1,47 +1,79 @@
-# NurulQuran – A Complete Islamic Learning & Quran Companion Platform
+# 📖 NurulQuran – Complete Islamic Learning & Quran Companion Platform
 
-NurulQuran is a premium, modern companion platform for Quran study, prayer tracking, and structured Islamic learning modules. This codebase represents the simplified version of **Module 1 (Planning & Project Foundation)**.
+Welcome to **NurulQuran**, a premium, modern, and highly interactive digital companion for Quran study, prayer time tracking, daily habit streaks, and structured Islamic learning modules.
 
-By leveraging a decoupled design, this setup separates the frontend and backend into clear, vanilla files that work immediately with VS Code's **Go Live (Live Server)** extension without compilation overhead.
+This codebase represents **Module 1 (Planning & Project Foundation)**. It leverages a decoupled, lightweight design where the frontend (vanilla CSS, HTML, and JS) integrates seamlessly with an Express backend and a MongoDB database, utilizing Firebase Authentication for user accounts.
 
 ---
 
-## 📂 Simplified Folder Structure
+## 🧭 Architecture & System Flow
 
-```text
-ZYNAX SOLUTION PROJECT/
-├── index.html          # Responsive homepage, navbar, footer & auth modal
-├── dashboard.html      # Protected user dashboard (streaks, progress, prayers)
-├── styles.css          # Vanilla theme variables, fonts, glassmorphism & animations
-├── app.js              # Client-side JavaScript (Firebase Auth, UI controllers)
-│
-├── server.js           # Lightweight Node.js/Express backend (serves configs, syncs MongoDB)
-├── package.json        # Backend scripts & dependency packages
-├── .env.example        # Blueprint configuration parameters
-└── README.md           # Simple startup documentation
+NurulQuran features a secure decoupled architecture. The frontend application fetches Firebase client configurations dynamically from the server, eliminating the need to hardcode API keys on the client side.
+
+```mermaid
+sequenceDiagram
+    participant User as User Browser
+    participant FE as Frontend App
+    participant BE as Express Backend
+    participant FB as Firebase Auth
+    participant DB as MongoDB
+
+    FE->>BE: GET /api/config (Load Credentials)
+    BE-->>FE: Firebase Configuration API Keys
+    FE->>FB: Initialize Firebase Auth Client
+    
+    Note over User, FE: User logs in or registers
+    User->>FE: Submit Email / Password
+    FE->>FB: signIn/signUpWithEmailAndPassword()
+    FB-->>FE: Returns User Session & ID Token
+    
+    FE->>BE: POST /api/auth/sync (Send Profile details)
+    BE->>DB: findOneAndUpdate() user in collection
+    DB-->>BE: User Saved Successfully
+    BE-->>FE: Sync Confirmation Response
+    FE->>User: Redirect/Unlock Dashboard Access
 ```
+
+---
+
+## 📂 Project Structure
+
+Here is a detailed breakdown of the codebase:
+
+*   **[index.html](file:///c:/Users/asada/Desktop/ZYNAX%20SOLUTION%20PROJECT/index.html)**: The landing homepage featuring a glassmorphism navbar, hero call-to-action (CTA), interactive Daily Verse & Prayer Times widgets, learning module cards, and the embedded login/signup authentication modal.
+*   **[dashboard.html](file:///c:/Users/asada/Desktop/ZYNAX%20SOLUTION%20PROJECT/dashboard.html)**: The protected client dashboard. It uses a client-side locking mechanism to protect content from logged-out visitors. Once authorized, it displays personalized statistics (streaks, memorized verses, completed lessons), current module learning progress, a clickable prayer checklist, and a detailed profile card.
+*   **[styles.css](file:///c:/Users/asada/Desktop/ZYNAX%20SOLUTION%20PROJECT/styles.css)**: Centralized style repository using CSS Custom Properties (variables) for theme control. Implements beautiful glassmorphism classes (`.glass`), smooth pulse animations, custom scrollbars, and fluid slide-up/fade-in modal transitions. It also handles system-level dark-mode defaults.
+*   **[app.js](file:///c:/Users/asada/Desktop/ZYNAX%20SOLUTION%20PROJECT/app.js)**: Client-side logic that orchestrates page transitions, dynamically updates user states across elements, handles Firebase Authentication, and sends session synchronizations to the backend.
+*   **[server.js](file:///c:/Users/asada/Desktop/ZYNAX%20SOLUTION%20PROJECT/server.js)**: Backend Node.js / Express web server. Safely serves environmental configs to the frontend, manages the Mongoose schema connection, and synchronizes accounts to the MongoDB cluster.
+*   **[package.json](file:///c:/Users/asada/Desktop/ZYNAX%20SOLUTION%20PROJECT/package.json)**: Node manifest containing package metadata, npm start script, and dependencies (`express`, `cors`, `mongoose`, `dotenv`).
+*   **[.env.example](file:///c:/Users/asada/Desktop/ZYNAX%20SOLUTION%20PROJECT/.env.example)**: Blueprint configuration template containing standard keys required for authentication and database synchronization.
 
 ---
 
 ## 🛠️ Technology Stack
 
-1.  **Frontend Layout:** HTML5 Semantic Structure & Tailwind CSS v3 via CDN
-2.  **Frontend Logic:** Vanilla ES6 Javascript (using modules map)
-3.  **Authentication:** Firebase Auth (v10 JS Client SDK loaded via GStatic)
-4.  **Backend Server:** Node.js + Express
-5.  **Database Sync:** MongoDB Atlas + Mongoose ORM
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend Layout** | **HTML5 Semantic elements** + **Tailwind CSS v3 (CDN)** | Rapid utility-first styling coupled with semantic tags for accessibility & SEO. |
+| **Frontend Logic** | **Vanilla ES6 Javascript** | Modules maps imports, native asynchronous fetches, and reactive DOM updates. |
+| **Authentication** | **Firebase Client SDK (v10)** | Secure client-side login, token generation, and persistence. Loaded via official Google CDN. |
+| **Backend Framework**| **Node.js + Express.js** | Fast, unopinionated server to bridge configuration and synchronize user states. |
+| **Database & ORM** | **MongoDB Atlas + Mongoose** | Cloud-native Document database with schema enforcement for persistent user accounts. |
 
 ---
 
-## ⚙️ Setup & Local Startup Guide
+## ⚙️ Configuration & Environment Variables
 
-Follow these 3 simple steps to get the project running locally:
+Copy the template file `.env.example` in the project root to create your private `.env` configuration file:
 
-### 1. Configure Environmental Variables
-Copy the `.env.example` file and create a new file named `.env.local` or `.env` in the root folder, then populate your credentials:
+```bash
+cp .env.example .env
+```
+
+Ensure the following variables are defined in your `.env`:
 
 ```env
-# Firebase Client Credentials
+# Firebase Credentials (Get these from your Firebase console -> Project Settings)
 FIREBASE_API_KEY=your_firebase_api_key
 FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
 FIREBASE_PROJECT_ID=your_project_id
@@ -49,30 +81,118 @@ FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
 FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 FIREBASE_APP_ID=your_app_id
 
-# MongoDB Server connection string
+# MongoDB connection string
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/nurulquran?retryWrites=true&w=majority
+
+# Backend Server Listening Port (defaults to 5000)
+PORT=5000
 ```
 
 > [!IMPORTANT]
-> Make sure to enable the **Email/Password** provider in your Firebase project console under **Authentication > Sign-in method** for authentication to function.
+> **Firebase Authentication setup requirement:**
+> Go to the [Firebase Console](https://console.firebase.google.com/), select your project, go to **Authentication > Sign-in method**, and enable the **Email/Password** provider. Without this, user authentication requests will fail.
 
 ---
 
-### 2. Start the Backend Server
-Install the lightweight node modules and start the backend Express server:
+## 🚀 Setup & Local Startup Guide
 
+Follow these steps to run the server and client applications concurrently:
+
+### 1. Install Server Dependencies
+In your terminal, navigate to the project directory and install the Node modules:
 ```bash
-# 1. Install dependencies
 npm install
+```
 
-# 2. Run backend Express server
+### 2. Start the Express Backend
+Launch the server. By default, it runs on port `5000` and initializes the MongoDB database connection:
+```bash
 npm start
 ```
-The server will start listening on port `5000` (http://localhost:5000) and automatically establish a connection with MongoDB.
+Upon success, the terminal output will read:
+```text
+Successfully connected to MongoDB
+NurulQuran Server is running on port: 5000
+Serve Firebase configs at: http://localhost:5000/api/config
+```
+
+### 3. Open the Frontend Application
+Run the frontend via one of the following methods:
+*   **VS Code Live Server Extension (Recommended)**: Right-click `index.html` and choose **Open with Live Server** (usually runs on port `5500` at `http://127.0.0.1:5500/index.html`).
+*   **Double-click file**: Open `index.html` directly in your browser. (Note: Using a local web server like Live Server is recommended to ensure CORS and relative paths function correctly).
 
 ---
 
-### 3. Open the Frontend Platform
-Open VS Code, click the **Go Live** button in the bottom right corner (from the Live Server extension) or double-click the `index.html` file to run the web application. 
+## 🔌 API Endpoints Reference
 
-It will automatically serve the page on **`http://127.0.0.1:5500/index.html`**, load Firebase Auth, and interface with your Express backend at port `5000`!
+### 1. Serve Firebase Configuration
+*   **Route:** `GET /api/config`
+*   **Description:** Returns the public Firebase configuration keys needed by the client.
+*   **Response (`200 OK`):**
+    ```json
+    {
+      "apiKey": "AIzaSy...",
+      "authDomain": "nurulquran-app.firebaseapp.com",
+      "projectId": "nurulquran-app",
+      "storageBucket": "nurulquran-app.appspot.com",
+      "messagingSenderId": "123456789",
+      "appId": "1:12345:web:abcd"
+    }
+    ```
+*   **Error Response (`500 Internal Server Error`):**
+    ```json
+    { "error": "Firebase configurations are missing on server .env file." }
+    ```
+
+### 2. Sync User Auth Data
+*   **Route:** `POST /api/auth/sync`
+*   **Headers:**
+    *   `Content-Type: application/json`
+    *   `Authorization: Bearer <Firebase_ID_Token>`
+*   **Request Body:**
+    ```json
+    {
+      "uid": "user_firebase_uid_string",
+      "email": "user@example.com",
+      "displayName": "Full Name",
+      "photoURL": "https://example.com/avatar.jpg"
+    }
+    ```
+*   **Response (`200 OK`):**
+    ```json
+    {
+      "success": true,
+      "user": {
+        "_id": "60c72b2f9b1d8a0015c9d4b3",
+        "uid": "user_firebase_uid_string",
+        "email": "user@example.com",
+        "displayName": "Full Name",
+        "photoURL": "https://example.com/avatar.jpg",
+        "lastLoginAt": "2026-07-24T11:37:16.000Z",
+        "createdAt": "2026-07-24T11:30:00.000Z",
+        "updatedAt": "2026-07-24T11:37:16.000Z",
+        "__v": 0
+      }
+    }
+    ```
+*   **Error Responses:**
+    *   `400 Bad Request`: `{ "error": "Missing required fields: uid or email" }`
+    *   `503 Service Unavailable`: `{ "error": "MongoDB connection is currently offline." }`
+    *   `500 Internal Server Error`: `{ "error": "Database synchronization failed", "details": "..." }`
+
+---
+
+## 🎨 UI/UX Styling Features
+
+*   **Glassmorphism Effects:** Using `backdrop-filter: blur(12px)` and translucent borders, styled using utility Tailwind CSS classes and customized inside `styles.css` (`.glass`).
+*   **Theme Integration:** Respects system-level preferences with automatic dark-mode setup based on `@media (prefers-color-scheme: dark)`.
+*   **Arabic Typography:** Imports high-quality Arabic calligraphic style font (`Amiri`) to render Quranic verses elegantly (`.quran-text`).
+*   **Smooth Animations:** Implements premium feel with micro-animations such as `@keyframes pulse-gold` for indicators, along with `@keyframes fadeIn` and `@keyframes slideUp` for the modal display lifecycle.
+
+---
+
+## 🛠️ Troubleshooting & Common Issues
+
+*   **Express Server Unreachable Warning**: If the client prints a console warning `Express backend not running or unreachable`, make sure the backend is active on port `5000` via `npm start`. If running the client on a custom host/port, check that CORS permissions are not blocking localhost communication.
+*   **MongoDB Connection Error**: Confirm your local IP address is whitelisted in MongoDB Atlas under Network Access, and verify that the `MONGODB_URI` string contains the correct username, password, and database name.
+*   **Firebase Initialisation Failures**: Double check the spelling of key credentials inside your `.env` file, and ensure they match the values listed in your Firebase project console.
