@@ -1,8 +1,12 @@
 # 📖 NurulQuran – Complete Islamic Learning & Quran Companion Platform
 
+**Project Metadata:**
+- **Active Module:** Module 1 (Planning & Project Foundation)
+- **Development Timeline:** July 20th – July 25th
+
 Welcome to **NurulQuran**, a premium, modern, and highly interactive digital companion for Quran study, prayer time tracking, daily habit streaks, and structured Islamic learning modules.
 
-This codebase represents **Module 1 (Planning & Project Foundation)**. It leverages a decoupled, lightweight design where the frontend (vanilla CSS, HTML, and JS) integrates seamlessly with an Express backend and a MongoDB database, utilizing Firebase Authentication for user accounts.
+This codebase represents the completed foundation of **Module 1 (Planning & Project Foundation)**. It leverages a decoupled, lightweight design where the frontend (vanilla CSS, HTML, and JS) integrates seamlessly with an Express backend and a MongoDB database, utilizing Firebase Authentication for user accounts.
 
 ---
 
@@ -91,6 +95,15 @@ PORT=5000
 > [!IMPORTANT]
 > **Firebase Authentication setup requirement:**
 > Go to the [Firebase Console](https://console.firebase.google.com/), select your project, go to **Authentication > Sign-in method**, and enable the **Email/Password** provider. Without this, user authentication requests will fail.
+
+> [!TIP]
+> **Mock Authentication Fallback (Zero-Config Test Mode):**
+> If you do not have a Firebase project or MongoDB cluster set up yet, you can still run and test the complete sign-up, sign-in, sign-out, and dashboard flows out of the box!
+> When the application detects that the `.env` configuration file is missing, unreachable, or configured with dummy `"mock-*"` credentials, it automatically enables **Mock Authentication Fallback**.
+> - **Sign Up:** Any valid name, email, and a password of at least 6 characters will create a mock account saved locally to your browser's `localStorage`.
+> - **Sign In:** Enter the registered email and password to log in.
+> - **Dashboard Unlocking:** Once logged in (either via real Firebase or the mock fallback), the dashboard content is fully unlocked and personalized with the user's name.
+> - **MongoDB Sync:** If the backend is running but MongoDB is offline, sync details will fail gracefully in the background console without breaking the login state.
 
 ---
 

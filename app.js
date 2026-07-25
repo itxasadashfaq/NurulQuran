@@ -23,27 +23,49 @@ let firebaseConfig = {
 // 2. Initialize App and Authentication
 let app;
 let auth;
+let isMockAuth = false;
 
 async function initFirebase() {
   try {
     const response = await fetch("http://localhost:5000/api/config");
     if (response.ok) {
-      firebaseConfig = await response.json();
-      console.log("Successfully loaded Firebase credentials from backend server.");
+      const serverConfig = await response.json();
+      if (serverConfig && serverConfig.apiKey) {
+        firebaseConfig = serverConfig;
+        console.log("Successfully loaded Firebase credentials from backend server.");
+      }
     }
   } catch (error) {
     console.warn("Express backend not running or unreachable. Running in client-fallback mode.", error);
   } finally {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    setupAuthObserver();
+    if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("mock")) {
+      isMockAuth = true;
+      console.log("Using Mock Authentication fallback since no real Firebase credentials are configured.");
+    }
+
+    if (isMockAuth) {
+      setupAuthObserver();
+    } else {
+      try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        setupAuthObserver();
+      } catch (error) {
+        console.error("Failed to initialize Firebase SDK, falling back to mock authentication:", error);
+        isMockAuth = true;
+        setupAuthObserver();
+      }
+    }
   }
 }
 
 // 3. Sync profile updates with MongoDB
 async function syncUserToMongoDB(user) {
   try {
-    const idToken = await user.getIdToken();
+    let idToken = "mock-id-token";
+    if (!isMockAuth && typeof user.getIdToken === "function") {
+      idToken = await user.getIdToken();
+    }
     const response = await fetch("http://localhost:5000/api/auth/sync", {
       method: "POST",
       headers: {
@@ -69,6 +91,28 @@ async function syncUserToMongoDB(user) {
 
 // 4. State Listener
 function setupAuthObserver() {
+  if (isMockAuth) {
+    const loadEl = document.getElementById("auth-loading");
+    if (loadEl) loadEl.classList.add("hidden");
+
+    const mockUserJson = localStorage.getItem("mock_user");
+    if (mockUserJson) {
+      try {
+        const user = JSON.parse(mockUserJson);
+        console.log("User logged in (Mock):", user.email);
+        updateUIForLoggedInUser(user);
+        syncUserToMongoDB(user);
+      } catch (e) {
+        console.error("Error parsing mock user session:", e);
+        updateUIForLoggedOutUser();
+      }
+    } else {
+      console.log("No active mock user session.");
+      updateUIForLoggedOutUser();
+    }
+    return;
+  }
+
   onAuthStateChanged(auth, async (user) => {
     // Hide headers loadings
     const loadEl = document.getElementById("auth-loading");
@@ -162,6 +206,12 @@ function updateUIForLoggedOutUser() {
 
 // 6. Sign Out Event Handlers
 function handleSignOut() {
+  if (isMockAuth) {
+    localStorage.removeItem("mock_user");
+    console.log("Logged out successfully (Mock)");
+    window.location.href = "index.html";
+    return;
+  }
   if (auth) {
     signOut(auth)
       .then(() => {
@@ -205,17 +255,69 @@ document.addEventListener("DOMContentLoaded", () => {
       submitBtn.textContent = "Processing...";
 
       try {
-        if (activeTab === "login") {
-          await signInWithEmailAndPassword(auth, email, password);
+        if (isMockAuth) {
+          if (window.activeTab === "login") {
+            const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+            const foundUser = mockUsers.find(u => u.email === email && u.password === password);
+            if (!foundUser) {
+              throw new Error("Invalid email or password.");
+            }
+            const loggedInUser = {
+              uid: foundUser.uid,
+              email: foundUser.email,
+              displayName: foundUser.displayName,
+              photoURL: "",
+              emailVerified: true
+            };
+            localStorage.setItem("mock_user", JSON.stringify(loggedInUser));
+            setupAuthObserver();
+          } else {
+            if (password.length < 6) {
+              throw new Error("Password should be at least 6 characters.");
+            }
+            const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+            if (mockUsers.some(u => u.email === email)) {
+              throw new Error("This email is already registered.");
+            }
+            const newUser = {
+              uid: "mock-uid-" + Math.random().toString(36).substr(2, 9),
+              email: email,
+              password: password,
+              displayName: name || "Brother/Sister"
+            };
+            mockUsers.push(newUser);
+            localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+
+            const loggedInUser = {
+              uid: newUser.uid,
+              email: newUser.email,
+              displayName: newUser.displayName,
+              photoURL: "",
+              emailVerified: true
+            };
+            localStorage.setItem("mock_user", JSON.stringify(loggedInUser));
+            
+            // Reload page to reflect updated profile details (as in original code)
+            window.location.reload();
+          }
+          if (typeof window.closeModal === "function") {
+            window.closeModal();
+          }
         } else {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(userCredential.user, {
-            displayName: name
-          });
-          // Reload page to reflect updated profile details
-          window.location.reload();
+          if (window.activeTab === "login") {
+            await signInWithEmailAndPassword(auth, email, password);
+          } else {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCredential.user, {
+              displayName: name
+            });
+            // Reload page to reflect updated profile details
+            window.location.reload();
+          }
+          if (typeof window.closeModal === "function") {
+            window.closeModal();
+          }
         }
-        closeModal();
       } catch (error) {
         console.error("Auth action failed:", error);
         alertDiv.classList.remove("hidden");
@@ -233,7 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alertDiv.textContent = errMsg;
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = activeTab === "login" ? "Sign In" : "Create Account";
+        submitBtn.textContent = window.activeTab === "login" ? "Sign In" : "Create Account";
       }
     });
   }
@@ -242,7 +344,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const authParam = urlParams.get('auth');
   if (authParam === 'login' || authParam === 'signup') {
-    openModal(authParam);
+    if (typeof window.openModal === "function") {
+      window.openModal(authParam);
+    }
   }
 });
 

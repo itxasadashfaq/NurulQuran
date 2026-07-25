@@ -500,7 +500,7 @@
     }
   </script>
   
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=3"></script>
   
   <script>
     // Local Page Helper Code
@@ -513,7 +513,7 @@
     }
 
     // Modal Helpers
-    let activeTab = 'login';
+    window.activeTab = 'login';
 
     function openModal(tab = 'login') {
       const modal = document.getElementById('auth-modal');
@@ -527,7 +527,7 @@
     }
 
     function switchTab(tab) {
-      activeTab = tab;
+      window.activeTab = tab;
       const title = document.getElementById('modal-title');
       const subtitle = document.getElementById('modal-subtitle');
       const nameField = document.getElementById('field-name');
@@ -561,7 +561,7 @@
     }
 
     function toggleActiveTab() {
-      switchTab(activeTab === 'login' ? 'signup' : 'login');
+      switchTab(window.activeTab === 'login' ? 'signup' : 'login');
     }
   </script>
 </body>
