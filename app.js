@@ -482,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const res = await fetch(
-          `https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,en.sahih,ur.jalandhry,en.tafsir.rezaanderson,${selectedReciter}`
+          `https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,en.sahih,ur.jalandhry,ur.maududi,${selectedReciter}`
         );
         if (res.ok) {
           const bodyData = await res.json();
@@ -597,10 +597,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="pl-9 pt-1.5 border-t border-slate-150 dark:border-slate-800/60">
             <button onclick="window.toggleTafseerInline(${index})" class="flex items-center gap-1 text-[11px] font-bold text-emerald-650 dark:text-emerald-450 hover:underline">
               <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-              <span id="tafseer-toggle-btn-txt-${index}">Show Tafseer (English)</span>
+              <span id="tafseer-toggle-btn-txt-${index}">Show Tafseer (Urdu)</span>
             </button>
             
-            <div id="tafseer-inline-box-${index}" class="hidden mt-3 p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/80 text-left ltr font-sans text-sm font-semibold text-slate-500 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+            <div id="tafseer-inline-box-${index}" class="hidden mt-3 p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/80 text-right rtl font-amiri text-xl font-bold text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
               ${v.tafseer}
             </div>
           </div>
@@ -830,7 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
           btnTxt.textContent = "Hide Tafseer";
         } else {
           box.classList.add("hidden");
-          btnTxt.textContent = "Show Tafseer (English)";
+          btnTxt.textContent = "Show Tafseer (Urdu)";
         }
       }
     };
