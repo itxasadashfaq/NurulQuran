@@ -1,12 +1,13 @@
 # 📖 NurulQuran – Complete Islamic Learning & Quran Companion Platform
 
 **Project Metadata:**
-- **Active Module:** Module 1 (Planning & Project Foundation)
-- **Development Timeline:** July 20th – July 25th
+- **Active Module:** Module 2 (Quran & Islamic Features)
+- **Development Timeline:** July 27th – August 02nd, 2026
 
 Welcome to **NurulQuran**, a premium, modern, and highly interactive digital companion for Quran study, prayer time tracking, daily habit streaks, and structured Islamic learning modules.
 
-This codebase represents the completed foundation of **Module 1 (Planning & Project Foundation)**. It leverages a decoupled, lightweight design where the frontend (vanilla CSS, HTML, and JS) integrates seamlessly with an Express backend and a MongoDB database, utilizing Firebase Authentication for user accounts.
+This codebase represents the completed features of **Module 2 (Quran & Islamic Features)** built on top of the Module 1 project foundation. It leverages a decoupled, lightweight design where the frontend (vanilla CSS, HTML, and JS) integrates seamlessly with an Express backend and a MongoDB database, utilizing Firebase Authentication for user accounts.
+
 
 ---
 
@@ -192,6 +193,19 @@ Run the frontend via one of the following methods:
     *   `400 Bad Request`: `{ "error": "Missing required fields: uid or email" }`
     *   `503 Service Unavailable`: `{ "error": "MongoDB connection is currently offline." }`
     *   `500 Internal Server Error`: `{ "error": "Database synchronization failed", "details": "..." }`
+
+## 🕋 Module 2: Quran Companion Features
+This module integrates public Quranic scripture database streams and standard HTML5 audio components into the frontend page flow:
+
+*   **API Parallel Fetching:** Leverages Al Quran Cloud's joint editions fetch endpoint (`/v1/surah/{number}/editions/quran-uthmani,en.sahih,{reciterId}`) to obtain original Arabic text, English translation, and audio streams in a single HTTP request, reducing latencies.
+*   **Surah Search Directory:** Scrollable sidebar selector listing all 114 Surahs. Includes a regex search filter box allowing users to instantly filter Surahs by Name, Revelation Number, or Revelational Meaning.
+*   **Custom Font Resizing:** Dynamic size adjuster controllers on the reader pane allowing fine-grained scale manipulation of Arabic scripture text for accessibility and readability.
+*   **Parallel Translation Toggles:** Standard toggles showing or hiding the Sahih International English translation lines dynamically.
+*   **Sticky Audio Player Bar:** A fixed media controller container appearing smoothly at the screen bottom upon verse playback. Features:
+    *   **Autoplay Next (Continuous Play):** The player automatically queues and plays the next verse in the Surah once the active verse ends.
+    *   **Visual Synchronisation:** Automatically highlights the active playing verse on the screen with a golden border and emerald background, and auto-scrolls it smoothly into view.
+    *   **Controls:** Play/Pause, Next/Prev verse buttons, volume progress, mute toggles, seek/scrubbing range slider, and a Qari selector dropdown.
+    *   **Qari Choices:** Includes streams from Mishary Alafasy, Abdul Basit (Mujawwad), Abu Bakr al-Shatri, Ali Al-Hudhaify, and Mahmoud Al-Husary.
 
 ---
 

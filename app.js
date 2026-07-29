@@ -348,7 +348,462 @@ document.addEventListener("DOMContentLoaded", () => {
       window.openModal(authParam);
     }
   }
+
+  // ================= QURAN COMPANION MODULE 2 =================
+  const isQuranPage = document.getElementById("surah-list") !== null;
+  if (isQuranPage) {
+    // Selectors
+    const surahSearchInput = document.getElementById("surah-search");
+    const surahListContainer = document.getElementById("surah-list");
+    const versesContainer = document.getElementById("verses-container");
+    const readerSurahTitle = document.getElementById("reader-surah-title");
+    const readerSurahMeta = document.getElementById("reader-surah-meta");
+    const btnFontDecrease = document.getElementById("btn-font-decrease");
+    const btnFontIncrease = document.getElementById("btn-font-increase");
+    const btnToggleTranslation = document.getElementById("btn-toggle-translation");
+    
+    const playerBar = document.getElementById("audio-player-bar");
+    const playerTitle = document.getElementById("player-title");
+    const playerSubtitle = document.getElementById("player-subtitle");
+    const playerBtnPlay = document.getElementById("player-btn-play");
+    const playIcon = document.getElementById("play-icon");
+    const pauseIcon = document.getElementById("pause-icon");
+    const playerBtnPrev = document.getElementById("player-btn-prev");
+    const playerBtnNext = document.getElementById("player-btn-next");
+    const playerSlider = document.getElementById("player-slider");
+    const playerTimeCurrent = document.getElementById("player-time-current");
+    const playerTimeTotal = document.getElementById("player-time-total");
+    const playerReciterSelect = document.getElementById("player-reciter-select");
+    const playerVolume = document.getElementById("player-volume");
+    const playerBtnMute = document.getElementById("player-btn-mute");
+    const volumeHighIcon = document.getElementById("volume-high-icon");
+    const volumeMutedIcon = document.getElementById("volume-muted-icon");
+    const playerBtnClose = document.getElementById("player-btn-close");
+    const quranAudio = document.getElementById("quran-audio-element");
+
+    // State parameters (Local page variables)
+    let surahsList = [];
+    let currentSurahNumber = 1;
+    let currentVerses = [];
+    let activePlayingVerseIndex = -1;
+    let isTranslationVisible = true;
+    let arabicFontSize = 26; // pixels
+    let selectedReciter = "ar.alafasy";
+    let isMuted = false;
+    let previousVolume = 0.8;
+    let isDraggingSlider = false;
+
+    // Fetch and load initial values
+    fetchSurahList();
+
+    // 1. Fetch Surah listings
+    async function fetchSurahList() {
+      try {
+        const res = await fetch("https://api.alquran.cloud/v1/surah");
+        if (res.ok) {
+          const data = await res.json();
+          surahsList = data.data;
+          renderSurahSidebar(surahsList);
+          // Initial load Al-Fatihah (Surah 1)
+          loadSurah(1);
+        } else {
+          surahListContainer.innerHTML = `<div class="text-xs text-red-500 text-center py-6">Failed to load Surah index.</div>`;
+        }
+      } catch (err) {
+        console.error("Error fetching Surah list:", err);
+        surahListContainer.innerHTML = `<div class="text-xs text-red-550 text-center py-6">Network error loading Surahs.</div>`;
+      }
+    }
+
+    // 2. Render Surah Sidebar list
+    function renderSurahSidebar(list) {
+      if (!surahListContainer) return;
+      surahListContainer.innerHTML = "";
+      if (list.length === 0) {
+        surahListContainer.innerHTML = `<div class="text-xs text-slate-400 text-center py-6">No matching Surahs found.</div>`;
+        return;
+      }
+
+      list.forEach((s) => {
+        const btn = document.createElement("button");
+        btn.className = `w-full p-3 flex items-center justify-between text-left rounded-xl transition-all border ${
+          currentSurahNumber === s.number
+            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-450 font-semibold"
+            : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-655 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+        }`;
+        btn.onclick = () => {
+          currentSurahNumber = s.number;
+          // Refresh list active styles
+          renderSurahSidebar(list);
+          loadSurah(s.number);
+        };
+
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold ${
+              currentSurahNumber === s.number
+                ? "bg-emerald-600 text-white"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+            }">${s.number}</span>
+            <div>
+              <div class="text-xs font-bold leading-tight">${s.englishName}</div>
+              <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">${s.revelationType} • ${s.numberOfAyahs} verses</div>
+            </div>
+          </div>
+          <span class="text-sm font-bold font-amiri text-emerald-700 dark:text-emerald-400">${s.name}</span>
+        `;
+        surahListContainer.appendChild(btn);
+      });
+    }
+
+    // 3. Search filter
+    if (surahSearchInput) {
+      surahSearchInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const filtered = surahsList.filter(
+          (s) =>
+            s.number.toString() === query ||
+            s.englishName.toLowerCase().includes(query) ||
+            s.englishNameTranslation.toLowerCase().includes(query) ||
+            s.name.includes(query)
+        );
+        renderSurahSidebar(filtered);
+      });
+    }
+
+    // 4. Fetch Surah text, translation, and audio
+    async function loadSurah(surahNum, shouldAutoPlay = false) {
+      versesContainer.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-24 space-y-3">
+          <div class="w-10 h-10 rounded-full border-3 border-emerald-500/30 border-t-emerald-600 animate-spin"></div>
+          <span class="text-sm text-slate-500">Loading Surah scripture...</span>
+        </div>
+      `;
+
+      try {
+        const res = await fetch(
+          `https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,en.sahih,${selectedReciter}`
+        );
+        if (res.ok) {
+          const bodyData = await res.json();
+          const editions = bodyData.data;
+
+          const arabicAyahs = editions[0].ayahs;
+          const translationAyahs = editions[1].ayahs;
+          const audioAyahs = editions[2].ayahs;
+
+          // Parse and combine editions
+          currentVerses = arabicAyahs.map((ayah, i) => {
+            let cleanText = ayah.text;
+            // Strip Bismillah prefix if not Al-Fatihah (1) or Al-Tawbah (9)
+            if (surahNum !== 1 && surahNum !== 9 && ayah.numberInSurah === 1) {
+              const bismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
+              if (cleanText.startsWith(bismillah)) {
+                cleanText = cleanText.substring(bismillah.length).trim();
+              }
+            }
+            return {
+              number: ayah.number,
+              numberInSurah: ayah.numberInSurah,
+              text: cleanText,
+              translation: translationAyahs[i].text,
+              audio: audioAyahs[i].audio
+            };
+          });
+
+          const activeSurahMeta = surahsList.find(s => s.number === surahNum);
+          if (activeSurahMeta) {
+            readerSurahTitle.textContent = `${activeSurahMeta.englishName} (${activeSurahMeta.name})`;
+            readerSurahMeta.textContent = `${activeSurahMeta.number}: ${activeSurahMeta.englishNameTranslation} (${activeSurahMeta.numberOfAyahs} Verses, ${activeSurahMeta.revelationType})`;
+            
+            // Set Player Title
+            playerTitle.textContent = activeSurahMeta.englishName;
+          }
+
+          renderVerses();
+          
+          if (shouldAutoPlay && currentVerses.length > 0) {
+            playVerse(0);
+          } else {
+            // Keep player state in sync if a surah is loaded
+            activePlayingVerseIndex = -1;
+            updateActiveVerseHighlight();
+          }
+        } else {
+          versesContainer.innerHTML = `<div class="text-sm text-red-500 text-center py-20">Failed to fetch Surah contents.</div>`;
+        }
+      } catch (err) {
+        console.error("Error loading Surah contents:", err);
+        versesContainer.innerHTML = `<div class="text-sm text-red-500 text-center py-20">Network error fetching Surah.</div>`;
+      }
+    }
+
+    // 5. Render verses layout
+    function renderVerses() {
+      if (!versesContainer) return;
+      versesContainer.innerHTML = "";
+
+      // Add Bismillah banner if not Surah 9 (Al-Tawbah) and not Surah 1 (Al-Fatihah, where Bismillah is verse 1)
+      if (currentSurahNumber !== 9 && currentSurahNumber !== 1) {
+        const bisDiv = document.createElement("div");
+        bisDiv.className = "text-center py-4 font-amiri text-2xl text-emerald-800 dark:text-emerald-400 border-b border-emerald-500/5 select-none";
+        bisDiv.textContent = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
+        versesContainer.appendChild(bisDiv);
+      }
+
+      currentVerses.forEach((v, index) => {
+        const verseRow = document.createElement("div");
+        verseRow.id = `verse-row-${index}`;
+        verseRow.className = "p-4 md:p-6 rounded-2xl border border-transparent transition-all space-y-4";
+        
+        verseRow.innerHTML = `
+          <div class="flex items-start justify-between gap-4">
+            <!-- Verse marker badge & play action -->
+            <div class="flex items-center gap-2">
+              <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-450 border border-emerald-500/10">
+                ${v.numberInSurah}
+              </span>
+              <button onclick="window.playVerseFromUI(${index})" class="p-1.5 rounded-lg text-emerald-650 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 transition-colors" title="Play Verse">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M4.555 3.168A1 1 0 003 4v12a1 1 0 001.555.832l10-6a1 1 0 000-1.664l-10-6z"/></svg>
+              </button>
+            </div>
+            
+            <!-- Verse Arabic scripture -->
+            <div class="quran-text text-right text-slate-800 dark:text-slate-100 flex-grow" style="font-size: ${arabicFontSize}px">
+              ${v.text}
+            </div>
+          </div>
+
+          <!-- Translation text block -->
+          <div class="translation-text text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium pl-9 ${isTranslationVisible ? '' : 'hidden'}">
+            ${v.translation}
+          </div>
+        `;
+        versesContainer.appendChild(verseRow);
+      });
+
+      // Keep scrolling container active verse highlighted if applicable
+      updateActiveVerseHighlight();
+    }
+
+    // 6. Font adjustment actions
+    if (btnFontIncrease) {
+      btnFontIncrease.addEventListener("click", () => {
+        if (arabicFontSize < 48) {
+          arabicFontSize += 3;
+          renderVerses();
+        }
+      });
+    }
+    if (btnFontDecrease) {
+      btnFontDecrease.addEventListener("click", () => {
+        if (arabicFontSize > 18) {
+          arabicFontSize -= 3;
+          renderVerses();
+        }
+      });
+    }
+
+    // 7. Translation toggle action
+    if (btnToggleTranslation) {
+      btnToggleTranslation.addEventListener("click", () => {
+        isTranslationVisible = !isTranslationVisible;
+        btnToggleTranslation.textContent = isTranslationVisible ? "Hide Translation" : "Show Translation";
+        
+        const transTexts = document.querySelectorAll(".translation-text");
+        transTexts.forEach((el) => {
+          if (isTranslationVisible) {
+            el.classList.remove("hidden");
+          } else {
+            el.classList.add("hidden");
+          }
+        });
+      });
+    }
+
+    // 8. Dynamic Audio Controls & Event Listeners
+    window.playVerseFromUI = function (index) {
+      playVerse(index);
+    };
+
+    function playVerse(index) {
+      if (index < 0 || index >= currentVerses.length) {
+        // Index out of bounds (End of Surah)
+        stopPlayback();
+        return;
+      }
+
+      activePlayingVerseIndex = index;
+      const verse = currentVerses[index];
+
+      // Update Player details
+      playerSubtitle.textContent = `Verse ${verse.numberInSurah} of ${currentVerses.length}`;
+      quranAudio.src = verse.audio;
+      quranAudio.play()
+        .then(() => {
+          playerBar.classList.remove("translate-y-full"); // Slide up player
+          playIcon.classList.add("hidden");
+          pauseIcon.classList.remove("hidden");
+          updateActiveVerseHighlight();
+          scrollToActiveVerse();
+        })
+        .catch(err => {
+          console.error("Audio playback error:", err);
+          stopPlayback();
+        });
+    }
+
+    function togglePlay() {
+      if (quranAudio.paused) {
+        if (activePlayingVerseIndex === -1 && currentVerses.length > 0) {
+          playVerse(0);
+        } else {
+          quranAudio.play();
+          playIcon.classList.add("hidden");
+          pauseIcon.classList.remove("hidden");
+        }
+      } else {
+        quranAudio.pause();
+        playIcon.classList.remove("hidden");
+        pauseIcon.classList.add("hidden");
+      }
+    }
+
+    function playNextVerse() {
+      playVerse(activePlayingVerseIndex + 1);
+    }
+
+    function playPrevVerse() {
+      playVerse(activePlayingVerseIndex - 1);
+    }
+
+    function stopPlayback() {
+      quranAudio.pause();
+      activePlayingVerseIndex = -1;
+      playIcon.classList.remove("hidden");
+      pauseIcon.classList.add("hidden");
+      updateActiveVerseHighlight();
+    }
+
+    function updateActiveVerseHighlight() {
+      // Remove highlight from all verses
+      const rows = document.querySelectorAll("[id^='verse-row-']");
+      rows.forEach(r => r.classList.remove("verse-active"));
+
+      // Add highlight to current
+      if (activePlayingVerseIndex !== -1) {
+        const activeRow = document.getElementById(`verse-row-${activePlayingVerseIndex}`);
+        if (activeRow) activeRow.classList.add("verse-active");
+      }
+    }
+
+    function scrollToActiveVerse() {
+      if (activePlayingVerseIndex === -1) return;
+      const activeRow = document.getElementById(`verse-row-${activePlayingVerseIndex}`);
+      if (activeRow && versesContainer) {
+        // Scroll active row smoothly into view inside the scroll container
+        versesContainer.scrollTo({
+          top: activeRow.offsetTop - versesContainer.offsetTop - 20,
+          behavior: "smooth"
+        });
+      }
+    }
+
+    // Audio tag event observers
+    quranAudio.addEventListener("timeupdate", () => {
+      if (isDraggingSlider) return;
+      if (quranAudio.duration) {
+        const progress = (quranAudio.currentTime / quranAudio.duration) * 100;
+        playerSlider.value = progress;
+        playerTimeCurrent.textContent = formatTime(quranAudio.currentTime);
+      }
+    });
+
+    quranAudio.addEventListener("loadedmetadata", () => {
+      playerTimeTotal.textContent = formatTime(quranAudio.duration);
+    });
+
+    quranAudio.addEventListener("ended", () => {
+      // Continuous autoplay next verse!
+      playNextVerse();
+    });
+
+    // Player controls buttons handlers
+    playerBtnPlay.addEventListener("click", togglePlay);
+    playerBtnPrev.addEventListener("click", playPrevVerse);
+    playerBtnNext.addEventListener("click", playNextVerse);
+    
+    playerBtnClose.addEventListener("click", () => {
+      stopPlayback();
+      playerBar.classList.add("translate-y-full"); // Slide down player
+    });
+
+    // Slider controls
+    playerSlider.addEventListener("mousedown", () => { isDraggingSlider = true; });
+    playerSlider.addEventListener("mouseup", () => { isDraggingSlider = false; });
+    playerSlider.addEventListener("input", (e) => {
+      if (quranAudio.duration) {
+        const val = e.target.value;
+        quranAudio.currentTime = (val / 100) * quranAudio.duration;
+        playerTimeCurrent.textContent = formatTime(quranAudio.currentTime);
+      }
+    });
+
+    // Volume sliders
+    playerVolume.addEventListener("input", (e) => {
+      const vol = e.target.value / 100;
+      quranAudio.volume = vol;
+      isMuted = vol === 0;
+      updateVolumeUI(vol);
+    });
+
+    playerBtnMute.addEventListener("click", () => {
+      isMuted = !isMuted;
+      if (isMuted) {
+        previousVolume = quranAudio.volume;
+        quranAudio.volume = 0;
+        playerVolume.value = 0;
+      } else {
+        quranAudio.volume = previousVolume;
+        playerVolume.value = previousVolume * 100;
+      }
+      updateVolumeUI(quranAudio.volume);
+    });
+
+    function updateVolumeUI(vol) {
+      if (vol === 0) {
+        volumeHighIcon.classList.add("hidden");
+        volumeMutedIcon.classList.remove("hidden");
+      } else {
+        volumeHighIcon.classList.remove("hidden");
+        volumeMutedIcon.classList.add("hidden");
+      }
+    }
+
+    // Reciter dropdown selection trigger
+    if (playerReciterSelect) {
+      playerReciterSelect.addEventListener("change", (e) => {
+        selectedReciter = e.target.value;
+        // Reload surah to update audio Links, preserving active position if possible
+        const lastActiveIndex = activePlayingVerseIndex;
+        loadSurah(currentSurahNumber, false).then(() => {
+          if (lastActiveIndex !== -1) {
+            playVerse(lastActiveIndex);
+          }
+        });
+      });
+    }
+
+    // Util Time formatter
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return "00:00";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
+  }
 });
 
 // Run Initializer
 initFirebase();
+

@@ -122,3 +122,17 @@ body {
 .animate-slide-up {
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Active Verse Highlight during Audio Playback */
+.verse-active {
+  border-left: 4px solid #d97706 !important;
+  background-color: rgba(4, 120, 87, 0.08) !important;
+  transition: all 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .verse-active {
+    background-color: rgba(4, 120, 87, 0.16) !important;
+  }
+}
+
