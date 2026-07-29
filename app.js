@@ -444,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.className = `w-full p-3 flex items-center justify-between text-left rounded-xl transition-all border ${
           currentSurahNumber === s.number
             ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-450 font-semibold"
-            : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-655 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+            : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40"
         }`;
         btn.onclick = () => {
           currentSurahNumber = s.number;
@@ -595,7 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
 
           <!-- Translation text block -->
-          <div class="translation-text text-slate-600 dark:text-slate-350 leading-relaxed pl-9 ${isTranslationVisible ? '' : 'hidden'} ${isUrdu ? 'text-right rtl font-amiri text-lg font-semibold text-emerald-900 dark:text-emerald-350' : 'text-left ltr text-sm font-medium'}">
+          <div class="translation-text leading-relaxed pl-9 ${isTranslationVisible ? '' : 'hidden'} ${isUrdu ? 'text-right rtl font-amiri text-xl font-bold text-emerald-800 dark:text-emerald-400' : 'text-left ltr text-sm font-semibold text-slate-500 dark:text-slate-300'}">
             ${v.translation}
           </div>
         `;
@@ -896,7 +896,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (activeTafsirTab === "ur" || activeTafsirTab === "ar") {
         tafsirContentBox.className = "text-right rtl font-amiri text-lg font-semibold text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-line";
       } else {
-        tafsirContentBox.className = "text-left ltr text-sm font-medium text-slate-655 dark:text-slate-350 leading-relaxed whitespace-pre-line";
+        tafsirContentBox.className = "text-left ltr text-sm font-semibold text-slate-500 dark:text-slate-300 leading-relaxed whitespace-pre-line";
       }
     }
 
