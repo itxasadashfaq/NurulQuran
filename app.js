@@ -389,9 +389,24 @@ document.addEventListener("DOMContentLoaded", () => {
     let isTranslationVisible = true;
     let arabicFontSize = 26; // pixels
     let selectedReciter = "ar.alafasy";
+    let selectedTranslation = "en.sahih";
     let isMuted = false;
     let previousVolume = 0.8;
     let isDraggingSlider = false;
+
+    // Tafsir States
+    let currentTafsirVerseNum = -1;
+    let activeTafsirTab = "ur"; // ur, ar, en
+    let loadedTafsirObj = null;
+
+    // Language dropdown selection binding
+    const readerLanguageSelect = document.getElementById("reader-language-select");
+    if (readerLanguageSelect) {
+      readerLanguageSelect.addEventListener("change", (e) => {
+        selectedTranslation = e.target.value;
+        loadSurah(currentSurahNumber, false);
+      });
+    }
 
     // Fetch and load initial values
     fetchSurahList();
@@ -482,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const res = await fetch(
-          `https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,en.sahih,${selectedReciter}`
+          `https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,${selectedTranslation},${selectedReciter}`
         );
         if (res.ok) {
           const bodyData = await res.json();
@@ -551,6 +566,8 @@ document.addEventListener("DOMContentLoaded", () => {
         versesContainer.appendChild(bisDiv);
       }
 
+      const isUrdu = selectedTranslation.startsWith("ur");
+
       currentVerses.forEach((v, index) => {
         const verseRow = document.createElement("div");
         verseRow.id = `verse-row-${index}`;
@@ -558,13 +575,16 @@ document.addEventListener("DOMContentLoaded", () => {
         
         verseRow.innerHTML = `
           <div class="flex items-start justify-between gap-4">
-            <!-- Verse marker badge & play action -->
-            <div class="flex items-center gap-2">
+            <!-- Verse marker badge & play action & tafsir action -->
+            <div class="flex items-center gap-1.5 flex-shrink-0">
               <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-450 border border-emerald-500/10">
                 ${v.numberInSurah}
               </span>
               <button onclick="window.playVerseFromUI(${index})" class="p-1.5 rounded-lg text-emerald-650 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 transition-colors" title="Play Verse">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M4.555 3.168A1 1 0 003 4v12a1 1 0 001.555.832l10-6a1 1 0 000-1.664l-10-6z"/></svg>
+              </button>
+              <button onclick="window.openTafsirFromUI(${index})" class="p-1.5 rounded-lg text-emerald-650 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 transition-colors" title="Read Tafsir">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
               </button>
             </div>
             
@@ -575,7 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
 
           <!-- Translation text block -->
-          <div class="translation-text text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium pl-9 ${isTranslationVisible ? '' : 'hidden'}">
+          <div class="translation-text text-slate-600 dark:text-slate-350 leading-relaxed pl-9 ${isTranslationVisible ? '' : 'hidden'} ${isUrdu ? 'text-right rtl font-amiri text-lg font-semibold text-emerald-900 dark:text-emerald-350' : 'text-left ltr text-sm font-medium'}">
             ${v.translation}
           </div>
         `;
@@ -791,6 +811,142 @@ document.addEventListener("DOMContentLoaded", () => {
             playVerse(lastActiveIndex);
           }
         });
+      });
+    }
+
+    // ================= TAFSIR CONTROLLERS =================
+    const tafsirModal = document.getElementById("tafsir-modal");
+    const tafsirArabicText = document.getElementById("tafsir-arabic-text");
+    const tafsirTranslationText = document.getElementById("tafsir-translation-text");
+    const tafsirLoading = document.getElementById("tafsir-loading");
+    const tafsirContentBox = document.getElementById("tafsir-content-box");
+    const tafsirModalTitle = document.getElementById("tafsir-modal-title");
+
+    const tabUr = document.getElementById("tab-tafsir-ur");
+    const tabAr = document.getElementById("tab-tafsir-ar");
+    const tabEn = document.getElementById("tab-tafsir-en");
+
+    window.openTafsirFromUI = function (index) {
+      if (index >= 0 && index < currentVerses.length) {
+        openTafsirModal(currentVerses[index]);
+      }
+    };
+
+    function openTafsirModal(verse) {
+      if (!tafsirModal) return;
+      
+      tafsirModal.classList.remove("hidden");
+      
+      // Load static details
+      tafsirModalTitle.textContent = `Surah ${currentSurahNumber} - Verse ${verse.numberInSurah}`;
+      tafsirArabicText.textContent = verse.text;
+      tafsirTranslationText.textContent = verse.translation;
+      
+      currentTafsirVerseNum = verse.number;
+      activeTafsirTab = "ur"; // Reset to Urdu tab by default
+      loadedTafsirObj = null;
+      
+      updateTafsirTabsUI();
+      
+      // Show loading spinner
+      tafsirLoading.classList.remove("hidden");
+      tafsirContentBox.classList.add("hidden");
+      
+      fetchTafsirContent(verse.number);
+    }
+
+    window.closeTafsirModal = function () {
+      if (tafsirModal) tafsirModal.classList.add("hidden");
+    };
+
+    async function fetchTafsirContent(ayahNum) {
+      try {
+        const res = await fetch(
+          `https://api.alquran.cloud/v1/ayah/${ayahNum}/editions/quran-uthmani,ur.jalandhry,ur.maududi,ar.tafsir.jalalayn,en.tafsir.rezaanderson`
+        );
+        if (res.ok) {
+          const bodyData = await res.json();
+          const editions = bodyData.data;
+          
+          loadedTafsirObj = {
+            ur: editions[2].text || "Urdu exegesis not available.",
+            ar: editions[3].text || "Arabic Tafsir Al-Jalalayn not available.",
+            en: editions[4].text || "English exegesis not available."
+          };
+          
+          tafsirLoading.classList.add("hidden");
+          tafsirContentBox.classList.remove("hidden");
+          renderTafsirText();
+        } else {
+          showTafsirError("Failed to load Tafsir comments.");
+        }
+      } catch (err) {
+        console.error("Error fetching Tafsir details:", err);
+        showTafsirError("Network error loading Tafsir.");
+      }
+    }
+
+    function renderTafsirText() {
+      if (!loadedTafsirObj || !tafsirContentBox) return;
+      
+      const txt = loadedTafsirObj[activeTafsirTab];
+      tafsirContentBox.textContent = txt;
+      
+      // Apply right-align for Urdu / Arabic tabs
+      if (activeTafsirTab === "ur" || activeTafsirTab === "ar") {
+        tafsirContentBox.className = "text-right rtl font-amiri text-lg font-semibold text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-line";
+      } else {
+        tafsirContentBox.className = "text-left ltr text-sm font-medium text-slate-655 dark:text-slate-350 leading-relaxed whitespace-pre-line";
+      }
+    }
+
+    function showTafsirError(msg) {
+      tafsirLoading.classList.add("hidden");
+      tafsirContentBox.classList.remove("hidden");
+      tafsirContentBox.textContent = msg;
+      tafsirContentBox.className = "text-center text-red-500 text-xs font-semibold py-4";
+    }
+
+    function updateTafsirTabsUI() {
+      const activeClasses = "border-emerald-600 text-emerald-600 dark:text-emerald-400";
+      const inactiveClasses = "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300";
+      
+      const tabs = [
+        { id: "ur", el: tabUr },
+        { id: "ar", el: tabAr },
+        { id: "en", el: tabEn }
+      ];
+      
+      tabs.forEach(t => {
+        if (!t.el) return;
+        if (t.id === activeTafsirTab) {
+          t.el.className = `flex-1 pb-2.5 text-xs font-bold border-b-2 ${activeClasses}`;
+        } else {
+          t.el.className = `flex-1 pb-2.5 text-xs font-semibold border-b-2 ${inactiveClasses}`;
+        }
+      });
+    }
+
+    // Bind tab clicks
+    if (tabUr) {
+      tabUr.addEventListener("click", () => {
+        activeTafsirTab = "ur";
+        updateTafsirTabsUI();
+        renderTafsirText();
+      });
+    }
+    if (tabAr) {
+      tabAr.addEventListener("click", () => {
+        activeTafsirTab = "ar";
+        updateTafsirTabsUI();
+        renderTafsirText();
+      });
+    }
+    if (tabEn) {
+      tabEn.addEventListener("click", () => {
+        activeTafsirTab = "en";
+        updateTafsirTabsUI();
+        renderTafsirText();
       });
     }
 
