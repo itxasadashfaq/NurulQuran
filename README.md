@@ -197,10 +197,11 @@ Run the frontend via one of the following methods:
 ## 🕋 Module 2: Quran Companion Features
 This module integrates public Quranic scripture database streams and standard HTML5 audio components into the frontend page flow:
 
-*   **API Parallel Fetching:** Leverages Al Quran Cloud's joint editions fetch endpoint (`/v1/surah/{number}/editions/quran-uthmani,en.sahih,{reciterId}`) to obtain original Arabic text, English translation, and audio streams in a single HTTP request, reducing latencies.
-*   **Surah Search Directory:** Scrollable sidebar selector listing all 114 Surahs. Includes a regex search filter box allowing users to instantly filter Surahs by Name, Revelation Number, or Revelational Meaning.
+*   **API Parallel Fetching:** Leverages Al Quran Cloud's joint editions fetch endpoint (`/v1/surah/{number}/editions/quran-uthmani,en.sahih,ur.jalandhry,ur.maududi,ar.alafasy`) to obtain the original Arabic text, English translation, Urdu translation, Urdu Tafseer exegesis, and recitation audio streams in a single joint HTTP request, reducing latencies.
+*   **Concurrent Translation Display:** Renders both **English translation** (left-aligned, LTR, slate color scheme) and **Urdu translation** (right-aligned, RTL, calligraphic emerald color scheme) concurrently under each verse for side-by-side comparison.
+*   **Inline Collapsible Urdu Tafseer:** Features a dedicated collapsible Tafseer block for each verse. Clicking "Show Tafseer (Urdu)" instantly expands Maududi's *Tafhim-ul-Quran* exegesis inline within the verse card inside a high-contrast, theme-compliant quote box, avoiding page redirect context switches.
+*   **Surah Search Directory:** Scrollable sidebar selector listing all 114 Surahs. Includes a search filter box allowing users to instantly filter Surahs by Name, Revelation Number, or Revelational Meaning.
 *   **Custom Font Resizing:** Dynamic size adjuster controllers on the reader pane allowing fine-grained scale manipulation of Arabic scripture text for accessibility and readability.
-*   **Parallel Translation Toggles:** Standard toggles showing or hiding the Sahih International English translation lines dynamically.
 *   **Sticky Audio Player Bar:** A fixed media controller container appearing smoothly at the screen bottom upon verse playback. Features:
     *   **Autoplay Next (Continuous Play):** The player automatically queues and plays the next verse in the Surah once the active verse ends.
     *   **Visual Synchronisation:** Automatically highlights the active playing verse on the screen with a golden border and emerald background, and auto-scrolls it smoothly into view.
