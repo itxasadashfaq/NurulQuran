@@ -1,12 +1,13 @@
 # 📖 NurulQuran – Complete Islamic Learning & Quran Companion Platform
 
 **Project Metadata:**
-- **Active Module:** Module 2 (Quran & Islamic Features)
-- **Development Timeline:** July 27th – August 02nd, 2026
+- **Current Active Module:** Module 2 (Quran & Islamic Features)
+- **Completed Modules:** Module 1 (Planning & Project Foundation), Module 2 (Quran & Islamic Features)
+- **Development Timeline:** July 20th – August 02nd, 2026
 
 Welcome to **NurulQuran**, a premium, modern, and highly interactive digital companion for Quran study, prayer time tracking, daily habit streaks, and structured Islamic learning modules.
 
-This codebase represents the completed features of **Module 2 (Quran & Islamic Features)** built on top of the Module 1 project foundation. It leverages a decoupled, lightweight design where the frontend (vanilla CSS, HTML, and JS) integrates seamlessly with an Express backend and a MongoDB database, utilizing Firebase Authentication for user accounts.
+This codebase represents the features of **Module 2 (Quran & Islamic Features)** built directly on top of the **Module 1 (Planning & Project Foundation)** codebase. It leverages a decoupled, lightweight design where the frontend (vanilla CSS, HTML, and JS) integrates seamlessly with an Express backend and a MongoDB database, utilizing Firebase Authentication for user accounts.
 
 
 ---
@@ -194,8 +195,21 @@ Run the frontend via one of the following methods:
     *   `503 Service Unavailable`: `{ "error": "MongoDB connection is currently offline." }`
     *   `500 Internal Server Error`: `{ "error": "Database synchronization failed", "details": "..." }`
 
+## 🕋 Module 1: Planning & Project Foundation
+This module covers the initial setup, design wireframes, responsive web layout interfaces, and user authentication infrastructure:
+
+*   **Requirement Analysis & UI/UX Planning:** Comprehensive specification mapping for user login streams, progress bars, responsive grids, and learning course wireframes.
+*   **Decoupled Directory Structure:** Clean folder isolation between frontend pages and assets, Express backend router files, and dotenv local setups.
+*   **Responsive Homepage Layout:** Mobile-friendly landing homepage (`index.html`) equipped with sticky navigation bar overlays, landing Call-to-Actions (CTAs), and full footer references.
+*   **Tailwind CSS Integration:** Configured Tailwind CSS play CDN with theme extensions for custom dark HSL colors, gold/amber hues, and responsive breakpoints.
+*   **Firebase Project Configuration:** Setup Firebase Authentication SDK on the client to register and authenticate users via secure email/password credential pairs.
+*   **MongoDB Atlas Database Sync:** Established Mongoose schema connection syncing auth profile records (UUID, emails, verification indicators, login timestamps) to MongoDB Atlas on successful registration.
+*   **Basic Interactive Dashboard:** A locked dashboard interface (`dashboard.html`) protecting personalized user details, lesson stats, and checklists behind a client-side authentication barrier.
+
+---
+
 ## 🕋 Module 2: Quran & Islamic Features
-This module integrates public Quranic scripture database streams and standard HTML5 audio components into the frontend page flow:
+This module integrates public Quranic scripture database streams, collapsible exegesis lookups, persistent bookmarks, coordinates trackers, and standard HTML5 audio components into the frontend page flow:
 
 *   **API Parallel Fetching:** Leverages Al Quran Cloud's joint editions fetch endpoint (`/v1/surah/{number}/editions/quran-uthmani,en.sahih,ur.jalandhry,ur.maududi,ar.alafasy,ur.khan`) to obtain the original Arabic text, English translation, Urdu translation, Urdu Tafseer exegesis, recitation audio, and Urdu translation audio streams in a single joint HTTP request, reducing latencies.
 *   **Urdu Translation Audio Recitation:** Plays the actual vocal recitation of the Urdu translation read by Qari Shamshad Ali Khan (`ur.khan`) directly on click. This ensures consistent cross-platform compatibility and high-quality voice delivery on all browsers without system text-to-speech dependencies.
