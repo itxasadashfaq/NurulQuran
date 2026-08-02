@@ -194,7 +194,7 @@ Run the frontend via one of the following methods:
     *   `503 Service Unavailable`: `{ "error": "MongoDB connection is currently offline." }`
     *   `500 Internal Server Error`: `{ "error": "Database synchronization failed", "details": "..." }`
 
-## 🕋 Module 2 & 3: Quran Companion Features
+## 🕋 Module 2: Quran & Islamic Features
 This module integrates public Quranic scripture database streams and standard HTML5 audio components into the frontend page flow:
 
 *   **API Parallel Fetching:** Leverages Al Quran Cloud's joint editions fetch endpoint (`/v1/surah/{number}/editions/quran-uthmani,en.sahih,ur.jalandhry,ur.maududi,ar.alafasy,ur.khan`) to obtain the original Arabic text, English translation, Urdu translation, Urdu Tafseer exegesis, recitation audio, and Urdu translation audio streams in a single joint HTTP request, reducing latencies.
