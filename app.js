@@ -631,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const res = await fetch(
-          `https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,en.sahih,ur.jalandhry,ur.maududi,${selectedReciter}`
+          `https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,en.sahih,ur.jalandhry,ur.maududi,${selectedReciter},ur.khan`
         );
         if (res.ok) {
           const bodyData = await res.json();
@@ -642,6 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const urduAyahs = editions[2].ayahs;
           const tafseerAyahs = editions[3].ayahs;
           const audioAyahs = editions[4].ayahs;
+          const urduAudioAyahs = editions[5].ayahs;
 
           // Parse and combine editions
           currentVerses = arabicAyahs.map((ayah, i) => {
@@ -660,7 +661,8 @@ document.addEventListener("DOMContentLoaded", () => {
               englishTranslation: englishAyahs[i].text,
               urduTranslation: urduAyahs[i].text,
               tafseer: tafseerAyahs[i].text,
-              audio: audioAyahs[i].audio
+              audio: audioAyahs[i].audio,
+              urduAudio: urduAudioAyahs[i].audio
             };
           });
 
@@ -777,7 +779,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="text-right rtl font-amiri text-xl font-bold text-emerald-800 dark:text-emerald-400">
               <div class="flex items-center justify-between gap-2 mb-1 flex-row-reverse select-none">
                 <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">اردو ترجمہ</span>
-                <button onclick="window.speakText(this, ${index}, 'ur')" class="p-1 rounded text-emerald-600 dark:text-emerald-450 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Translation">
+                <button onclick="window.playUrduAudioFromUI(this, ${index})" class="p-1 rounded text-emerald-600 dark:text-emerald-450 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Translation">
                   <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                 </button>
               </div>
@@ -1309,12 +1311,60 @@ window.removeBookmarkFromDashboard = function (surahNumber, verseNumber) {
   }
 };
 
+let activeUrduAudio = null;
+let activeUrduAudioBtn = null;
+
+window.playUrduAudioFromUI = function (btn, index) {
+  if (index >= 0 && index < currentVerses.length) {
+    const v = currentVerses[index];
+    const audioUrl = v.urduAudio;
+
+    if (!audioUrl) {
+      alert("Urdu translation audio is not available.");
+      return;
+    }
+
+    if (activeUrduAudio && !activeUrduAudio.paused) {
+      activeUrduAudio.pause();
+      if (activeUrduAudioBtn) {
+        activeUrduAudioBtn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+      }
+      if (activeUrduAudioBtn === btn) {
+        activeUrduAudio = null;
+        activeUrduAudioBtn = null;
+        return;
+      }
+    }
+
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+
+    activeUrduAudio = new Audio(audioUrl);
+    activeUrduAudioBtn = btn;
+
+    btn.innerHTML = `<span class="text-[9px] font-sans font-bold text-amber-500 animate-pulse">Playing...</span>`;
+
+    activeUrduAudio.play();
+
+    activeUrduAudio.onended = () => {
+      btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+      activeUrduAudio = null;
+      activeUrduAudioBtn = null;
+    };
+
+    activeUrduAudio.onerror = () => {
+      btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+      activeUrduAudio = null;
+      activeUrduAudioBtn = null;
+      alert("Could not load Urdu recitation stream.");
+    };
+  }
+};
+
 window.speakText = function (btn, index, lang) {
   let text = "";
-  if (lang === 'ur') {
-    const el = document.getElementById(`urdu-text-${index}`);
-    if (el) text = el.textContent;
-  } else if (lang === 'tafseer') {
+  if (lang === 'tafseer') {
     const el = document.getElementById(`tafseer-text-${index}`);
     if (el) text = el.textContent;
   }
