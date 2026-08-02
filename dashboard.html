@@ -256,27 +256,26 @@
 
           <!-- Last Read & Bookmarks Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <!-- Last Read Card -->
+                     <!-- Last Read Card -->
             <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
               <div class="space-y-4">
                 <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <svg class="w-4.5 h-4.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                   Last Read Verse
                 </h3>
-                <div class="p-4 rounded-2xl bg-amber-505/5 border border-amber-500/10 text-center space-y-3">
-                  <div class="text-xs text-amber-600 dark:text-amber-400 font-semibold">
+                <div id="dash-last-read-card" class="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 text-center space-y-3">
+                  <div id="dash-last-read-ref" class="text-xs text-amber-600 dark:text-amber-400 font-semibold">
                     Surah Al-Kahf (18:10)
                   </div>
-                  <div class="quran-text text-xl font-bold text-slate-800 dark:text-slate-200">
+                  <div id="dash-last-read-arabic" class="quran-text text-xl font-bold text-slate-800 dark:text-slate-200">
                     إِذْ أَوَى الْفِتْيَةُ إِلَى الْكَهْفِ
                   </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 italic">
+                  <p id="dash-last-read-translation" class="text-xs text-slate-500 dark:text-slate-400 italic">
                     &ldquo;When the youths retreated to the cave...&rdquo;
                   </p>
                 </div>
               </div>
-              <a href="index.html#quran" class="w-full py-2 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold text-center border border-slate-200/50 dark:border-slate-800 transition-colors">
+              <a id="dash-btn-continue-reading" href="index.html#quran" class="w-full py-2 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold text-center border border-slate-200/50 dark:border-slate-800 transition-colors">
                 Continue Reading
               </a>
             </div>
@@ -286,21 +285,10 @@
               <div class="space-y-4">
                 <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <svg class="w-4.5 h-4.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                  Bookmarked Surahs
+                  Bookmarked Verses
                 </h3>
-                <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
-                  <a href="index.html#quran" class="py-2.5 flex items-center justify-between text-xs hover:text-emerald-600 transition-colors group">
-                    <span class="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600">Surah Al-Kahf</span>
-                    <span class="text-slate-400 dark:text-slate-500">Verse 1-10</span>
-                  </a>
-                  <a href="index.html#quran" class="py-2.5 flex items-center justify-between text-xs hover:text-emerald-600 transition-colors group">
-                    <span class="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600">Surah Yaseen</span>
-                    <span class="text-slate-400 dark:text-slate-500">Verse 1-83</span>
-                  </a>
-                  <a href="index.html#quran" class="py-2.5 flex items-center justify-between text-xs hover:text-emerald-600 transition-colors group">
-                    <span class="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600">Surah Al-Mulk</span>
-                    <span class="text-slate-400 dark:text-slate-500">Verse 1-30</span>
-                  </a>
+                <div id="dashboard-bookmarks-container" class="divide-y divide-slate-100 dark:divide-slate-800/50 max-h-[170px] overflow-y-auto pr-1 space-y-1">
+                  <div class="text-center py-10 text-xs text-slate-400">No bookmarked verses yet.</div>
                 </div>
               </div>
               <a href="index.html#quran" class="w-full py-2 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold text-center border border-slate-200/50 dark:border-slate-800 transition-colors">

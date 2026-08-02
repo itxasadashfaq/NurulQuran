@@ -194,12 +194,17 @@ Run the frontend via one of the following methods:
     *   `503 Service Unavailable`: `{ "error": "MongoDB connection is currently offline." }`
     *   `500 Internal Server Error`: `{ "error": "Database synchronization failed", "details": "..." }`
 
-## 🕋 Module 2: Quran Companion Features
+## 🕋 Module 2 & 3: Quran Companion Features
 This module integrates public Quranic scripture database streams and standard HTML5 audio components into the frontend page flow:
 
 *   **API Parallel Fetching:** Leverages Al Quran Cloud's joint editions fetch endpoint (`/v1/surah/{number}/editions/quran-uthmani,en.sahih,ur.jalandhry,ur.maududi,ar.alafasy`) to obtain the original Arabic text, English translation, Urdu translation, Urdu Tafseer exegesis, and recitation audio streams in a single joint HTTP request, reducing latencies.
 *   **Concurrent Translation Display:** Renders both **English translation** (left-aligned, LTR, slate color scheme) and **Urdu translation** (right-aligned, RTL, calligraphic emerald color scheme) concurrently under each verse for side-by-side comparison.
 *   **Inline Collapsible Urdu Tafseer:** Features a dedicated collapsible Tafseer block for each verse. Clicking "Show Tafseer (Urdu)" instantly expands Maududi's *Tafhim-ul-Quran* exegesis inline within the verse card inside a high-contrast, theme-compliant quote box, avoiding page redirect context switches.
+*   **Dynamic Daily Ayat Widget:** Date-seeded hash engine selector displaying a fresh inspiring Quranic verse daily on the homepage with custom media recitation triggers and bookmark actions.
+*   **Full-Text Quran Search Engine:** Tabbed search pane in the sidebar supporting auto language detection (Arabic/English/Urdu) scanning the entire Quran. Launching a result loads the Surah, triggers smooth scroll-into-view, and flashes the verse with feedback highlights.
+*   **Persistent Bookmark Manager:** Verse-level bookmark ribbons with fill indicators, rendering dynamic lists on the Dashboard page that allow jumping back to coordinates or deleting items.
+*   **Continue Reading Coordinator:** Tracks the user's last read Surah & Verse coordinates, providing an interactive card preview on the dashboard for quick resumption.
+*   **Reading History Tracker:** Scrollable sidebar widgets logging recently viewed Surahs.
 *   **Surah Search Directory:** Scrollable sidebar selector listing all 114 Surahs. Includes a search filter box allowing users to instantly filter Surahs by Name, Revelation Number, or Revelational Meaning.
 *   **Custom Font Resizing:** Dynamic size adjuster controllers on the reader pane allowing fine-grained scale manipulation of Arabic scripture text for accessibility and readability.
 *   **Sticky Audio Player Bar:** A fixed media controller container appearing smoothly at the screen bottom upon verse playback. Features:

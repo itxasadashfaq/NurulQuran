@@ -180,6 +180,7 @@ function updateUIForLoggedInUser(user) {
   if (dashEmail) dashEmail.textContent = user.email;
   if (dashUid) dashUid.textContent = user.uid;
   if (dashVerified) dashVerified.textContent = user.emailVerified ? "Verified Account" : "Pending Verification";
+  updateDashboardWidgets();
 }
 
 function updateUIForLoggedOutUser() {
@@ -393,6 +394,144 @@ document.addEventListener("DOMContentLoaded", () => {
     let previousVolume = 0.8;
     let isDraggingSlider = false;
 
+    // ================= SIDEBAR TABS & SEARCH =================
+    const tabSurahsBtn = document.getElementById("sidebar-tab-surahs");
+    const tabSearchBtn = document.getElementById("sidebar-tab-search");
+    const tabBookmarksBtn = document.getElementById("sidebar-tab-bookmarks");
+    
+    const containerSurahs = document.getElementById("sidebar-container-surahs");
+    const containerSearch = document.getElementById("sidebar-container-search");
+    const containerBookmarks = document.getElementById("sidebar-container-bookmarks");
+
+    if (tabSurahsBtn && tabSearchBtn && tabBookmarksBtn) {
+      tabSurahsBtn.addEventListener("click", () => setActiveSidebarTab("surahs"));
+      tabSearchBtn.addEventListener("click", () => setActiveSidebarTab("search"));
+      tabBookmarksBtn.addEventListener("click", () => setActiveSidebarTab("bookmarks"));
+    }
+
+    function setActiveSidebarTab(tabName) {
+      const activeTabClasses = "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-bold";
+      const inactiveTabClasses = "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-semibold";
+
+      [tabSurahsBtn, tabSearchBtn, tabBookmarksBtn].forEach(btn => {
+        if (btn) btn.className = `flex-1 text-center py-1.5 text-xs focus:outline-none cursor-pointer border-b-2 ${inactiveTabClasses}`;
+      });
+
+      if (containerSurahs) containerSurahs.classList.add("hidden");
+      if (containerSearch) containerSearch.classList.add("hidden");
+      if (containerBookmarks) containerBookmarks.classList.add("hidden");
+
+      if (tabName === "surahs") {
+        if (tabSurahsBtn) tabSurahsBtn.className = `flex-1 text-center py-1.5 text-xs focus:outline-none cursor-pointer border-b-2 ${activeTabClasses}`;
+        if (containerSurahs) containerSurahs.classList.remove("hidden");
+      } else if (tabName === "search") {
+        if (tabSearchBtn) tabSearchBtn.className = `flex-1 text-center py-1.5 text-xs focus:outline-none cursor-pointer border-b-2 ${activeTabClasses}`;
+        if (containerSearch) containerSearch.classList.remove("hidden");
+      } else if (tabName === "bookmarks") {
+        if (tabBookmarksBtn) tabBookmarksBtn.className = `flex-1 text-center py-1.5 text-xs focus:outline-none cursor-pointer border-b-2 ${activeTabClasses}`;
+        if (containerBookmarks) containerBookmarks.classList.remove("hidden");
+        if (typeof window.loadSidebarBookmarksAndHistory === "function") {
+          window.loadSidebarBookmarksAndHistory();
+        }
+      }
+    }
+
+    const quranSearchQueryInput = document.getElementById("quran-search-query");
+    const triggerSearchBtn = document.getElementById("btn-trigger-quran-search");
+    const searchResultsContainer = document.getElementById("quran-search-results");
+
+    if (triggerSearchBtn && quranSearchQueryInput) {
+      triggerSearchBtn.addEventListener("click", performQuranSearch);
+      quranSearchQueryInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") performQuranSearch();
+      });
+    }
+
+    async function performQuranSearch() {
+      const query = quranSearchQueryInput.value.trim();
+      if (!query) return;
+
+      if (!searchResultsContainer) return;
+      searchResultsContainer.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-12 space-y-2">
+          <div class="w-6 h-6 rounded-full border-2 border-emerald-500/30 border-t-emerald-600 animate-spin"></div>
+          <span class="text-[10px] text-slate-400">Searching corpus...</span>
+        </div>
+      `;
+
+      try {
+        let edition = "en.sahih";
+        const isArabic = /[\u0600-\u06ff]/.test(query);
+        if (isArabic) {
+          const isUrdu = /[ٹڈڑںےہؤئ]/.test(query) || query.includes("ہے") || query.includes("میں") || query.includes("کو");
+          edition = isUrdu ? "ur.jalandhry" : "quran-simple";
+        }
+
+        const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/${edition}`);
+        if (res.ok) {
+          const body = await res.json();
+          const count = body.data.count;
+          const matches = body.data.matches;
+
+          if (count === 0 || !matches || matches.length === 0) {
+            searchResultsContainer.innerHTML = `<div class="text-center py-8 text-slate-400">No verses found matching &ldquo;${query}&rdquo;.</div>`;
+            return;
+          }
+
+          searchResultsContainer.innerHTML = `
+            <div class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wide">Matches found: ${count}</div>
+            <div class="space-y-2.5"></div>
+          `;
+          const listDiv = searchResultsContainer.querySelector(".space-y-2\\.5");
+
+          const displayMatches = matches.slice(0, 50);
+
+          displayMatches.forEach(m => {
+            const matchRow = document.createElement("button");
+            matchRow.className = "w-full p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 text-left hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all text-[11px] space-y-1 block cursor-pointer";
+            
+            const isMatchArabic = edition === "quran-simple";
+            const textDir = isMatchArabic || edition === "ur.jalandhry" ? "text-right rtl font-amiri" : "text-left ltr font-sans";
+            
+            matchRow.innerHTML = `
+              <div class="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-1">
+                <span>Surah ${m.surah.englishName}</span>
+                <span class="text-emerald-600 dark:text-emerald-450">${m.surah.number}:${m.numberInSurah}</span>
+              </div>
+              <div class="text-slate-700 dark:text-slate-300 leading-normal whitespace-normal ${textDir}">
+                ${m.text}
+              </div>
+            `;
+
+            matchRow.onclick = () => {
+              window.goToVerseFromSearch(m.surah.number, m.numberInSurah);
+            };
+
+            listDiv.appendChild(matchRow);
+          });
+
+          if (count > 50) {
+            const moreDiv = document.createElement("div");
+            moreDiv.className = "text-[9px] text-center text-slate-400 py-1 italic";
+            moreDiv.textContent = `Showing first 50 results of ${count}...`;
+            searchResultsContainer.appendChild(moreDiv);
+          }
+        } else {
+          searchResultsContainer.innerHTML = `<div class="text-center py-8 text-red-550 font-medium">Search failed. Please try a different term.</div>`;
+        }
+      } catch (err) {
+        console.error("Quran Search Error:", err);
+        searchResultsContainer.innerHTML = `<div class="text-center py-8 text-red-550 font-medium">Network error executing search.</div>`;
+      }
+    }
+
+    window.goToVerseFromSearch = function (surahNum, verseNum) {
+      currentSurahNumber = surahNum;
+      const filtered = surahSearchInput.value ? filterSurahs(surahSearchInput.value) : surahsList;
+      renderSurahSidebar(filtered);
+      loadSurah(surahNum, false, verseNum);
+    };
+
     // Fetch and load initial values
     fetchSurahList();
 
@@ -404,8 +543,18 @@ document.addEventListener("DOMContentLoaded", () => {
           const data = await res.json();
           surahsList = data.data;
           renderSurahSidebar(surahsList);
-          // Initial load Al-Fatihah (Surah 1)
-          loadSurah(1);
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          const initSurah = parseInt(urlParams.get("surah"));
+          const initVerse = parseInt(urlParams.get("verse"));
+          
+          if (initSurah && !isNaN(initSurah)) {
+            currentSurahNumber = initSurah;
+            renderSurahSidebar(surahsList);
+            loadSurah(initSurah, false, initVerse || 1);
+          } else {
+            loadSurah(1);
+          }
         } else {
           surahListContainer.innerHTML = `<div class="text-xs text-red-500 text-center py-6">Failed to load Surah index.</div>`;
         }
@@ -472,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 4. Fetch Surah text, translation, and audio
-    async function loadSurah(surahNum, shouldAutoPlay = false) {
+    async function loadSurah(surahNum, shouldAutoPlay = false, scrollToVerseNum = null) {
       versesContainer.innerHTML = `
         <div class="flex flex-col items-center justify-center py-24 space-y-3">
           <div class="w-10 h-10 rounded-full border-3 border-emerald-500/30 border-t-emerald-600 animate-spin"></div>
@@ -522,10 +671,45 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Set Player Title
             playerTitle.textContent = activeSurahMeta.englishName;
+
+            // Log Reading History
+            const history = JSON.parse(localStorage.getItem("quran_history") || "[]");
+            const hIndex = history.findIndex(h => h.surahNumber === surahNum);
+            if (hIndex > -1) {
+              history.splice(hIndex, 1);
+            }
+            history.unshift({
+              surahNumber: surahNum,
+              surahName: activeSurahMeta.englishName,
+              timestamp: new Date().toISOString()
+            });
+            if (history.length > 10) history.pop();
+            localStorage.setItem("quran_history", JSON.stringify(history));
+
+            // Log Last Read Coordinates (Default: Verse 1 of loaded Surah)
+            const lastRead = {
+              surahNumber: surahNum,
+              surahName: activeSurahMeta.englishName,
+              verseNumber: scrollToVerseNum || 1,
+              text: currentVerses[(scrollToVerseNum || 1) - 1]?.text || "",
+              translation: currentVerses[(scrollToVerseNum || 1) - 1]?.englishTranslation || ""
+            };
+            localStorage.setItem("quran_last_read", JSON.stringify(lastRead));
           }
 
           renderVerses();
           
+          if (scrollToVerseNum) {
+            setTimeout(() => {
+              const verseRow = document.getElementById(`verse-row-${scrollToVerseNum - 1}`);
+              if (verseRow) {
+                verseRow.scrollIntoView({ behavior: "smooth", block: "center" });
+                verseRow.classList.add("ring-2", "ring-emerald-500/50");
+                setTimeout(() => verseRow.classList.remove("ring-2", "ring-emerald-500/50"), 3000);
+              }
+            }, 500);
+          }
+
           if (shouldAutoPlay && currentVerses.length > 0) {
             playVerse(0);
           } else {
@@ -555,20 +739,29 @@ document.addEventListener("DOMContentLoaded", () => {
         versesContainer.appendChild(bisDiv);
       }
 
+      const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+
       currentVerses.forEach((v, index) => {
         const verseRow = document.createElement("div");
         verseRow.id = `verse-row-${index}`;
         verseRow.className = "p-4 md:p-6 rounded-2xl border border-transparent transition-all space-y-4";
         
+        const isBookmarked = bookmarks.some(b => b.surahNumber === currentSurahNumber && b.verseNumber === v.numberInSurah);
+
         verseRow.innerHTML = `
           <div class="flex items-start justify-between gap-4">
-            <!-- Verse marker badge & play action -->
+            <!-- Verse marker badge & play action & bookmark action -->
             <div class="flex items-center gap-1.5 flex-shrink-0">
               <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-450 border border-emerald-500/10">
                 ${v.numberInSurah}
               </span>
-              <button onclick="window.playVerseFromUI(${index})" class="p-1.5 rounded-lg text-emerald-650 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 transition-colors" title="Play Verse">
+              <button onclick="window.playVerseFromUI(${index})" class="p-1.5 rounded-lg text-emerald-650 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 transition-colors cursor-pointer" title="Play Verse">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M4.555 3.168A1 1 0 003 4v12a1 1 0 001.555.832l10-6a1 1 0 000-1.664l-10-6z"/></svg>
+              </button>
+              <button onclick="window.toggleBookmarkFromUI(${index})" class="p-1.5 rounded-lg text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/50 hover:text-amber-600 transition-colors cursor-pointer" title="Bookmark Verse">
+                <svg class="w-4 h-4 ${isBookmarked ? 'fill-current' : 'fill-none stroke-current'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
               </button>
             </div>
             
@@ -834,6 +1027,200 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     };
+    // ================= BOOKMARKS & HISTORY CONTROLLERS =================
+    window.loadSidebarBookmarksAndHistory = function () {
+      const bookmarksListEl = document.getElementById("sidebar-bookmarks-list");
+      const historyListEl = document.getElementById("sidebar-history-list");
+      
+      if (bookmarksListEl) {
+        const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+        if (bookmarks.length === 0) {
+          bookmarksListEl.innerHTML = `<div class="text-center py-6 text-slate-450 italic text-[10px]">No bookmarked verses yet.</div>`;
+        } else {
+          bookmarksListEl.innerHTML = "";
+          bookmarks.forEach(b => {
+            const bRow = document.createElement("div");
+            bRow.className = "p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 text-[10px]";
+            
+            bRow.innerHTML = `
+              <button onclick="window.goToVerseFromSearch(${b.surahNumber}, ${b.verseNumber})" class="font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 transition-colors text-left flex-grow truncate focus:outline-none cursor-pointer">
+                Surah ${b.surahName} (${b.surahNumber}:${b.verseNumber})
+              </button>
+              <button onclick="window.removeBookmarkFromSidebar(${b.surahNumber}, ${b.verseNumber})" class="text-red-400 hover:text-red-500 transition-colors font-bold text-[9px] cursor-pointer focus:outline-none flex-shrink-0">
+                Remove
+              </button>
+            `;
+            bookmarksListEl.appendChild(bRow);
+          });
+        }
+      }
+
+      if (historyListEl) {
+        const history = JSON.parse(localStorage.getItem("quran_history") || "[]");
+        if (history.length === 0) {
+          historyListEl.innerHTML = `<div class="text-center py-6 text-slate-455 italic text-[10px]">No reading history yet.</div>`;
+        } else {
+          historyListEl.innerHTML = "";
+          history.forEach(h => {
+            const hRow = document.createElement("button");
+            hRow.className = "w-full p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-left hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-[10px] font-semibold text-slate-700 dark:text-slate-300 flex justify-between items-center cursor-pointer focus:outline-none";
+            hRow.innerHTML = `
+              <span>Surah ${h.surahName}</span>
+              <span class="text-[8px] text-slate-400 font-normal font-sans">${new Date(h.timestamp).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
+            `;
+            hRow.onclick = () => {
+              window.goToVerseFromSearch(h.surahNumber, 1);
+            };
+            historyListEl.appendChild(hRow);
+          });
+        }
+      }
+    };
+
+    window.toggleBookmarkFromUI = function (index) {
+      if (index >= 0 && index < currentVerses.length) {
+        const v = currentVerses[index];
+        const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+        const bIndex = bookmarks.findIndex(b => b.surahNumber === currentSurahNumber && b.verseNumber === v.numberInSurah);
+        
+        const activeSurahMeta = surahsList.find(s => s.number === currentSurahNumber);
+        const surahName = activeSurahMeta ? activeSurahMeta.englishName : "Surah";
+
+        if (bIndex > -1) {
+          bookmarks.splice(bIndex, 1);
+        } else {
+          bookmarks.push({
+            surahNumber: currentSurahNumber,
+            surahName: surahName,
+            verseNumber: v.numberInSurah,
+            text: v.text,
+            englishTranslation: v.englishTranslation,
+            urduTranslation: v.urduTranslation
+          });
+        }
+        localStorage.setItem("quran_bookmarks", JSON.stringify(bookmarks));
+        renderVerses();
+        
+        if (tabBookmarksBtn && tabBookmarksBtn.classList.contains("border-emerald-600")) {
+          window.loadSidebarBookmarksAndHistory();
+        }
+      }
+    };
+
+    window.removeBookmarkFromSidebar = function (surahNumber, verseNumber) {
+      const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+      const bIndex = bookmarks.findIndex(b => b.surahNumber === surahNumber && b.verseNumber === verseNumber);
+      if (bIndex > -1) {
+        bookmarks.splice(bIndex, 1);
+        localStorage.setItem("quran_bookmarks", JSON.stringify(bookmarks));
+        window.loadSidebarBookmarksAndHistory();
+        if (surahNumber === currentSurahNumber) {
+          renderVerses();
+        }
+      }
+    };
+    // ================= DAILY AYAT ENGINE =================
+    const dailyArabicEl = document.getElementById("daily-verse-arabic");
+    if (dailyArabicEl) {
+      loadDailyAyat();
+    }
+
+    async function loadDailyAyat() {
+      const today = new Date();
+      const dateString = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+      
+      let hash = 0;
+      for (let i = 0; i < dateString.length; i++) {
+        hash = dateString.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const absoluteAyahNumber = Math.abs(hash) % 6236 || 1;
+
+      try {
+        const res = await fetch(`https://api.alquran.cloud/v1/ayah/${absoluteAyahNumber}/editions/quran-uthmani,en.sahih,ur.jalandhry,ar.alafasy`);
+        if (res.ok) {
+          const body = await res.json();
+          const editions = body.data;
+          
+          const arabicText = editions[0].text;
+          const englishText = editions[1].text;
+          const urduText = editions[2].text;
+          const audioUrl = editions[3].audio;
+          const surahName = editions[0].surah.englishName;
+          const surahNumber = editions[0].surah.number;
+          const numberInSurah = editions[0].numberInSurah;
+          
+          const refEl = document.getElementById("daily-verse-ref");
+          const arabicEl = document.getElementById("daily-verse-arabic");
+          const transEl = document.getElementById("daily-verse-translation");
+          
+          if (refEl) refEl.textContent = `Surah ${surahName} ${surahNumber}:${numberInSurah}`;
+          if (arabicEl) arabicEl.textContent = arabicText;
+          if (transEl) {
+            transEl.innerHTML = `
+              <div class="space-y-3">
+                <div class="text-left ltr text-xs font-semibold text-slate-300">
+                  <span class="text-[9px] uppercase tracking-wider text-emerald-400 block mb-1">English Translation</span>
+                  ${englishText}
+                </div>
+                <div class="text-right rtl font-amiri text-lg font-bold text-emerald-300">
+                  <span class="text-[9px] uppercase font-sans tracking-wider text-emerald-400 block mb-1">اردو ترجمہ</span>
+                  ${urduText}
+                </div>
+              </div>
+            `;
+          }
+
+          const playBtn = document.getElementById("btn-play-daily");
+          if (playBtn) {
+            let dailyAudio = null;
+            playBtn.addEventListener("click", () => {
+              if (dailyAudio && !dailyAudio.paused) {
+                dailyAudio.pause();
+                playBtn.innerHTML = `<span class="text-amber-400">▶</span> Play Recitation`;
+              } else {
+                if (!dailyAudio) {
+                  dailyAudio = new Audio(audioUrl);
+                  dailyAudio.addEventListener("ended", () => {
+                    playBtn.innerHTML = `<span class="text-amber-400">▶</span> Play Recitation`;
+                  });
+                }
+                dailyAudio.play();
+                playBtn.innerHTML = `<span class="text-amber-400">⏸</span> Pause Recitation`;
+              }
+            });
+          }
+
+          const bookmarkBtn = document.getElementById("btn-bookmark-daily");
+          if (bookmarkBtn) {
+            const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+            const isBookmarked = bookmarks.some(b => b.surahNumber === surahNumber && b.verseNumber === numberInSurah);
+            bookmarkBtn.textContent = isBookmarked ? "✦ Bookmarked" : "✦ Bookmark";
+
+            bookmarkBtn.addEventListener("click", () => {
+              const currentBookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+              const index = currentBookmarks.findIndex(b => b.surahNumber === surahNumber && b.verseNumber === numberInSurah);
+              if (index > -1) {
+                currentBookmarks.splice(index, 1);
+                bookmarkBtn.textContent = "✦ Bookmark";
+              } else {
+                currentBookmarks.push({
+                  surahNumber,
+                  surahName,
+                  verseNumber: numberInSurah,
+                  text: arabicText,
+                  englishTranslation: englishText,
+                  urduTranslation: urduText
+                });
+                bookmarkBtn.textContent = "✦ Bookmarked";
+              }
+              localStorage.setItem("quran_bookmarks", JSON.stringify(currentBookmarks));
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error loading Daily Ayat:", err);
+      }
+    }
 
     // Util Time formatter
     function formatTime(seconds) {
@@ -844,6 +1231,72 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
+// ================= DASHBOARD WIDGET UPDATERS =================
+function updateDashboardWidgets() {
+  const dashLastReadCard = document.getElementById("dash-last-read-card");
+  const dashLastReadRef = document.getElementById("dash-last-read-ref");
+  const dashLastReadArabic = document.getElementById("dash-last-read-arabic");
+  const dashLastReadTranslation = document.getElementById("dash-last-read-translation");
+  const dashBtnContinueReading = document.getElementById("dash-btn-continue-reading");
+  
+  const dashBookmarksContainer = document.getElementById("dashboard-bookmarks-container");
+
+  // 1. Update Last Read widget
+  if (dashLastReadCard) {
+    const lastRead = JSON.parse(localStorage.getItem("quran_last_read"));
+    if (lastRead) {
+      if (dashLastReadRef) dashLastReadRef.textContent = `Surah ${lastRead.surahName} (${lastRead.surahNumber}:${lastRead.verseNumber})`;
+      if (dashLastReadArabic) dashLastReadArabic.textContent = lastRead.text || "بِسْمِ ٱللَّهِ";
+      if (dashLastReadTranslation) dashLastReadTranslation.textContent = lastRead.translation || "";
+      if (dashBtnContinueReading) {
+        dashBtnContinueReading.href = `index.html?surah=${lastRead.surahNumber}&verse=${lastRead.verseNumber}#quran`;
+      }
+    } else {
+      // Default fallback
+      if (dashLastReadRef) dashLastReadRef.textContent = "Surah Al-Kahf (18:10)";
+      if (dashLastReadArabic) dashLastReadArabic.textContent = "إِذْ أَوَى الْفِتْيَةُ إِلَى الْكَهْفِ";
+      if (dashLastReadTranslation) dashLastReadTranslation.textContent = "When the youths retreated to the cave...";
+      if (dashBtnContinueReading) {
+        dashBtnContinueReading.href = `index.html?surah=18&verse=10#quran`;
+      }
+    }
+  }
+
+  // 2. Update Bookmarks widget
+  if (dashBookmarksContainer) {
+    const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+    if (bookmarks.length === 0) {
+      dashBookmarksContainer.innerHTML = `<div class="text-center py-10 text-xs text-slate-400">No bookmarked verses yet.</div>`;
+    } else {
+      dashBookmarksContainer.innerHTML = "";
+      bookmarks.forEach(b => {
+        const bRow = document.createElement("div");
+        bRow.className = "py-2.5 flex items-center justify-between text-xs border-b border-slate-100 dark:border-slate-800/50 last:border-0 group";
+        
+        bRow.innerHTML = `
+          <a href="index.html?surah=${b.surahNumber}&verse=${b.verseNumber}#quran" class="font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 transition-colors">
+            Surah ${b.surahName} (${b.surahNumber}:${b.verseNumber})
+          </a>
+          <button onclick="window.removeBookmarkFromDashboard(${b.surahNumber}, ${b.verseNumber})" class="text-red-400 hover:text-red-500 transition-colors text-[10px] font-bold cursor-pointer focus:outline-none">
+            Remove
+          </button>
+        `;
+        dashBookmarksContainer.appendChild(bRow);
+      });
+    }
+  }
+}
+
+window.removeBookmarkFromDashboard = function (surahNumber, verseNumber) {
+  const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+  const bIndex = bookmarks.findIndex(b => b.surahNumber === surahNumber && b.verseNumber === verseNumber);
+  if (bIndex > -1) {
+    bookmarks.splice(bIndex, 1);
+    localStorage.setItem("quran_bookmarks", JSON.stringify(bookmarks));
+    updateDashboardWidgets();
+  }
+};
 
 // Run Initializer
 initFirebase();
