@@ -775,8 +775,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="translation-block space-y-4 pl-9 ${isTranslationVisible ? '' : 'hidden'}">
             <!-- Urdu Translation -->
             <div class="text-right rtl font-amiri text-xl font-bold text-emerald-800 dark:text-emerald-400">
-              <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">اردو ترجمہ</span>
-              ${v.urduTranslation}
+              <div class="flex items-center justify-between gap-2 mb-1 flex-row-reverse select-none">
+                <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">اردو ترجمہ</span>
+                <button onclick="window.speakText(this, ${index}, 'ur')" class="p-1 rounded text-emerald-600 dark:text-emerald-450 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Translation">
+                  <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                </button>
+              </div>
+              <span id="urdu-text-${index}">${v.urduTranslation}</span>
             </div>
 
             <!-- English Translation -->
@@ -793,8 +798,14 @@ document.addEventListener("DOMContentLoaded", () => {
               <span id="tafseer-toggle-btn-txt-${index}">Show Tafseer (Urdu)</span>
             </button>
             
-            <div id="tafseer-inline-box-${index}" class="hidden mt-3 p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/80 text-right rtl font-amiri text-xl font-bold text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
-              ${v.tafseer}
+            <div id="tafseer-inline-box-${index}" class="hidden mt-3 p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/80 text-right rtl font-amiri text-xl font-bold text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line space-y-2">
+              <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-1.5 mb-1.5 flex-row-reverse select-none">
+                <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">تفسیر (تفہیم القرآن)</span>
+                <button onclick="window.speakText(this, ${index}, 'tafseer')" class="p-1 rounded text-emerald-600 dark:text-emerald-450 hover:bg-slate-200 dark:hover:bg-slate-800/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Tafseer">
+                  <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                </button>
+              </div>
+              <span id="tafseer-text-${index}">${v.tafseer}</span>
             </div>
           </div>
         `;
@@ -1295,6 +1306,50 @@ window.removeBookmarkFromDashboard = function (surahNumber, verseNumber) {
     bookmarks.splice(bIndex, 1);
     localStorage.setItem("quran_bookmarks", JSON.stringify(bookmarks));
     updateDashboardWidgets();
+  }
+};
+
+window.speakText = function (btn, index, lang) {
+  let text = "";
+  if (lang === 'ur') {
+    const el = document.getElementById(`urdu-text-${index}`);
+    if (el) text = el.textContent;
+  } else if (lang === 'tafseer') {
+    const el = document.getElementById(`tafseer-text-${index}`);
+    if (el) text = el.textContent;
+  }
+  
+  if (!text) return;
+  
+  if ('speechSynthesis' in window) {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      // Reset button icon
+      btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+      return;
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ur-PK';
+    
+    btn.innerHTML = `<span class="text-[9px] font-sans font-bold text-amber-500 animate-pulse">Playing...</span>`;
+    
+    utterance.onend = () => {
+      btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+    };
+    
+    utterance.onerror = () => {
+      btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+    };
+
+    const voices = window.speechSynthesis.getVoices();
+    // Prefer Urdu voice, fallback to Arabic or system default
+    const urVoice = voices.find(v => v.lang.startsWith('ur') || v.lang.startsWith('ar'));
+    if (urVoice) utterance.voice = urVoice;
+
+    window.speechSynthesis.speak(utterance);
+  } else {
+    alert("Text-to-speech is not supported in your browser.");
   }
 };
 
