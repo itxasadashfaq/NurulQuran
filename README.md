@@ -1,9 +1,9 @@
 # 📖 NurulQuran – Complete Islamic Learning & Quran Companion Platform
 
 **Project Metadata:**
-- **Current Active Module:** Module 2 (Quran & Islamic Features)
-- **Completed Modules:** Module 1 (Planning & Project Foundation), Module 2 (Quran & Islamic Features)
-- **Development Timeline:** July 20th – August 02nd, 2026
+- **Current Active Module:** Module 3 (Prayer & Community Features)
+- **Completed Modules:** Module 1 (Planning & Project Foundation), Module 2 (Quran & Islamic Features), Module 3 (Prayer & Community Features)
+- **Development Timeline:** July 20th – August 03rd, 2026
 
 Welcome to **NurulQuran**, a premium, modern, and highly interactive digital companion for Quran study, prayer time tracking, daily habit streaks, and structured Islamic learning modules.
 
@@ -230,6 +230,19 @@ This module integrates public Quranic scripture database streams, collapsible ex
     *   **Qari Choices:** Includes streams from Mishary Alafasy, Abdul Basit (Mujawwad), Abu Bakr al-Shatri, Ali Al-Hudhaify, and Mahmoud Al-Husary.
 
 ---
+
+## 🕋 Module 3: Prayer & Community Features
+This module integrates real-time prayer calculations, location detection, customizable calculation parameters, and an interactive compass to determine the Qibla bearing toward the Kaaba in Makkah:
+
+*   **Aladhan Prayer Times API Integration**: Interfaces with the Aladhan REST API to fetch accurate prayer times dynamically using date-seeded requests (`GET /timings/{date}`).
+*   **GPS Geolocation Detection**: Auto-detects the user's latitude and longitude using standard browser APIs (`navigator.geolocation.getCurrentPosition`), falling back gracefully to manual presets or custom inputs when permissions are denied.
+*   **Sleek Location Settings Panel**: Glassmorphic modal allowing user configuration of calculations, including Juristic School adjustments (Hanafi vs Shafi'i for Asr) and Method selections (MWL, ISNA, Umm Al-Qura, Karachi, etc.). Settings persist locally in the user's browser.
+*   **Active Prayer Identification**: Runs inline calculations checking system clocks against loaded prayer hours to identify, highlight, and style the active prayer card and next upcoming prayer.
+*   **Local Tracker & Checklists**: An interactive checklist row container on the user dashboard. Toggling checkboxes check off completed prayers and records progress in local storage mapped by date.
+*   **Interactive Qibla Compass**: A beautifully styled CSS compass rose dial displaying the precise bearing to Makkah. It leverages absolute mobile orientation sensors (`deviceorientationabsolute`) for dynamic movement and includes a manual adjustment slider fallback for desktop users.
+
+---
+
 
 ## 🎨 UI/UX Styling Features
 

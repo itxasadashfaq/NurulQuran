@@ -1403,6 +1403,603 @@ window.speakText = function (btn, index, lang) {
   }
 };
 
+// ================= PRAYER TIMES & QIBLA COMPASS MODULE 3 =================
+
+// State Configuration
+let prayerSettings = {
+  locMode: "gps", // "gps" or "manual"
+  manualPreset: "karachi",
+  lat: 24.8607,
+  lng: 67.0011,
+  calcMethod: "3", // MWL
+  asrSchool: "0", // Standard (Shafi)
+  cityName: "Karachi"
+};
+
+// Preset Coordinates Mapping
+const PRESET_CITIES = {
+  karachi: { lat: 24.8607, lng: 67.0011, name: "Karachi, PK" },
+  makkah: { lat: 21.4225, lng: 39.8262, name: "Makkah, SA" },
+  london: { lat: 51.5074, lng: -0.1278, name: "London, UK" },
+  newyork: { lat: 40.7128, lng: -74.0060, name: "New York, US" },
+  cairo: { lat: 30.0444, lng: 31.2357, name: "Cairo, EG" },
+  istanbul: { lat: 41.0082, lng: 28.9784, name: "Istanbul, TR" },
+  dhaka: { lat: 23.8103, lng: 90.4125, name: "Dhaka, BD" },
+  dubai: { lat: 25.2048, lng: 55.2708, name: "Dubai, AE" },
+  sydney: { lat: -33.8688, lng: 151.2093, name: "Sydney, AU" }
+};
+
+// Load saved settings
+function loadPrayerSettings() {
+  const saved = localStorage.getItem("nqp_prayer_settings");
+  if (saved) {
+    try {
+      prayerSettings = { ...prayerSettings, ...JSON.parse(saved) };
+    } catch (e) {
+      console.error("Failed to load prayer settings:", e);
+    }
+  }
+}
+
+// Save current settings
+function savePrayerSettings() {
+  localStorage.setItem("nqp_prayer_settings", JSON.stringify(prayerSettings));
+}
+
+// Calculate client bearing to Makkah
+function getQiblaBearing(lat, lng) {
+  const kaabaLat = 21.422487 * Math.PI / 180;
+  const kaabaLng = 39.826206 * Math.PI / 180;
+  const myLat = lat * Math.PI / 180;
+  const myLng = lng * Math.PI / 180;
+
+  const dLng = kaabaLng - myLng;
+  const y = Math.sin(dLng);
+  const x = Math.cos(myLat) * Math.tan(kaabaLat) - Math.sin(myLat) * Math.cos(dLng);
+
+  let bearing = Math.atan2(y, x) * 180 / Math.PI;
+  bearing = (bearing + 360) % 360;
+  return bearing;
+}
+
+// Fetch and load prayer times (with memory caching support)
+let cachedTimings = null;
+let cachedDateKey = "";
+
+async function updatePrayerTimes() {
+  const lat = prayerSettings.lat;
+  const lng = prayerSettings.lng;
+  const method = prayerSettings.calcMethod;
+  const school = prayerSettings.asrSchool;
+
+  // Format today's date DD-MM-YYYY
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+  const dateStr = `${dd}-${mm}-${yyyy}`;
+
+  // Update Location indicators in HTML
+  const locText = prayerSettings.locMode === "gps" ? `GPS (${lat.toFixed(2)}, ${lng.toFixed(2)})` : prayerSettings.cityName;
+  
+  const homeLocEl = document.getElementById("home-prayer-location");
+  if (homeLocEl) homeLocEl.textContent = locText;
+
+  const dashLocEl = document.getElementById("dash-prayer-location");
+  if (dashLocEl) dashLocEl.textContent = locText;
+
+  // Cache hit check: skip API request if settings and date remain unchanged
+  const currentConfigKey = `${dateStr}_${lat}_${lng}_${method}_${school}`;
+  if (cachedTimings && cachedDateKey === currentConfigKey) {
+    renderPrayerTimes(cachedTimings);
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=${method}&school=${school}`);
+    if (!res.ok) throw new Error("Failed to fetch timings from Aladhan");
+    
+    const data = await res.json();
+    const timings = data.data.timings;
+    
+    cachedTimings = timings;
+    cachedDateKey = currentConfigKey;
+    renderPrayerTimes(timings);
+  } catch (err) {
+    console.error("Error loading Prayer Times:", err);
+    if (cachedTimings) {
+      renderPrayerTimes(cachedTimings);
+    }
+  }
+}
+
+// Render values into elements
+function renderPrayerTimes(timings) {
+  // Normalize prayer values
+  const prayers = [
+    { name: "Fajr", time: timings.Fajr },
+    { name: "Dhuhr", time: timings.Dhuhr },
+    { name: "Asr", time: timings.Asr },
+    { name: "Maghrib", time: timings.Maghrib },
+    { name: "Isha", time: timings.Isha }
+  ];
+
+  // Render on Homepage
+  prayers.forEach(p => {
+    const timeEl = document.getElementById(`home-${p.name.toLowerCase()}-time`);
+    if (timeEl) {
+      timeEl.textContent = format12Hour(p.time);
+    }
+  });
+
+  // Calculate active and next prayer
+  const activeObj = getActivePrayer(prayers);
+  const homeActiveBadge = document.getElementById("home-prayer-active-badge");
+  if (homeActiveBadge) {
+    homeActiveBadge.textContent = `Active: ${activeObj.active}`;
+  }
+
+  // Highlight active prayer card on homepage
+  prayers.forEach(p => {
+    const card = document.getElementById(`home-${p.name.toLowerCase()}-card`);
+    if (card) {
+      // Remove previous active classes
+      card.className = "p-1.5 rounded-xl text-center transition-all bg-slate-800/30 border border-transparent text-slate-400 opacity-60";
+      
+      if (p.name === activeObj.active) {
+        card.className = "p-1.5 rounded-xl text-center transition-all bg-emerald-500/20 border-emerald-500 text-amber-300 scale-102 font-semibold shadow-md";
+      } else if (p.name === activeObj.next) {
+        card.className = "p-1.5 rounded-xl text-center transition-all bg-slate-800/60 border border-slate-700/50 text-slate-200";
+      }
+    }
+  });
+
+  // Render on Dashboard
+  const dashList = document.getElementById("dash-prayer-list");
+  if (dashList) {
+    dashList.innerHTML = "";
+    
+    // Load Checked prayers for today
+    const todayKey = `checked_prayers_${new Date().toDateString()}`;
+    const checkedPrayers = JSON.parse(localStorage.getItem(todayKey) || "[]");
+
+    // Automatically clean up old checked_prayers keys in localStorage to keep it tidy
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("checked_prayers_") && key !== todayKey) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (e) {
+      console.warn("Storage cleanup warning:", e);
+    }
+
+    prayers.forEach(p => {
+      const isChecked = checkedPrayers.includes(p.name);
+      const isActive = p.name === activeObj.active;
+      
+      const row = document.createElement("div");
+      // Style base
+      let rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-slate-50/50 dark:bg-slate-800/10 border-transparent text-slate-400 opacity-60 transition-all";
+      
+      if (isActive) {
+        rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/60 text-slate-850 dark:text-white shadow-sm font-semibold prayer-active-row";
+      } else if (!isActive && isChecked) {
+        rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-slate-50/50 dark:bg-slate-800/10 border-transparent text-slate-800 dark:text-slate-350 transition-all";
+      } else if (!isActive && !isChecked) {
+        rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition-all";
+      }
+
+      row.className = rowClasses;
+      row.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <input type="checkbox" id="chk-prayer-${p.name.toLowerCase()}" ${isChecked ? 'checked' : ''} 
+            class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-850 cursor-pointer"
+            onclick="window.togglePrayerCheck('${p.name}')">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider">${p.name}</span>
+            ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-ping"></span>' : ''}
+          </div>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm font-semibold">${format12Hour(p.time)}</span>
+          <span id="chk-status-${p.name.toLowerCase()}" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-450 ${isChecked ? '' : 'invisible'}">✓</span>
+        </div>
+      `;
+      dashList.appendChild(row);
+    });
+  }
+}
+
+// Toggle prayer checkoff
+window.togglePrayerCheck = function(prayerName) {
+  const todayKey = `checked_prayers_${new Date().toDateString()}`;
+  let checked = JSON.parse(localStorage.getItem(todayKey) || "[]");
+  
+  const idx = checked.indexOf(prayerName);
+  if (idx > -1) {
+    checked.splice(idx, 1);
+  } else {
+    checked.push(prayerName);
+  }
+  localStorage.setItem(todayKey, JSON.stringify(checked));
+  
+  // Re-render to reflect checkbox status
+  updatePrayerTimes();
+};
+
+// Formatter to convert "13:30" to "01:30 PM"
+function format12Hour(time24) {
+  if (!time24) return "--:--";
+  const parts = time24.split(':');
+  let hrs = parseInt(parts[0]);
+  const mins = parts[1];
+  const ampm = hrs >= 12 ? 'PM' : 'AM';
+  hrs = hrs % 12;
+  hrs = hrs ? hrs : 12; // 0 should be 12
+  const hrsStr = String(hrs).padStart(2, '0');
+  return `${hrsStr}:${mins} ${ampm}`;
+}
+
+// Helper to calculate active and next prayer
+function getActivePrayer(prayers) {
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // Map prayer times to minutes from midnight
+  const times = prayers.map(p => {
+    const parts = p.time.split(':');
+    return {
+      name: p.name,
+      minutes: parseInt(parts[0]) * 60 + parseInt(parts[1])
+    };
+  });
+
+  // Sort by minutes
+  times.sort((a, b) => a.minutes - b.minutes);
+
+  let activeIndex = -1;
+  for (let i = 0; i < times.length; i++) {
+    if (currentMinutes >= times[i].minutes) {
+      activeIndex = i;
+    }
+  }
+
+  // Fallback if before Fajr (active is Isha of yesterday, next is Fajr)
+  if (activeIndex === -1) {
+    return {
+      active: "Isha",
+      next: "Fajr"
+    };
+  }
+
+  const activeName = times[activeIndex].name;
+  const nextName = times[(activeIndex + 1) % times.length].name;
+
+  return {
+    active: activeName,
+    next: nextName
+  };
+}
+
+// Qibla Compass logic
+let compassHeading = 0; // Device orientation heading
+let qiblaHeading = 0; // Computed Qibla bearing
+let manualHeading = 0; // Manually adjusted heading
+
+function updateQiblaUI() {
+  const dial = document.getElementById("qibla-compass-dial");
+  const needle = document.getElementById("qibla-needle");
+  
+  const bearingText = document.getElementById("qibla-bearing-text");
+  const coordsText = document.getElementById("qibla-coords-text");
+  
+  if (bearingText) bearingText.textContent = `Qibla Direction: ${qiblaHeading.toFixed(1)}°`;
+  if (coordsText) coordsText.textContent = `Coordinates: ${prayerSettings.lat.toFixed(4)}°, ${prayerSettings.lng.toFixed(4)}°`;
+
+  // Total dial rotation includes device heading or manual slider heading
+  const dialRotation = compassHeading !== 0 ? -compassHeading : -manualHeading;
+  const needleRotation = qiblaHeading + dialRotation;
+
+  if (dial) dial.style.transform = `rotate(${dialRotation}deg)`;
+  if (needle) needle.style.transform = `rotate(${needleRotation}deg)`;
+}
+
+// Setup orientation sensors
+function initQiblaCompass() {
+  qiblaHeading = getQiblaBearing(prayerSettings.lat, prayerSettings.lng);
+  updateQiblaUI();
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const desktopCtrls = document.getElementById("qibla-desktop-controls");
+
+  if (!isMobile) {
+    // Show manual slider for desktop fallback
+    if (desktopCtrls) {
+      desktopCtrls.classList.remove("hidden");
+      const slider = document.getElementById("qibla-manual-slider");
+      const sliderVal = document.getElementById("qibla-slider-value");
+      if (slider && sliderVal) {
+        slider.addEventListener("input", (e) => {
+          manualHeading = parseInt(e.target.value);
+          sliderVal.textContent = `${manualHeading}°`;
+          updateQiblaUI();
+        });
+      }
+    }
+    
+    const statusText = document.getElementById("qibla-status-text");
+    if (statusText) statusText.textContent = "Adjust compass manually using slider";
+    return;
+  }
+
+  // Device orientation checking for mobile
+  const statusText = document.getElementById("qibla-status-text");
+  if (statusText) statusText.textContent = "Align device to North";
+
+  const handleOrientation = (e) => {
+    if (e.webkitCompassHeading !== undefined) {
+      compassHeading = e.webkitCompassHeading;
+    } else if (e.alpha !== null) {
+      compassHeading = 360 - e.alpha;
+    }
+    updateQiblaUI();
+  };
+
+  // Check absolute orientation events (mainly for Android)
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    
+    // Compass click prompt to request permission (required for newer iOS versions)
+    const compassBox = document.getElementById("qibla-compass-dial");
+    if (compassBox) {
+      compassBox.style.cursor = "pointer";
+      compassBox.addEventListener("click", async () => {
+        if (typeof DeviceOrientationEvent.requestPermission === "function") {
+          try {
+            const permissionState = await DeviceOrientationEvent.requestPermission();
+            if (permissionState === "granted") {
+              window.addEventListener("deviceorientation", handleOrientation, true);
+              if (statusText) statusText.textContent = "Orientation active";
+            } else {
+              alert("Compass orientation permission denied. You can still use the manual slider if available.");
+            }
+          } catch (error) {
+            console.error("Error requesting DeviceOrientation permission:", error);
+          }
+        }
+      });
+    }
+  }
+}
+
+// IP Geolocation Fallback (completely automatic, silent)
+async function detectIPLocation() {
+  try {
+    const res = await fetch("https://ip-api.com/json/");
+    if (res.ok) {
+      const ipData = await res.json();
+      if (ipData && ipData.lat && ipData.lon) {
+        console.log("IP-based geolocation auto-detected:", ipData.city, ipData.lat, ipData.lon);
+        
+        // Auto update if user is in GPS mode and hasn't received higher precision GPS coordinates yet
+        if (prayerSettings.locMode === "gps" && (prayerSettings.lat === 24.8607 && prayerSettings.lng === 67.0011)) {
+          prayerSettings.lat = ipData.lat;
+          prayerSettings.lng = ipData.lon;
+          prayerSettings.cityName = `${ipData.city}, ${ipData.countryCode || ""}`;
+          savePrayerSettings();
+          
+          updatePrayerTimes();
+          qiblaHeading = getQiblaBearing(ipData.lat, ipData.lon);
+          updateQiblaUI();
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Silent IP Geolocation fallback failed:", e);
+  }
+}
+
+// GPS Location detection helper
+function detectGPSLocation() {
+  const gpsStatus = document.getElementById("settings-gps-status");
+  const gpsLat = document.getElementById("settings-gps-lat");
+  const gpsLng = document.getElementById("settings-gps-lng");
+
+  if (!navigator.geolocation) {
+    if (gpsStatus) gpsStatus.textContent = "Not Supported";
+    detectIPLocation(); // Fallback silently
+    return;
+  }
+
+  if (gpsStatus) gpsStatus.textContent = "Requesting...";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      
+      if (gpsStatus) gpsStatus.textContent = "Active";
+      if (gpsLat) gpsLat.textContent = lat.toFixed(4);
+      if (gpsLng) gpsLng.textContent = lng.toFixed(4);
+
+      if (prayerSettings.locMode === "gps") {
+        prayerSettings.lat = lat;
+        prayerSettings.lng = lng;
+        savePrayerSettings();
+        updatePrayerTimes();
+        qiblaHeading = getQiblaBearing(lat, lng);
+        updateQiblaUI();
+      }
+    },
+    (err) => {
+      console.warn("Geolocation error:", err);
+      if (gpsStatus) gpsStatus.textContent = "Denied/Unavailable";
+      
+      // Auto fallback to IP location silently on GPS block or failure
+      if (prayerSettings.locMode === "gps") {
+        detectIPLocation();
+      }
+    },
+    { enableHighAccuracy: true, timeout: 6000 }
+  );
+}
+
+// Open settings modal
+window.openPrayerSettingsModal = function() {
+  const modal = document.getElementById("prayer-settings-modal");
+  if (!modal) return;
+
+  // Initialize input fields based on settings state
+  const methodSelect = document.getElementById("settings-calc-method");
+  const schoolSelect = document.getElementById("settings-asr-school");
+  const citySelect = document.getElementById("settings-city-preset");
+  const manualLatInput = document.getElementById("settings-manual-lat");
+  const manualLngInput = document.getElementById("settings-manual-lng");
+
+  if (methodSelect) methodSelect.value = prayerSettings.calcMethod;
+  if (schoolSelect) schoolSelect.value = prayerSettings.asrSchool;
+  if (citySelect) citySelect.value = prayerSettings.manualPreset;
+  if (manualLatInput) manualLatInput.value = prayerSettings.lat;
+  if (manualLngInput) manualLngInput.value = prayerSettings.lng;
+
+  applyLocationModeUI();
+  detectGPSLocation(); // Probe GPS details
+
+  modal.classList.remove("hidden");
+};
+
+// Close settings modal
+window.closePrayerSettingsModal = function() {
+  const modal = document.getElementById("prayer-settings-modal");
+  if (modal) modal.classList.add("hidden");
+};
+
+// Mode switcher UI helper
+function applyLocationModeUI() {
+  const gpsBtn = document.getElementById("settings-loc-gps");
+  const manualBtn = document.getElementById("settings-loc-manual");
+  
+  const gpsInfo = document.getElementById("settings-gps-info");
+  const manualInfo = document.getElementById("settings-manual-info");
+
+  if (!gpsBtn || !manualBtn) return;
+
+  if (prayerSettings.locMode === "gps") {
+    gpsBtn.className = "py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none bg-emerald-600 text-white shadow-sm cursor-pointer";
+    manualBtn.className = "py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-350 cursor-pointer";
+    if (gpsInfo) gpsInfo.classList.remove("hidden");
+    if (manualInfo) manualInfo.classList.add("hidden");
+  } else {
+    manualBtn.className = "py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none bg-emerald-600 text-white shadow-sm cursor-pointer";
+    gpsBtn.className = "py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-350 cursor-pointer";
+    if (gpsInfo) gpsInfo.classList.add("hidden");
+    if (manualInfo) manualInfo.classList.remove("hidden");
+  }
+}
+
+// On Settings Save
+function handleSettingsSave(e) {
+  e.preventDefault();
+
+  const methodSelect = document.getElementById("settings-calc-method");
+  const schoolSelect = document.getElementById("settings-asr-school");
+  const citySelect = document.getElementById("settings-city-preset");
+  const manualLatInput = document.getElementById("settings-manual-lat");
+  const manualLngInput = document.getElementById("settings-manual-lng");
+
+  if (methodSelect) prayerSettings.calcMethod = methodSelect.value;
+  if (schoolSelect) prayerSettings.asrSchool = schoolSelect.value;
+
+  if (prayerSettings.locMode === "manual") {
+    const preset = citySelect ? citySelect.value : "karachi";
+    prayerSettings.manualPreset = preset;
+
+    if (preset === "custom") {
+      prayerSettings.lat = parseFloat(manualLatInput.value) || 24.8607;
+      prayerSettings.lng = parseFloat(manualLngInput.value) || 67.0011;
+      prayerSettings.cityName = `Custom (${prayerSettings.lat.toFixed(2)}, ${prayerSettings.lng.toFixed(2)})`;
+    } else {
+      const data = PRESET_CITIES[preset];
+      prayerSettings.lat = data.lat;
+      prayerSettings.lng = data.lng;
+      prayerSettings.cityName = data.name;
+    }
+  }
+
+  savePrayerSettings();
+  updatePrayerTimes();
+  
+  qiblaHeading = getQiblaBearing(prayerSettings.lat, prayerSettings.lng);
+  updateQiblaUI();
+
+  window.closePrayerSettingsModal();
+}
+
+// Initial binding
+function initPrayerAndQiblaModule() {
+  loadPrayerSettings();
+  
+  // Set up event listeners for settings elements
+  const gpsBtn = document.getElementById("settings-loc-gps");
+  const manualBtn = document.getElementById("settings-loc-manual");
+  if (gpsBtn && manualBtn) {
+    gpsBtn.addEventListener("click", () => {
+      prayerSettings.locMode = "gps";
+      applyLocationModeUI();
+      detectGPSLocation();
+    });
+    manualBtn.addEventListener("click", () => {
+      prayerSettings.locMode = "manual";
+      applyLocationModeUI();
+    });
+  }
+
+  const citySelect = document.getElementById("settings-city-preset");
+  const customCoordsRow = document.getElementById("settings-custom-coords-row");
+  if (citySelect) {
+    citySelect.addEventListener("change", (e) => {
+      if (e.target.value === "custom") {
+        if (customCoordsRow) customCoordsRow.classList.remove("hidden");
+      } else {
+        if (customCoordsRow) customCoordsRow.classList.add("hidden");
+      }
+    });
+  }
+
+  const settingsForm = document.getElementById("prayer-settings-form");
+  if (settingsForm) {
+    settingsForm.addEventListener("submit", handleSettingsSave);
+  }
+
+  // Auto detect location: run silent IP geolocation lookup first to load times instantly
+  if (prayerSettings.locMode === "gps") {
+    detectIPLocation().then(() => {
+      // Then attempt high-precision GPS lookup
+      detectGPSLocation();
+    });
+  } else {
+    updatePrayerTimes();
+  }
+  
+  initQiblaCompass();
+
+  // Automated periodic active prayer highlight refresher (every 30 seconds)
+  setInterval(() => {
+    updatePrayerTimes();
+  }, 30000);
+}
+
+// Kick off when script loads and DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPrayerAndQiblaModule);
+} else {
+  initPrayerAndQiblaModule();
+}
+
 // Run Initializer
 initFirebase();
+
 

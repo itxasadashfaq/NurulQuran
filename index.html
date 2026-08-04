@@ -208,34 +208,42 @@
           <!-- Mini Prayer Times Card -->
           <div class="p-6 rounded-2xl bg-slate-900/50 backdrop-blur-md border border-slate-800/50 shadow-xl space-y-4">
             <div class="flex items-center justify-between text-xs text-slate-400">
-              <span class="flex items-center gap-1.5">
+              <span class="flex items-center gap-1.5 font-bold">
                 <svg class="w-3.5 h-3.5 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 PRAYER TIMES
               </span>
-              <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold uppercase tracking-wider text-[10px]">
-                Active: Asr
+              <div class="flex items-center gap-2">
+                <span id="home-prayer-location" class="text-[10px] text-slate-350 italic max-w-[90px] truncate" title="Detecting...">Detecting...</span>
+                <button onclick="window.openPrayerSettingsModal()" class="p-1 rounded bg-slate-800/60 hover:bg-slate-700/80 text-slate-300 hover:text-white transition-all cursor-pointer focus:outline-none" title="Prayer Settings">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </button>
+              </div>
+            </div>
+            <div id="home-prayer-active-container" class="flex justify-end">
+              <span id="home-prayer-active-badge" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-450 font-bold uppercase tracking-wider text-[9px]">
+                Active: --
               </span>
             </div>
-            <div class="grid grid-cols-5 gap-2">
-              <div class="p-2 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60">
-                <span class="text-[9px] uppercase font-bold">Fajr</span>
-                <span class="text-xs font-semibold block mt-1">4:12</span>
+            <div class="grid grid-cols-5 gap-1.5" id="home-prayer-times-grid">
+              <div id="home-fajr-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Fajr</span>
+                <span id="home-fajr-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
               </div>
-              <div class="p-2 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60">
-                <span class="text-[9px] uppercase font-bold">Dhuhr</span>
-                <span class="text-xs font-semibold block mt-1">12:28</span>
+              <div id="home-dhuhr-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Dhuhr</span>
+                <span id="home-dhuhr-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
               </div>
-              <div class="p-2 rounded-xl text-center bg-emerald-500/20 border border-emerald-500 text-amber-300">
-                <span class="text-[9px] uppercase font-bold">Asr</span>
-                <span class="text-xs font-semibold block mt-1">4:54</span>
+              <div id="home-asr-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Asr</span>
+                <span id="home-asr-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
               </div>
-              <div class="p-2 rounded-xl text-center bg-slate-800/50 border border-slate-700/50 text-slate-200">
-                <span class="text-[9px] uppercase font-bold">Maghrib</span>
-                <span class="text-xs font-semibold block mt-1">7:18</span>
+              <div id="home-maghrib-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Maghrib</span>
+                <span id="home-maghrib-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
               </div>
-              <div class="p-2 rounded-xl text-center bg-slate-800/50 border border-slate-700/50 text-slate-200">
-                <span class="text-[9px] uppercase font-bold">Isha</span>
-                <span class="text-xs font-semibold block mt-1">8:44</span>
+              <div id="home-isha-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Isha</span>
+                <span id="home-isha-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
               </div>
             </div>
           </div>
@@ -418,16 +426,16 @@
             </p>
           </div>
           <div class="pt-6">
-            <span class="inline-flex items-center gap-1 text-sm font-semibold text-amber-600 dark:text-amber-400 group-hover:underline">
+            <a href="dashboard.html" class="inline-flex items-center gap-1 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:underline">
               Start Lessons →
-            </span>
+            </a>
           </div>
         </div>
 
         <!-- Module 3: Hifz -->
         <div class="group p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-200">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-450 group-hover:scale-110 transition-transform duration-200">
               <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
             </div>
             <h3 class="text-xl font-bold text-slate-800 dark:text-white mt-6 mb-3">
@@ -439,9 +447,9 @@
             </p>
           </div>
           <div class="pt-6">
-            <span class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 dark:text-emerald-400 group-hover:underline">
+            <a href="dashboard.html" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 dark:text-emerald-450 hover:underline">
               Track Memorization →
-            </span>
+            </a>
           </div>
         </div>
       </div>
@@ -604,6 +612,107 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- ================= PRAYER SETTINGS MODAL ================= -->
+  <div id="prayer-settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div class="relative w-full max-w-md overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-emerald-500/20 max-h-[90vh] flex flex-col animate-slide-up">
+      
+      <!-- Decorative Border -->
+      <div class="h-2 bg-gradient-to-r from-emerald-600 via-yellow-500 to-emerald-800 w-full"></div>
+
+      <!-- Close Button -->
+      <button onclick="window.closePrayerSettingsModal()" class="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none cursor-pointer">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+
+      <div class="p-8 overflow-y-auto space-y-6">
+        <div class="text-center">
+          <h2 class="text-xl font-bold text-slate-800 dark:text-white">Prayer & Location Settings</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Configure coordinates and calculation preferences</p>
+        </div>
+
+        <form id="prayer-settings-form" class="space-y-5">
+          <!-- Location Mode Toggle -->
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Location Detection</label>
+            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+              <button type="button" id="settings-loc-gps" class="py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none cursor-pointer">GPS (Auto)</button>
+              <button type="button" id="settings-loc-manual" class="py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none cursor-pointer">City (Manual)</button>
+            </div>
+          </div>
+
+          <!-- GPS Location status info -->
+          <div id="settings-gps-info" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-150 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-450 space-y-1">
+            <div class="flex justify-between"><span>GPS Status:</span> <span id="settings-gps-status" class="font-bold">Detecting...</span></div>
+            <div class="flex justify-between"><span>Latitude:</span> <span id="settings-gps-lat" class="font-mono">--</span></div>
+            <div class="flex justify-between"><span>Longitude:</span> <span id="settings-gps-lng" class="font-mono">--</span></div>
+          </div>
+
+          <!-- Manual selection details -->
+          <div id="settings-manual-info" class="space-y-3 hidden">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Preset City</label>
+              <select id="settings-city-preset" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+                <option value="karachi">Karachi, Pakistan</option>
+                <option value="makkah">Makkah, Saudi Arabia</option>
+                <option value="london">London, United Kingdom</option>
+                <option value="newyork">New York, USA</option>
+                <option value="cairo">Cairo, Egypt</option>
+                <option value="istanbul">Istanbul, Turkey</option>
+                <option value="dhaka">Dhaka, Bangladesh</option>
+                <option value="dubai">Dubai, UAE</option>
+                <option value="sydney">Sydney, Australia</option>
+                <option value="custom">-- Custom Coordinates --</option>
+              </select>
+            </div>
+
+            <!-- Custom Coordinates Row -->
+            <div id="settings-custom-coords-row" class="grid grid-cols-2 gap-3 hidden">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Latitude</label>
+                <input type="number" id="settings-manual-lat" step="any" placeholder="24.8607" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Longitude</label>
+                <input type="number" id="settings-manual-lng" step="any" placeholder="67.0011" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculation Method -->
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Calculation Method</label>
+            <select id="settings-calc-method" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              <option value="1">University of Islamic Sciences, Karachi</option>
+              <option value="2">Islamic Society of North America (ISNA)</option>
+              <option value="3" selected>Muslim World League (MWL)</option>
+              <option value="4">Umm Al-Qura University, Makkah</option>
+              <option value="5">Egyptian General Authority of Survey</option>
+              <option value="7">Institute of Geophysics, University of Tehran</option>
+              <option value="8">Gulf Region</option>
+              <option value="9">Kuwait</option>
+              <option value="12">Union Organization Islamique de France</option>
+              <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
+              <option value="14">Spiritual Administration of Muslims of Russia</option>
+            </select>
+          </div>
+
+          <!-- Asr Juristic School -->
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Asr Juristic Method (School)</label>
+            <select id="settings-asr-school" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              <option value="0">Standard (Shafi'i, Maliki, Hanbali, Ja'fari)</option>
+              <option value="1">Hanafi School</option>
+            </select>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer">
+            Save Settings & Sync
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
