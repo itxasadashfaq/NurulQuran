@@ -2002,4 +2002,713 @@ if (document.readyState === "loading") {
 // Run Initializer
 initFirebase();
 
+// ================= FAITH & KNOWLEDGE TOOLS SYSTEM =================
+
+// State variables
+let tasbeehCount = 0;
+let tasbeehTarget = 33;
+let tasbeehDhikr = "SubhanAllah";
+let currentCalDate = new Date();
+let activeBook = null;
+let activeChapterIndex = 0;
+let activeHadithTopic = "all";
+let audioCtx = null;
+
+// Tab Switcher
+window.switchFaithTab = function(tabId) {
+  const tabs = ['tasbeeh', 'calendar', 'books', 'hadith'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tab-btn-${t}`);
+    const pane = document.getElementById(`pane-${t}`);
+    
+    if (btn) {
+      if (t === tabId) {
+        btn.classList.add('tab-active');
+      } else {
+        btn.classList.remove('tab-active');
+      }
+    }
+    
+    if (pane) {
+      if (t === tabId) {
+        pane.classList.remove('hidden');
+      } else {
+        pane.classList.add('hidden');
+      }
+    }
+  });
+};
+
+// Tasbeeh Synthesizer Audio Feedback
+function playTallySound(type) {
+  try {
+    const isEnabled = document.getElementById("tasbeeh-sound")?.checked;
+    if (!isEnabled) return;
+
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === "click") {
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(850, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.04);
+    } else if (type === "complete") {
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // E5
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    }
+  } catch (e) {
+    console.warn("AudioContext playback blocked/failed:", e);
+  }
+}
+
+// Tasbeeh Vibration Feedback
+function triggerVibration(duration) {
+  try {
+    const isEnabled = document.getElementById("tasbeeh-vibration")?.checked;
+    if (isEnabled && navigator.vibrate) {
+      navigator.vibrate(duration);
+    }
+  } catch (e) {
+    console.warn("Vibrate failed:", e);
+  }
+}
+
+// Tasbeeh Increment
+window.incrementTasbeeh = function() {
+  tasbeehCount++;
+  
+  const display = document.getElementById("tasbeeh-display");
+  if (display) {
+    display.textContent = String(tasbeehCount).padStart(2, '0');
+  }
+
+  // Check Target Met
+  if (tasbeehTarget !== "infinite" && tasbeehCount >= tasbeehTarget) {
+    playTallySound("complete");
+    triggerVibration(200);
+    
+    // Save completion log
+    saveTasbeehLog(tasbeehDhikr, tasbeehCount);
+    
+    // Toast alert
+    const targetBadge = document.getElementById("tasbeeh-target-status");
+    if (targetBadge) {
+      const originalText = targetBadge.textContent;
+      targetBadge.textContent = "🎯 Complete!";
+      targetBadge.className = "text-[10px] font-semibold text-white bg-emerald-600 px-3 py-1 rounded-full animate-bounce";
+      setTimeout(() => {
+        targetBadge.textContent = originalText;
+        targetBadge.className = "text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200/50 dark:border-slate-700/50";
+      }, 2000);
+    }
+    
+    tasbeehCount = 0;
+    if (display) {
+      setTimeout(() => {
+        display.textContent = "00";
+      }, 500);
+    }
+  } else {
+    playTallySound("click");
+    triggerVibration(15);
+  }
+};
+
+window.decrementTasbeeh = function() {
+  if (tasbeehCount > 0) {
+    tasbeehCount--;
+    const display = document.getElementById("tasbeeh-display");
+    if (display) {
+      display.textContent = String(tasbeehCount).padStart(2, '0');
+    }
+    playTallySound("click");
+    triggerVibration(10);
+  }
+};
+
+window.resetTasbeeh = function() {
+  tasbeehCount = 0;
+  const display = document.getElementById("tasbeeh-display");
+  if (display) display.textContent = "00";
+  playTallySound("click");
+  triggerVibration(15);
+};
+
+window.onDhikrChange = function() {
+  const preset = document.getElementById("tasbeeh-preset");
+  const customRow = document.getElementById("tasbeeh-custom-row");
+  const dhikrInputBox = document.getElementById("tasbeeh-custom-dhikr-box");
+  
+  if (!preset) return;
+
+  if (preset.value === "custom") {
+    if (customRow) customRow.classList.remove("hidden");
+    if (dhikrInputBox) dhikrInputBox.classList.remove("hidden");
+    tasbeehDhikr = "";
+  } else {
+    if (dhikrInputBox) dhikrInputBox.classList.add("hidden");
+    if (customRow && document.getElementById("tasbeeh-custom-target-box").classList.contains("hidden")) {
+      customRow.classList.add("hidden");
+    }
+    tasbeehDhikr = preset.options[preset.selectedIndex].text.split(' (')[0];
+  }
+};
+
+window.onTargetChange = function() {
+  const target = document.getElementById("tasbeeh-target");
+  const customRow = document.getElementById("tasbeeh-custom-row");
+  const targetInputBox = document.getElementById("tasbeeh-custom-target-box");
+  const targetBadge = document.getElementById("tasbeeh-target-status");
+
+  if (!target) return;
+
+  if (target.value === "custom") {
+    if (customRow) customRow.classList.remove("hidden");
+    if (targetInputBox) targetInputBox.classList.remove("hidden");
+    tasbeehTarget = 33;
+  } else if (target.value === "infinite") {
+    if (targetInputBox) targetInputBox.classList.add("hidden");
+    if (customRow && document.getElementById("tasbeeh-custom-dhikr-box").classList.contains("hidden")) {
+      customRow.classList.add("hidden");
+    }
+    tasbeehTarget = "infinite";
+    if (targetBadge) targetBadge.textContent = "Target: Free Count";
+  } else {
+    if (targetInputBox) targetInputBox.classList.add("hidden");
+    if (customRow && document.getElementById("tasbeeh-custom-dhikr-box").classList.contains("hidden")) {
+      customRow.classList.add("hidden");
+    }
+    tasbeehTarget = parseInt(target.value);
+    if (targetBadge) targetBadge.textContent = `Target: ${tasbeehTarget}`;
+  }
+};
+
+function saveTasbeehLog(dhikrText, countVal) {
+  const preset = document.getElementById("tasbeeh-preset");
+  
+  let finalDhikr = dhikrText;
+  if (preset && preset.value === "custom") {
+    const input = document.getElementById("tasbeeh-custom-dhikr-input");
+    finalDhikr = (input && input.value.trim()) ? input.value.trim() : "Custom Dhikr";
+  }
+
+  const newLog = {
+    dhikr: finalDhikr,
+    count: countVal,
+    time: new Date().toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' })
+  };
+
+  const logs = JSON.parse(localStorage.getItem("nqp_tasbeeh_logs") || "[]");
+  logs.unshift(newLog);
+  if (logs.length > 15) logs.pop();
+  localStorage.setItem("nqp_tasbeeh_logs", JSON.stringify(logs));
+  window.renderTasbeehHistory();
+}
+
+window.clearTasbeehHistory = function() {
+  localStorage.removeItem("nqp_tasbeeh_logs");
+  window.renderTasbeehHistory();
+};
+
+window.renderTasbeehHistory = function() {
+  const container = document.getElementById("tasbeeh-history");
+  if (!container) return;
+
+  const logs = JSON.parse(localStorage.getItem("nqp_tasbeeh_logs") || "[]");
+  if (logs.length === 0) {
+    container.innerHTML = '<div class="text-center py-4 text-[10px] text-slate-400">No completion logs recorded today.</div>';
+    return;
+  }
+
+  container.innerHTML = logs.map(l => `
+    <div class="flex justify-between py-1.5 text-[11px]">
+      <span class="font-semibold text-slate-700 dark:text-slate-350">${l.dhikr}</span>
+      <div class="flex gap-2">
+        <span class="font-mono text-emerald-600 dark:text-emerald-450 font-bold">${l.count}x</span>
+        <span class="text-slate-400 font-mono">${l.time}</span>
+      </div>
+    </div>
+  `).join('');
+};
+
+// Hijri Calendar Converter & Renderer
+const ISLAMIC_EVENTS = {
+  "1/1": { name: "Hijri New Year", desc: "Start of the Islamic Year (1st Muharram)" },
+  "1/10": { name: "Day of Ashura", desc: "Fasting day of historical deliverance (10th Muharram)" },
+  "3/12": { name: "Mawlid al-Nabi", desc: "Prophet Muhammad's Birthday (12th Rabi' al-Awwal)" },
+  "7/27": { name: "Isra' and Mi'raj", desc: "Prophet's miraculous Night Journey (27th Rajab)" },
+  "8/15": { name: "Mid-Sha'ban", desc: "Night of salvation and prayer (15th Sha'ban)" },
+  "9/1": { name: "Ramadan Begins", desc: "Month of obligatory daily fasting (1st Ramadan)" },
+  "9/27": { name: "Laylat al-Qadr", desc: "Night of Power (observed 27th Ramadan)" },
+  "10/1": { name: "Eid al-Fitr", desc: "Holiday marking the end of Ramadan (1st Shawwal)" },
+  "12/9": { name: "Day of Arafah", desc: "Core day of Hajj pilgrimage (9th Dhu al-Hijjah)" },
+  "12/10": { name: "Eid al-Adha", desc: "Feast of Sacrifice (10th Dhu al-Hijjah)" }
+};
+
+function getHijriDetails(date) {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric'
+    });
+    const parts = formatter.formatToParts(date);
+    const day = parseInt(parts.find(p => p.type === 'day').value);
+    const month = parseInt(parts.find(p => p.type === 'month').value);
+    const year = parseInt(parts.find(p => p.type === 'year').value);
+    
+    const monthNames = [
+      "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+      "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+      "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+    ];
+    
+    return {
+      day,
+      month,
+      year,
+      monthName: monthNames[month - 1] || "Unknown"
+    };
+  } catch (e) {
+    console.error("Hijri formatting failed:", e);
+    return null;
+  }
+}
+
+window.changeCalendarMonth = function(direction) {
+  currentCalDate.setMonth(currentCalDate.getMonth() + direction);
+  window.renderCalendar();
+};
+
+window.renderCalendar = function() {
+  const hijriMonthLabel = document.getElementById("calendar-hijri-month");
+  const gregMonthLabel = document.getElementById("calendar-gregorian-month");
+  const grid = document.getElementById("calendar-grid");
+  const eventsList = document.getElementById("calendar-events-list");
+
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  const yr = currentCalDate.getFullYear();
+  const mo = currentCalDate.getMonth();
+
+  if (gregMonthLabel) {
+    gregMonthLabel.textContent = currentCalDate.toLocaleDateString("en-US", { year: 'numeric', month: 'long' });
+  }
+
+  const totalDays = new Date(yr, mo + 1, 0).getDate();
+  const firstDayIndex = new Date(yr, mo, 1).getDay();
+
+  const middleDate = new Date(yr, mo, 15);
+  const midHijri = getHijriDetails(middleDate);
+  if (midHijri && hijriMonthLabel) {
+    hijriMonthLabel.textContent = `${midHijri.monthName} ${midHijri.year} AH`;
+  }
+
+  for (let i = 0; i < firstDayIndex; i++) {
+    const emptyCell = document.createElement("div");
+    emptyCell.className = "calendar-day-cell calendar-empty";
+    grid.appendChild(emptyCell);
+  }
+
+  const eventsInThisMonth = [];
+  const today = new Date();
+
+  for (let day = 1; day <= totalDays; day++) {
+    const dateObj = new Date(yr, mo, day);
+    const hijri = getHijriDetails(dateObj);
+    
+    if (!hijri) continue;
+
+    const cell = document.createElement("div");
+    
+    const isToday = dateObj.getDate() === today.getDate() && 
+                    dateObj.getMonth() === today.getMonth() && 
+                    dateObj.getFullYear() === today.getFullYear();
+    
+    const holidayKey = `${hijri.month}/${hijri.day}`;
+    const holiday = ISLAMIC_EVENTS[holidayKey];
+    
+    let cellClasses = "calendar-day-cell bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 shadow-sm";
+    if (isToday) cellClasses += " calendar-day-today";
+    if (holiday) {
+      cellClasses += " calendar-day-event has-tooltip";
+      eventsInThisMonth.push({
+        dayGreg: day,
+        dayHijri: hijri.day,
+        monthNameHijri: hijri.monthName,
+        name: holiday.name,
+        desc: holiday.desc
+      });
+    }
+
+    cell.className = cellClasses;
+    cell.innerHTML = `
+      <span class="text-xs font-bold text-slate-850 dark:text-slate-200 self-start">${day}</span>
+      <span class="text-[9px] font-mono text-slate-400 self-end">${hijri.day}</span>
+      ${holiday ? `
+        <div class="tooltip-box bg-slate-950/90 text-white text-[9px] font-medium p-2 rounded-xl border border-slate-800 shadow-xl max-w-[150px] leading-tight text-center">
+          <div class="font-bold text-amber-400">${holiday.name}</div>
+          <div class="mt-0.5 text-slate-300 text-[8px]">${holiday.desc}</div>
+        </div>
+      ` : ''}
+    `;
+    grid.appendChild(cell);
+  }
+
+  if (eventsList) {
+    if (eventsInThisMonth.length === 0) {
+      eventsList.innerHTML = '<div class="text-[10px] text-slate-450 text-center py-4">No events found in this Hijri month.</div>';
+    } else {
+      eventsInThisMonth.sort((a, b) => a.dayGreg - b.dayGreg);
+      eventsList.innerHTML = eventsInThisMonth.map(e => `
+        <div class="p-2.5 rounded-xl border border-amber-500/10 bg-amber-500/5 flex items-start gap-2.5">
+          <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-500/15 flex flex-col items-center justify-center text-amber-600 dark:text-amber-400 font-mono">
+            <span class="text-xs font-bold">${e.dayHijri}</span>
+            <span class="text-[7px] uppercase font-bold tracking-tight">${e.monthNameHijri.substring(0, 3)}</span>
+          </div>
+          <div class="space-y-0.5 min-w-0 flex-grow">
+            <h5 class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">${e.name}</h5>
+            <p class="text-[9px] text-slate-550 dark:text-slate-400 leading-normal">${e.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+};
+
+window.convertDate = function(e) {
+  if (e) e.preventDefault();
+  
+  const input = document.getElementById("convert-input-date");
+  const resultBox = document.getElementById("convert-result");
+  
+  if (!input || !resultBox) return;
+
+  const dateVal = new Date(input.value);
+  if (isNaN(dateVal.getTime())) return;
+
+  const hijri = getHijriDetails(dateVal);
+  if (hijri) {
+    resultBox.textContent = `🕋 ${hijri.monthName} ${hijri.day}, ${hijri.year} AH`;
+    resultBox.classList.remove("hidden");
+  }
+};
+
+// Islamic Books shelf & Reader Implementation
+window.renderBookshelf = function() {
+  const shelf = document.getElementById("bookshelf-grid");
+  if (!shelf) return;
+
+  shelf.innerHTML = ISLAMIC_BOOKS.map(b => {
+    const progressIndex = parseInt(localStorage.getItem(`nqp_read_progress_${b.id}`) || "-1");
+    const progressPercent = Math.round(((progressIndex + 1) / b.chapters.length) * 100);
+
+    return `
+      <div class="book-card p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between h-[280px]">
+        <div>
+          <div class="w-full h-24 rounded-2xl bg-gradient-to-br ${b.coverGradient} p-4 flex flex-col justify-between text-white shadow-sm relative overflow-hidden select-none">
+            <div class="absolute inset-0 opacity-5 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:10px_10px] pointer-events-none"></div>
+            <span class="text-[9px] font-bold tracking-widest uppercase opacity-70">${b.category}</span>
+            <h4 class="text-sm font-bold leading-tight font-serif drop-shadow">${b.title}</h4>
+          </div>
+          <div class="mt-4 space-y-1">
+            <h5 class="text-xs font-bold text-slate-800 dark:text-white truncate">${b.title}</h5>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">${b.author}</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <div class="flex justify-between text-[9px] font-bold text-slate-455 dark:text-slate-500">
+              <span>Read: ${progressIndex + 1}/${b.chapters.length} Ch</span>
+              <span>${progressPercent}%</span>
+            </div>
+            <div class="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-600 rounded-full" style="width: ${progressPercent}%"></div>
+            </div>
+          </div>
+          <button onclick="window.openBookReader('${b.id}', '')" class="w-full py-2 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/10 hover:bg-emerald-600 hover:text-white text-emerald-700 dark:text-emerald-400 rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center">
+            ${progressPercent > 0 ? 'Resume Reading' : 'Start Reading'} &rarr;
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+window.openBookReader = function(bookId, chapterId) {
+  const book = ISLAMIC_BOOKS.find(b => b.id === bookId);
+  if (!book) return;
+
+  activeBook = book;
+  
+  if (!chapterId) {
+    activeChapterIndex = parseInt(localStorage.getItem(`nqp_read_progress_${bookId}`) || "0");
+  } else {
+    activeChapterIndex = book.chapters.findIndex(c => c.id === chapterId);
+    if (activeChapterIndex === -1) activeChapterIndex = 0;
+  }
+
+  const modal = document.getElementById("book-reader-modal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+  }
+
+  const readerTitle = document.getElementById("reader-book-title");
+  if (readerTitle) readerTitle.textContent = book.title;
+
+  const menu = document.getElementById("reader-chapters-menu");
+  if (menu) {
+    menu.innerHTML = book.chapters.map((ch, idx) => `
+      <button onclick="window.openBookReader('${book.id}', '${ch.id}')" 
+        class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer ${idx === activeChapterIndex ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+        ${ch.title.split(': ')[0]}
+      </button>
+    `).join('');
+  }
+
+  loadChapterContent();
+};
+
+window.closeBookReader = function() {
+  const modal = document.getElementById("book-reader-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+  }
+  window.renderBookshelf();
+};
+
+function loadChapterContent() {
+  if (!activeBook) return;
+
+  const ch = activeBook.chapters[activeChapterIndex];
+  if (!ch) return;
+
+  localStorage.setItem(`nqp_read_progress_${activeBook.id}`, activeChapterIndex);
+
+  const chTitle = document.getElementById("reader-chapter-title");
+  if (chTitle) chTitle.textContent = ch.title;
+
+  const arabicEl = document.getElementById("reader-text-arabic");
+  const englishEl = document.getElementById("reader-text-english");
+  const explanationEl = document.getElementById("reader-text-explanation");
+  const explanationBox = document.getElementById("reader-explanation-box");
+
+  if (arabicEl) arabicEl.textContent = ch.arabic;
+  if (englishEl) englishEl.textContent = ch.english;
+  
+  if (ch.explanation) {
+    if (explanationBox) explanationBox.classList.remove("hidden");
+    if (explanationEl) explanationEl.textContent = ch.explanation;
+  } else {
+    if (explanationBox) explanationBox.classList.add("hidden");
+  }
+
+  const pageLabel = document.getElementById("reader-page-indicator");
+  if (pageLabel) {
+    pageLabel.textContent = `Chapter ${activeChapterIndex + 1} of ${activeBook.chapters.length}`;
+  }
+
+  const prevBtn = document.getElementById("reader-btn-prev");
+  const nextBtn = document.getElementById("reader-btn-next");
+  if (prevBtn) prevBtn.disabled = activeChapterIndex === 0;
+  if (nextBtn) nextBtn.disabled = activeChapterIndex === activeBook.chapters.length - 1;
+
+  const container = document.getElementById("reader-text-container");
+  if (container) container.scrollTop = 0;
+}
+
+window.navigateBookChapter = function(direction) {
+  if (!activeBook) return;
+  const newIdx = activeChapterIndex + direction;
+  if (newIdx >= 0 && newIdx < activeBook.chapters.length) {
+    activeChapterIndex = newIdx;
+    
+    const menu = document.getElementById("reader-chapters-menu");
+    if (menu) {
+      const btns = menu.querySelectorAll("button");
+      btns.forEach((btn, idx) => {
+        if (idx === activeChapterIndex) {
+          btn.className = "w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer bg-emerald-600 text-white shadow-sm";
+        } else {
+          btn.className = "w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+        }
+      });
+    }
+
+    loadChapterContent();
+  }
+};
+
+window.bindReaderEvents = function() {
+  const fontSlider = document.getElementById("reader-font-slider");
+  if (fontSlider) {
+    fontSlider.addEventListener("input", (e) => {
+      const size = parseInt(e.target.value);
+      const arabic = document.getElementById("reader-text-arabic");
+      const english = document.getElementById("reader-text-english");
+      
+      if (arabic) arabic.style.fontSize = `${size + 2}px`;
+      if (english) english.style.fontSize = `${size - 2}px`;
+    });
+  }
+};
+
+// Hadith Search Engine Implementation
+window.searchHadith = function() {
+  const container = document.getElementById("hadith-results-container");
+  const emptyLabel = document.getElementById("hadith-search-empty");
+  const queryInput = document.getElementById("hadith-search-input");
+  const collFilter = document.getElementById("hadith-filter-collection");
+
+  if (!container) return;
+
+  const query = queryInput ? queryInput.value.trim().toLowerCase() : "";
+  const collection = collFilter ? collFilter.value : "all";
+
+  const results = HADITH_SEARCH_COLLECTION.filter(h => {
+    if (activeHadithTopic !== "all" && h.topic !== activeHadithTopic) {
+      return false;
+    }
+    
+    if (collection !== "all") {
+      const refLower = h.ref.toLowerCase();
+      if (collection === "bukhari" && !refLower.includes("bukhari")) return false;
+      if (collection === "muslim" && !refLower.includes("muslim")) return false;
+      if (collection === "abudawud" && !refLower.includes("dawud")) return false;
+      if (collection === "tirmidhi" && !refLower.includes("tirmidhi")) return false;
+    }
+
+    if (query !== "") {
+      const textMatch = h.english.toLowerCase().includes(query) || 
+                         h.arabic.includes(query) || 
+                         h.ref.toLowerCase().includes(query) ||
+                         h.tags.some(t => t.toLowerCase().includes(query));
+      if (!textMatch) return false;
+    }
+
+    return true;
+  });
+
+  if (results.length === 0) {
+    container.innerHTML = "";
+    if (emptyLabel) emptyLabel.classList.remove("hidden");
+    return;
+  }
+
+  if (emptyLabel) emptyLabel.classList.add("hidden");
+
+  function highlightText(text, keyword) {
+    if (!keyword) return text;
+    const escapedKwd = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`(${escapedKwd})`, 'gi');
+    return text.replace(regex, '<mark class="bg-yellow-250 dark:bg-amber-900/60 rounded px-0.5 text-slate-900 dark:text-slate-100">$1</mark>');
+  }
+
+  container.innerHTML = results.map(h => {
+    const highlightedEnglish = highlightText(h.english, query);
+    const highlightedRef = highlightText(h.ref, query);
+    
+    const escapedEnglish = h.english.replace(/'/g, "\\'");
+    const escapedArabic = h.arabic.replace(/'/g, "\\'");
+    const escapedRef = h.ref.replace(/'/g, "\\'");
+
+    return `
+      <div class="p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm space-y-4 flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 text-[9px] font-bold uppercase tracking-wider">${h.topic}</span>
+            <span class="text-[10px] font-bold text-slate-400 font-mono">${highlightedRef}</span>
+          </div>
+          <div class="quran-text text-lg text-slate-800 dark:text-slate-200 leading-normal text-right select-all">${h.arabic}</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${highlightedEnglish}</p>
+        </div>
+        <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800/80">
+          <div class="flex gap-1.5 overflow-hidden">
+            ${h.tags.map(t => `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md uppercase tracking-wider truncate max-w-[60px]">${t}</span>`).join('')}
+          </div>
+          <button onclick="window.copyHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
+            📋 Copy Hadith
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+window.selectHadithTopicTag = function(btnEl, topicName) {
+  const tags = document.querySelectorAll(".hadith-topic-tag");
+  tags.forEach(t => {
+    t.className = "hadith-topic-tag px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 hover:text-slate-750 text-[10px] font-bold transition-all cursor-pointer";
+  });
+
+  if (btnEl) {
+    btnEl.className = "hadith-topic-tag px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold transition-all cursor-pointer";
+  }
+
+  activeHadithTopic = topicName;
+  window.searchHadith();
+};
+
+window.copyHadith = function(ref, arabic, english, btnEl) {
+  const textToCopy = `Hadith [${ref}]:\n\n${arabic}\n\n"${english}"\n\n- via NurulQuran App`;
+  
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    if (btnEl) {
+      const originalText = btnEl.innerHTML;
+      btnEl.innerHTML = "✓ Copied!";
+      btnEl.className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
+      setTimeout(() => {
+        btnEl.innerHTML = originalText;
+        btnEl.className = "px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
+      }, 1500);
+    }
+  }).catch(e => {
+    console.error("Clipboard copy failed:", e);
+  });
+};
+
+// Global initializer launcher
+window.initFaithTools = function() {
+  if (!document.getElementById("bookshelf-grid")) return;
+
+  window.switchFaithTab('tasbeeh');
+  window.renderBookshelf();
+  window.searchHadith();
+  window.renderCalendar();
+  window.renderTasbeehHistory();
+  window.bindReaderEvents();
+};
+
+// Hook into ready listeners
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", window.initFaithTools);
+} else {
+  window.initFaithTools();
+}
+
+
 

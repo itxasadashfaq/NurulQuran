@@ -2,7 +2,7 @@
 
 **Project Metadata:**
 - **Current Active Module:** Module 3 (Prayer & Community Features)
-- **Completed Modules:** Module 1 (Planning & Project Foundation), Module 2 (Quran & Islamic Features), Module 3 (Prayer & Community Features)
+- **Completed Modules:** Module 1 (Planning & Project Foundation), Module 2 (Quran & Islamic Features), Module 3 (Prayer & Community Features), Module 4 (Faith & Knowledge Tools)
 - **Development Timeline:** July 20th – August 03rd, 2026
 
 Welcome to **NurulQuran**, a premium, modern, and highly interactive digital companion for Quran study, prayer time tracking, daily habit streaks, and structured Islamic learning modules.
@@ -243,6 +243,15 @@ This module integrates real-time prayer calculations, location detection, custom
 
 ---
 
+## 🕋 Module 4: Faith & Knowledge Tools
+This module integrates daily faith-building utilities and educational references (Tasbeeh counters, dynamic lunar calendars, and curated text libraries) into the protected companion dashboard:
+
+*   **Tactile Tasbeeh Counter**: A glassmorphic clicker dial containing custom target limits (33, 99, 100, custom, or infinite), presets, click sound synthesizers, device vibrations, and completion ledgers.
+*   **Dynamic Hijri Calendar**: Maps Gregorian days to their correct Hijri calendar positions client-side. Highlights major Islamic holidays (e.g. Ramadan, Eid, Ashura) on calendar cells with tooltip details, and offers a Gregorian-to-Hijri converter.
+*   **Islamic Books Section**: A bookshelf grid displaying reading percentages. Features a fullscreen responsive reader pane with page navigations, text scaling controls, and persistent progress bookmarking.
+*   **Hadith Search Directory**: A keyword lookup scanning 60+ authentic Hadiths by book collection or topic tag. Highlights search terms and formats copying parameters to the clipboard.
+
+---
 
 ## 🎨 UI/UX Styling Features
 

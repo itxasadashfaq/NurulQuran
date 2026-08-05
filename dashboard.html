@@ -340,6 +340,245 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- ================= FAITH & KNOWLEDGE TOOLS SECTION ================= -->
+      <div class="p-6 md:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+        
+        <!-- Tab Headers -->
+        <div class="flex border-b border-slate-100 dark:border-slate-800 overflow-x-auto scrollbar-none">
+          <button onclick="window.switchFaithTab('tasbeeh')" id="tab-btn-tasbeeh" class="tab-btn tab-active px-5 py-3 text-sm font-semibold text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all">
+            <span>🕋</span> Tasbeeh Counter
+          </button>
+          <button onclick="window.switchFaithTab('calendar')" id="tab-btn-calendar" class="tab-btn px-5 py-3 text-sm font-semibold text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all">
+            <span>📅</span> Hijri Calendar
+          </button>
+          <button onclick="window.switchFaithTab('books')" id="tab-btn-books" class="tab-btn px-5 py-3 text-sm font-semibold text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all">
+            <span>📖</span> Islamic Books
+          </button>
+          <button onclick="window.switchFaithTab('hadith')" id="tab-btn-hadith" class="tab-btn px-5 py-3 text-sm font-semibold text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all">
+            <span>🔍</span> Hadith Search
+          </button>
+        </div>
+
+        <!-- Tab Content Panes -->
+        <div class="space-y-6">
+          
+          <!-- Tally Counter Pane -->
+          <div id="pane-tasbeeh" class="tab-pane space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+              
+              <!-- Left side: The Digital Counter visualizer -->
+              <div class="md:col-span-5 flex flex-col items-center justify-center space-y-4">
+                <div class="relative w-56 h-56 rounded-full tasbeeh-btn flex flex-col items-center justify-center cursor-pointer select-none" onclick="window.incrementTasbeeh()">
+                  <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-550">Tap Inside Ring</div>
+                  <div id="tasbeeh-display" class="text-6xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono my-2">00</div>
+                  <div id="tasbeeh-target-status" class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200/50 dark:border-slate-700/50">Target: 33</div>
+                </div>
+                
+                <div class="flex gap-4">
+                  <button onclick="window.decrementTasbeeh()" class="px-4 py-2 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-355 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+                    ➖ Subtract
+                  </button>
+                  <button onclick="window.resetTasbeeh()" class="px-4 py-2 bg-red-50 dark:bg-red-955/20 hover:bg-red-100/30 text-red-600 dark:text-red-400 border border-red-200/20 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+                    🔄 Reset
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right side: Tally configurations -->
+              <div class="md:col-span-7 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  
+                  <!-- Select Dhikr -->
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Select Dhikr</label>
+                    <select id="tasbeeh-preset" onchange="window.onDhikrChange()" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+                      <option value="SubhanAllah">سُبْحَانَ ٱللَّٰهِ (SubhanAllah)</option>
+                      <option value="Alhamdulillah">ٱلْحَمْدُ لِلَّٰهِ (Alhamdulillah)</option>
+                      <option value="AllahuAkbar">ٱللَّٰهُ أَكْبَرُ (Allahu Akbar)</option>
+                      <option value="Astaghfirullah">أَسْتَغْفِرُ ٱللَّٰهَ (Astaghfirullah)</option>
+                      <option value="LaIlahaIllallah">لَا إِلَٰهَ إِلَّا ٱللَّٰهُ (La ilaha illallah)</option>
+                      <option value="custom">✍️ Custom Dhikr...</option>
+                    </select>
+                  </div>
+
+                  <!-- Select Target -->
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Target Count</label>
+                    <select id="tasbeeh-target" onchange="window.onTargetChange()" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+                      <option value="33">33 Repetitions</option>
+                      <option value="99">99 Repetitions</option>
+                      <option value="100">100 Repetitions</option>
+                      <option value="infinite">♾️ Infinite / Free Count</option>
+                      <option value="custom">✍️ Custom Target...</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Custom Input Area -->
+                <div id="tasbeeh-custom-row" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
+                  <div id="tasbeeh-custom-dhikr-box" class="hidden">
+                    <label class="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Custom Dhikr Text</label>
+                    <input type="text" id="tasbeeh-custom-dhikr-input" placeholder="e.g. Subhanallahi wa bihamdihi" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+                  </div>
+                  <div id="tasbeeh-custom-target-box" class="hidden">
+                    <label class="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Custom Target Number</label>
+                    <input type="number" id="tasbeeh-custom-target-input" min="1" placeholder="e.g. 50" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+                  </div>
+                </div>
+
+                <!-- Sound & Haptic settings -->
+                <div class="flex items-center gap-6 p-3 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" id="tasbeeh-sound" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-850 cursor-pointer">
+                    <label for="tasbeeh-sound" class="text-xs font-semibold text-slate-600 dark:text-slate-350 cursor-pointer select-none">🔊 Click Sounds</label>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" id="tasbeeh-vibration" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-855 cursor-pointer">
+                    <label for="tasbeeh-vibration" class="text-xs font-semibold text-slate-600 dark:text-slate-355 cursor-pointer select-none">📳 Haptic Vibration</label>
+                  </div>
+                </div>
+
+                <!-- Tally Logs Ledger -->
+                <div class="space-y-2">
+                  <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <span>Dhikr Logs Ledger</span>
+                    <button onclick="window.clearTasbeehHistory()" class="text-[9px] text-red-500 hover:underline">Clear History</button>
+                  </div>
+                  <div id="tasbeeh-history" class="p-3 bg-slate-50 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800 rounded-2xl max-h-[100px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/50 text-xs text-slate-550 dark:text-slate-400 pr-1 space-y-1">
+                    <!-- Logs list -->
+                    <div class="text-center py-4 text-[10px] text-slate-400">No completion logs recorded today.</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Hijri Calendar Pane -->
+          <div id="pane-calendar" class="tab-pane hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              
+              <!-- Left side: The Calendar Grid (8 cols) -->
+              <div class="lg:col-span-8 space-y-4">
+                
+                <!-- Month Selection Bar -->
+                <div class="flex items-center justify-between p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/15">
+                  <button onclick="window.changeCalendarMonth(-1)" class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-650 dark:text-slate-250 cursor-pointer focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+                  
+                  <div class="text-center space-y-0.5">
+                    <h4 id="calendar-hijri-month" class="text-base font-bold text-emerald-800 dark:text-emerald-400">Loading Hijri Month...</h4>
+                    <p id="calendar-gregorian-month" class="text-xs text-slate-500 dark:text-slate-400">Loading Gregorian...</p>
+                  </div>
+
+                  <button onclick="window.changeCalendarMonth(1)" class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-650 dark:text-slate-250 cursor-pointer focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                </div>
+
+                <!-- Calendar Grid Container -->
+                <div class="overflow-x-auto bg-slate-50 dark:bg-slate-850/40 p-4 border border-slate-100 dark:border-slate-800/80 rounded-2xl">
+                  <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pb-2 border-b border-slate-155 dark:border-slate-800/80 mb-2 min-w-[320px]">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                  </div>
+                  <div id="calendar-grid" class="grid grid-cols-7 gap-2 min-w-[320px]">
+                    <!-- Dynamically rendered cells -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right side: Dynamic Events and Date Converter Form (4 cols) -->
+              <div class="lg:col-span-4 space-y-6">
+                <!-- Holidays / Events list -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/80 space-y-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Sacred Days in Month
+                  </h4>
+                  <div id="calendar-events-list" class="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                    <!-- Dynamic Event list items -->
+                    <div class="text-[10px] text-slate-400 text-center py-4">No events found in this Hijri month.</div>
+                  </div>
+                </div>
+
+                <!-- Date Converter Form -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/80 space-y-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Hijri Converter
+                  </h4>
+                  <form id="date-converter-form" onsubmit="window.convertDate(event)" class="space-y-3">
+                    <div>
+                      <label class="block text-[9px] font-bold text-slate-450 uppercase mb-1">Select Gregorian Date</label>
+                      <input type="date" id="convert-input-date" class="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200" required>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-505 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm">
+                      Convert to Hijri
+                    </button>
+                    <div id="convert-result" class="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-center font-bold text-xs text-emerald-800 dark:text-emerald-400 hidden">
+                      --
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Islamic Books Shelf Pane -->
+          <div id="pane-books" class="tab-pane hidden space-y-6">
+            <div id="bookshelf-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <!-- Dynamically populated books -->
+            </div>
+          </div>
+
+          <!-- Hadith Search Pane -->
+          <div id="pane-hadith" class="tab-pane hidden space-y-6">
+            
+            <!-- Search & Filters -->
+            <div class="p-4 md:p-6 bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/80 rounded-2xl space-y-4">
+              <div class="flex flex-col sm:flex-row gap-3">
+                
+                <!-- Search bar -->
+                <div class="relative flex-grow">
+                  <input type="text" id="hadith-search-input" onkeyup="window.searchHadith()" placeholder="Search hadiths by keyword (e.g. intention, manners, charity)..." class="w-full pl-9 pr-3 py-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+                  <svg class="absolute left-3 top-3 w-4 h-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                
+                <!-- Collection filter -->
+                <select id="hadith-filter-collection" onchange="window.searchHadith()" class="px-3 py-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200 w-full sm:w-40">
+                  <option value="all">All Collections</option>
+                  <option value="bukhari">Sahih Bukhari</option>
+                  <option value="muslim">Sahih Muslim</option>
+                  <option value="abudawud">Sunan Abu Dawud</option>
+                  <option value="tirmidhi">Jami at-Tirmidhi</option>
+                </select>
+              </div>
+
+              <!-- Topic Tags row -->
+              <div class="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Topics:</span>
+                <button onclick="window.selectHadithTopicTag(this, 'all')" class="hadith-topic-tag px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold transition-all cursor-pointer">All</button>
+                <button onclick="window.selectHadithTopicTag(this, 'Faith')" class="hadith-topic-tag px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 hover:text-slate-750 text-[10px] font-bold transition-all cursor-pointer">Faith</button>
+                <button onclick="window.selectHadithTopicTag(this, 'Manners')" class="hadith-topic-tag px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 hover:text-slate-750 text-[10px] font-bold transition-all cursor-pointer">Manners</button>
+                <button onclick="window.selectHadithTopicTag(this, 'Charity')" class="hadith-topic-tag px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 hover:text-slate-750 text-[10px] font-bold transition-all cursor-pointer">Charity</button>
+                <button onclick="window.selectHadithTopicTag(this, 'Knowledge')" class="hadith-topic-tag px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 hover:text-slate-750 text-[10px] font-bold transition-all cursor-pointer">Knowledge</button>
+                <button onclick="window.selectHadithTopicTag(this, 'Prayer')" class="hadith-topic-tag px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 hover:text-slate-750 text-[10px] font-bold transition-all cursor-pointer">Prayer</button>
+              </div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="hadith-results-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Result cards -->
+            </div>
+            
+            <div id="hadith-search-empty" class="text-center py-10 text-xs text-slate-400 hidden">
+              No Hadiths found matching your search.
+            </div>
+          </div>
+
+        </div>
 
       </div>
 
@@ -539,6 +778,84 @@
       </div>
     </div>
   </div>
+
+  <!-- ================= ISLAMIC BOOK READER MODAL ================= -->
+  <div id="book-reader-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-0 md:p-6 bg-black/75 backdrop-blur-md reader-modal">
+    <div class="relative w-full h-full md:max-w-5xl md:h-[90vh] bg-white dark:bg-slate-900 rounded-none md:rounded-3xl shadow-2xl border border-emerald-500/10 flex flex-col overflow-hidden reader-modal-content">
+      
+      <!-- Top reader bar -->
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/20 flex items-center justify-between">
+        <div class="space-y-0.5">
+          <h2 id="reader-book-title" class="text-sm font-bold text-emerald-800 dark:text-emerald-450 truncate max-w-[250px] sm:max-w-[400px]">Book Title</h2>
+          <p id="reader-chapter-title" class="text-xs text-slate-500 dark:text-slate-400 font-semibold truncate max-w-[200px] sm:max-w-[300px]">Chapter 1</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <!-- Text Scale slider -->
+          <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-850 rounded-xl">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Size</span>
+            <input type="range" id="reader-font-slider" min="14" max="28" value="18" class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+          </div>
+          <!-- Close Button -->
+          <button onclick="window.closeBookReader()" class="p-1.5 text-slate-400 hover:text-slate-655 dark:hover:text-slate-250 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main reader content split view -->
+      <div class="flex-grow flex overflow-hidden">
+        <!-- Sidebar Chapters list (hidden on small screens, toggleable) -->
+        <div id="reader-sidebar" class="hidden md:block w-64 border-r border-slate-100 dark:border-slate-800/80 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/10 p-4 space-y-2 select-none">
+          <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Chapters List</h3>
+          <div id="reader-chapters-menu" class="space-y-1">
+            <!-- Chapter buttons loaded dynamically -->
+          </div>
+        </div>
+
+        <!-- Main text view area -->
+        <div class="flex-grow overflow-y-auto p-6 md:p-10 space-y-8 bg-white dark:bg-slate-900" id="reader-text-container">
+          <div class="space-y-6">
+            <!-- Arabic Text card -->
+            <div id="reader-text-arabic" class="quran-text text-center text-slate-800 dark:text-slate-100 select-none pb-6 border-b border-slate-100 dark:border-slate-800/50" style="font-size: 20px">
+              Loading...
+            </div>
+            <!-- English Text card -->
+            <div class="space-y-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-450 select-none">English Translation</h4>
+              <p id="reader-text-english" class="text-slate-700 dark:text-slate-350 leading-relaxed" style="font-size: 16px">
+                Loading...
+              </p>
+            </div>
+            <!-- Commentary card -->
+            <div id="reader-explanation-box" class="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/10 space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 select-none">Guidance & Commentary</h4>
+              <p id="reader-text-explanation" class="text-slate-650 dark:text-slate-400 text-xs leading-relaxed">
+                Loading...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Reader Control Bar (Pagination) -->
+      <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/20 flex items-center justify-between">
+        <button id="reader-btn-prev" onclick="window.navigateBookChapter(-1)" class="px-4 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850/80 text-slate-655 dark:text-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer">
+          &larr; Prev Chapter
+        </button>
+        
+        <span id="reader-page-indicator" class="text-xs font-semibold text-slate-400">Chapter 1 of 8</span>
+        
+        <button id="reader-btn-next" onclick="window.navigateBookChapter(1)" class="px-4 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850/80 text-slate-655 dark:text-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer">
+          Next Chapter &rarr;
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Load Local Islamic Database -->
+  <script src="books_data.js"></script>
 
   <!-- Import Firebase configuration & app scripts -->
   <script type="importmap">
