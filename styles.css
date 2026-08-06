@@ -287,3 +287,50 @@ body {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Zakat Calculator & Mosque Locator Styles */
+.zakat-result-card {
+  background: linear-gradient(135deg, rgba(4, 120, 87, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1.5px solid rgba(16, 185, 129, 0.2);
+}
+.zakat-history-log {
+  max-height: 180px;
+  overflow-y: auto;
+}
+#mosque-map {
+  width: 100%;
+  height: 380px;
+  border-radius: 20px;
+  z-index: 10;
+  border: 1px solid rgba(4, 120, 87, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+@media (prefers-color-scheme: dark) {
+  #mosque-map {
+    border-color: rgba(17, 56, 36, 0.3);
+    /* Dark map filter to soften tiles in dark mode */
+    filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%);
+  }
+}
+/* Leaflet Popup overrides to fit theme */
+.leaflet-popup-content-wrapper {
+  background: white !important;
+  color: #0f172a !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(4, 120, 87, 0.2) !important;
+  font-family: inherit !important;
+}
+.leaflet-popup-tip {
+  background: white !important;
+}
+@media (prefers-color-scheme: dark) {
+  .leaflet-popup-content-wrapper {
+    background: #082216 !important;
+    color: #f1f5f9 !important;
+    border: 1px solid #113824 !important;
+  }
+  .leaflet-popup-tip {
+    background: #082216 !important;
+  }
+}
+
+

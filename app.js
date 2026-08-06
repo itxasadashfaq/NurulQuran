@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnSignout) btnSignout.addEventListener("click", handleSignOut);
   if (btnMobileSignout) btnMobileSignout.addEventListener("click", handleSignOut);
   if (btnDashSignout) btnDashSignout.addEventListener("click", handleSignOut);
-  
+
   // Dashboard profile card signout button
   const pSignout = document.getElementById("btn-dash-signout");
   if (pSignout) pSignout.addEventListener("click", handleSignOut);
@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (authForm) {
     authForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
+
       const email = document.getElementById("auth-email").value;
       const password = document.getElementById("auth-password").value;
       const name = document.getElementById("auth-name").value;
@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
               emailVerified: true
             };
             localStorage.setItem("mock_user", JSON.stringify(loggedInUser));
-            
+
             // Reload page to reflect updated profile details (as in original code)
             window.location.reload();
           }
@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         console.error("Auth action failed:", error);
         alertDiv.classList.remove("hidden");
-        
+
         let errMsg = error.message;
         if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
           errMsg = "Invalid email or password.";
@@ -362,7 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnFontDecrease = document.getElementById("btn-font-decrease");
     const btnFontIncrease = document.getElementById("btn-font-increase");
     const btnToggleTranslation = document.getElementById("btn-toggle-translation");
-    
+
     const playerBar = document.getElementById("audio-player-bar");
     const playerTitle = document.getElementById("player-title");
     const playerSubtitle = document.getElementById("player-subtitle");
@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tabSurahsBtn = document.getElementById("sidebar-tab-surahs");
     const tabSearchBtn = document.getElementById("sidebar-tab-search");
     const tabBookmarksBtn = document.getElementById("sidebar-tab-bookmarks");
-    
+
     const containerSurahs = document.getElementById("sidebar-container-surahs");
     const containerSearch = document.getElementById("sidebar-container-search");
     const containerBookmarks = document.getElementById("sidebar-container-bookmarks");
@@ -489,10 +489,10 @@ document.addEventListener("DOMContentLoaded", () => {
           displayMatches.forEach(m => {
             const matchRow = document.createElement("button");
             matchRow.className = "w-full p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 text-left hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all text-[11px] space-y-1 block cursor-pointer";
-            
+
             const isMatchArabic = edition === "quran-simple";
             const textDir = isMatchArabic || edition === "ur.jalandhry" ? "text-right rtl font-amiri" : "text-left ltr font-sans";
-            
+
             matchRow.innerHTML = `
               <div class="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-1">
                 <span>Surah ${m.surah.englishName}</span>
@@ -543,11 +543,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const data = await res.json();
           surahsList = data.data;
           renderSurahSidebar(surahsList);
-          
+
           const urlParams = new URLSearchParams(window.location.search);
           const initSurah = parseInt(urlParams.get("surah"));
           const initVerse = parseInt(urlParams.get("verse"));
-          
+
           if (initSurah && !isNaN(initSurah)) {
             currentSurahNumber = initSurah;
             renderSurahSidebar(surahsList);
@@ -575,11 +575,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       list.forEach((s) => {
         const btn = document.createElement("button");
-        btn.className = `w-full p-3 flex items-center justify-between text-left rounded-xl transition-all border ${
-          currentSurahNumber === s.number
+        btn.className = `w-full p-3 flex items-center justify-between text-left rounded-xl transition-all border ${currentSurahNumber === s.number
             ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-450 font-semibold"
             : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40"
-        }`;
+          }`;
         btn.onclick = () => {
           currentSurahNumber = s.number;
           // Refresh list active styles
@@ -589,11 +588,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btn.innerHTML = `
           <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold ${
-              currentSurahNumber === s.number
-                ? "bg-emerald-600 text-white"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-            }">${s.number}</span>
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold ${currentSurahNumber === s.number
+            ? "bg-emerald-600 text-white"
+            : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+          }">${s.number}</span>
             <div>
               <div class="text-xs font-bold leading-tight">${s.englishName}</div>
               <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">${s.revelationType} • ${s.numberOfAyahs} verses</div>
@@ -670,7 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (activeSurahMeta) {
             readerSurahTitle.textContent = `${activeSurahMeta.englishName} (${activeSurahMeta.name})`;
             readerSurahMeta.textContent = `${activeSurahMeta.number}: ${activeSurahMeta.englishNameTranslation} (${activeSurahMeta.numberOfAyahs} Verses, ${activeSurahMeta.revelationType})`;
-            
+
             // Set Player Title
             playerTitle.textContent = activeSurahMeta.englishName;
 
@@ -700,7 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           renderVerses();
-          
+
           if (scrollToVerseNum) {
             setTimeout(() => {
               const verseRow = document.getElementById(`verse-row-${scrollToVerseNum - 1}`);
@@ -747,7 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const verseRow = document.createElement("div");
         verseRow.id = `verse-row-${index}`;
         verseRow.className = "p-4 md:p-6 rounded-2xl border border-transparent transition-all space-y-4";
-        
+
         const isBookmarked = bookmarks.some(b => b.surahNumber === currentSurahNumber && b.verseNumber === v.numberInSurah);
 
         verseRow.innerHTML = `
@@ -841,7 +839,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btnToggleTranslation.addEventListener("click", () => {
         isTranslationVisible = !isTranslationVisible;
         btnToggleTranslation.textContent = isTranslationVisible ? "Hide Translation" : "Show Translation";
-        
+
         const transTexts = document.querySelectorAll(".translation-text");
         transTexts.forEach((el) => {
           if (isTranslationVisible) {
@@ -964,7 +962,7 @@ document.addEventListener("DOMContentLoaded", () => {
     playerBtnPlay.addEventListener("click", togglePlay);
     playerBtnPrev.addEventListener("click", playPrevVerse);
     playerBtnNext.addEventListener("click", playNextVerse);
-    
+
     playerBtnClose.addEventListener("click", () => {
       stopPlayback();
       playerBar.classList.add("translate-y-full"); // Slide down player
@@ -1044,7 +1042,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.loadSidebarBookmarksAndHistory = function () {
       const bookmarksListEl = document.getElementById("sidebar-bookmarks-list");
       const historyListEl = document.getElementById("sidebar-history-list");
-      
+
       if (bookmarksListEl) {
         const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
         if (bookmarks.length === 0) {
@@ -1054,7 +1052,7 @@ document.addEventListener("DOMContentLoaded", () => {
           bookmarks.forEach(b => {
             const bRow = document.createElement("div");
             bRow.className = "p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 text-[10px]";
-            
+
             bRow.innerHTML = `
               <button onclick="window.goToVerseFromSearch(${b.surahNumber}, ${b.verseNumber})" class="font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 transition-colors text-left flex-grow truncate focus:outline-none cursor-pointer">
                 Surah ${b.surahName} (${b.surahNumber}:${b.verseNumber})
@@ -1079,7 +1077,7 @@ document.addEventListener("DOMContentLoaded", () => {
             hRow.className = "w-full p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-left hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-[10px] font-semibold text-slate-700 dark:text-slate-300 flex justify-between items-center cursor-pointer focus:outline-none";
             hRow.innerHTML = `
               <span>Surah ${h.surahName}</span>
-              <span class="text-[8px] text-slate-400 font-normal font-sans">${new Date(h.timestamp).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
+              <span class="text-[8px] text-slate-400 font-normal font-sans">${new Date(h.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
             `;
             hRow.onclick = () => {
               window.goToVerseFromSearch(h.surahNumber, 1);
@@ -1095,7 +1093,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const v = currentVerses[index];
         const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
         const bIndex = bookmarks.findIndex(b => b.surahNumber === currentSurahNumber && b.verseNumber === v.numberInSurah);
-        
+
         const activeSurahMeta = surahsList.find(s => s.number === currentSurahNumber);
         const surahName = activeSurahMeta ? activeSurahMeta.englishName : "Surah";
 
@@ -1113,7 +1111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         localStorage.setItem("quran_bookmarks", JSON.stringify(bookmarks));
         renderVerses();
-        
+
         if (tabBookmarksBtn && tabBookmarksBtn.classList.contains("border-emerald-600")) {
           window.loadSidebarBookmarksAndHistory();
         }
@@ -1141,7 +1139,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadDailyAyat() {
       const today = new Date();
       const dateString = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-      
+
       let hash = 0;
       for (let i = 0; i < dateString.length; i++) {
         hash = dateString.charCodeAt(i) + ((hash << 5) - hash);
@@ -1153,7 +1151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.ok) {
           const body = await res.json();
           const editions = body.data;
-          
+
           const arabicText = editions[0].text;
           const englishText = editions[1].text;
           const urduText = editions[2].text;
@@ -1161,11 +1159,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const surahName = editions[0].surah.englishName;
           const surahNumber = editions[0].surah.number;
           const numberInSurah = editions[0].numberInSurah;
-          
+
           const refEl = document.getElementById("daily-verse-ref");
           const arabicEl = document.getElementById("daily-verse-arabic");
           const transEl = document.getElementById("daily-verse-translation");
-          
+
           if (refEl) refEl.textContent = `Surah ${surahName} ${surahNumber}:${numberInSurah}`;
           if (arabicEl) arabicEl.textContent = arabicText;
           if (transEl) {
@@ -1252,7 +1250,7 @@ function updateDashboardWidgets() {
   const dashLastReadArabic = document.getElementById("dash-last-read-arabic");
   const dashLastReadTranslation = document.getElementById("dash-last-read-translation");
   const dashBtnContinueReading = document.getElementById("dash-btn-continue-reading");
-  
+
   const dashBookmarksContainer = document.getElementById("dashboard-bookmarks-container");
 
   // 1. Update Last Read widget
@@ -1286,7 +1284,7 @@ function updateDashboardWidgets() {
       bookmarks.forEach(b => {
         const bRow = document.createElement("div");
         bRow.className = "py-2.5 flex items-center justify-between text-xs border-b border-slate-100 dark:border-slate-800/50 last:border-0 group";
-        
+
         bRow.innerHTML = `
           <a href="index.html?surah=${b.surahNumber}&verse=${b.verseNumber}#quran" class="font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 transition-colors">
             Surah ${b.surahName} (${b.surahNumber}:${b.verseNumber})
@@ -1368,9 +1366,9 @@ window.speakText = function (btn, index, lang) {
     const el = document.getElementById(`tafseer-text-${index}`);
     if (el) text = el.textContent;
   }
-  
+
   if (!text) return;
-  
+
   if ('speechSynthesis' in window) {
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
@@ -1378,16 +1376,16 @@ window.speakText = function (btn, index, lang) {
       btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
       return;
     }
-    
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ur-PK';
-    
+
     btn.innerHTML = `<span class="text-[9px] font-sans font-bold text-amber-500 animate-pulse">Playing...</span>`;
-    
+
     utterance.onend = () => {
       btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
     };
-    
+
     utterance.onerror = () => {
       btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
     };
@@ -1413,7 +1411,8 @@ let prayerSettings = {
   lng: 67.0011,
   calcMethod: "3", // MWL
   asrSchool: "0", // Standard (Shafi)
-  cityName: "Karachi"
+  cityName: "Karachi",
+  hijriAdjust: 0
 };
 
 // Preset Coordinates Mapping
@@ -1481,7 +1480,7 @@ async function updatePrayerTimes() {
 
   // Update Location indicators in HTML
   const locText = prayerSettings.locMode === "gps" ? `GPS (${lat.toFixed(2)}, ${lng.toFixed(2)})` : prayerSettings.cityName;
-  
+
   const homeLocEl = document.getElementById("home-prayer-location");
   if (homeLocEl) homeLocEl.textContent = locText;
 
@@ -1498,10 +1497,10 @@ async function updatePrayerTimes() {
   try {
     const res = await fetch(`https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=${method}&school=${school}`);
     if (!res.ok) throw new Error("Failed to fetch timings from Aladhan");
-    
+
     const data = await res.json();
     const timings = data.data.timings;
-    
+
     cachedTimings = timings;
     cachedDateKey = currentConfigKey;
     renderPrayerTimes(timings);
@@ -1545,7 +1544,7 @@ function renderPrayerTimes(timings) {
     if (card) {
       // Remove previous active classes
       card.className = "p-1.5 rounded-xl text-center transition-all bg-slate-800/30 border border-transparent text-slate-400 opacity-60";
-      
+
       if (p.name === activeObj.active) {
         card.className = "p-1.5 rounded-xl text-center transition-all bg-emerald-500/20 border-emerald-500 text-amber-300 scale-102 font-semibold shadow-md";
       } else if (p.name === activeObj.next) {
@@ -1558,7 +1557,7 @@ function renderPrayerTimes(timings) {
   const dashList = document.getElementById("dash-prayer-list");
   if (dashList) {
     dashList.innerHTML = "";
-    
+
     // Load Checked prayers for today
     const todayKey = `checked_prayers_${new Date().toDateString()}`;
     const checkedPrayers = JSON.parse(localStorage.getItem(todayKey) || "[]");
@@ -1578,11 +1577,11 @@ function renderPrayerTimes(timings) {
     prayers.forEach(p => {
       const isChecked = checkedPrayers.includes(p.name);
       const isActive = p.name === activeObj.active;
-      
+
       const row = document.createElement("div");
       // Style base
       let rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-slate-50/50 dark:bg-slate-800/10 border-transparent text-slate-400 opacity-60 transition-all";
-      
+
       if (isActive) {
         rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/60 text-slate-850 dark:text-white shadow-sm font-semibold prayer-active-row";
       } else if (!isActive && isChecked) {
@@ -1613,10 +1612,10 @@ function renderPrayerTimes(timings) {
 }
 
 // Toggle prayer checkoff
-window.togglePrayerCheck = function(prayerName) {
+window.togglePrayerCheck = function (prayerName) {
   const todayKey = `checked_prayers_${new Date().toDateString()}`;
   let checked = JSON.parse(localStorage.getItem(todayKey) || "[]");
-  
+
   const idx = checked.indexOf(prayerName);
   if (idx > -1) {
     checked.splice(idx, 1);
@@ -1624,7 +1623,7 @@ window.togglePrayerCheck = function(prayerName) {
     checked.push(prayerName);
   }
   localStorage.setItem(todayKey, JSON.stringify(checked));
-  
+
   // Re-render to reflect checkbox status
   updatePrayerTimes();
 };
@@ -1691,10 +1690,10 @@ let manualHeading = 0; // Manually adjusted heading
 function updateQiblaUI() {
   const dial = document.getElementById("qibla-compass-dial");
   const needle = document.getElementById("qibla-needle");
-  
+
   const bearingText = document.getElementById("qibla-bearing-text");
   const coordsText = document.getElementById("qibla-coords-text");
-  
+
   if (bearingText) bearingText.textContent = `Qibla Direction: ${qiblaHeading.toFixed(1)}°`;
   if (coordsText) coordsText.textContent = `Coordinates: ${prayerSettings.lat.toFixed(4)}°, ${prayerSettings.lng.toFixed(4)}°`;
 
@@ -1728,7 +1727,7 @@ function initQiblaCompass() {
         });
       }
     }
-    
+
     const statusText = document.getElementById("qibla-status-text");
     if (statusText) statusText.textContent = "Adjust compass manually using slider";
     return;
@@ -1751,7 +1750,7 @@ function initQiblaCompass() {
   if (window.DeviceOrientationEvent) {
     window.addEventListener("deviceorientationabsolute", handleOrientation, true);
     window.addEventListener("deviceorientation", handleOrientation, true);
-    
+
     // Compass click prompt to request permission (required for newer iOS versions)
     const compassBox = document.getElementById("qibla-compass-dial");
     if (compassBox) {
@@ -1783,14 +1782,14 @@ async function detectIPLocation() {
       const ipData = await res.json();
       if (ipData && ipData.lat && ipData.lon) {
         console.log("IP-based geolocation auto-detected:", ipData.city, ipData.lat, ipData.lon);
-        
+
         // Auto update if user is in GPS mode and hasn't received higher precision GPS coordinates yet
         if (prayerSettings.locMode === "gps" && (prayerSettings.lat === 24.8607 && prayerSettings.lng === 67.0011)) {
           prayerSettings.lat = ipData.lat;
           prayerSettings.lng = ipData.lon;
           prayerSettings.cityName = `${ipData.city}, ${ipData.countryCode || ""}`;
           savePrayerSettings();
-          
+
           updatePrayerTimes();
           qiblaHeading = getQiblaBearing(ipData.lat, ipData.lon);
           updateQiblaUI();
@@ -1820,7 +1819,7 @@ function detectGPSLocation() {
     (position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-      
+
       if (gpsStatus) gpsStatus.textContent = "Active";
       if (gpsLat) gpsLat.textContent = lat.toFixed(4);
       if (gpsLng) gpsLng.textContent = lng.toFixed(4);
@@ -1837,7 +1836,7 @@ function detectGPSLocation() {
     (err) => {
       console.warn("Geolocation error:", err);
       if (gpsStatus) gpsStatus.textContent = "Denied/Unavailable";
-      
+
       // Auto fallback to IP location silently on GPS block or failure
       if (prayerSettings.locMode === "gps") {
         detectIPLocation();
@@ -1848,7 +1847,7 @@ function detectGPSLocation() {
 }
 
 // Open settings modal
-window.openPrayerSettingsModal = function() {
+window.openPrayerSettingsModal = function () {
   const modal = document.getElementById("prayer-settings-modal");
   if (!modal) return;
 
@@ -1872,7 +1871,7 @@ window.openPrayerSettingsModal = function() {
 };
 
 // Close settings modal
-window.closePrayerSettingsModal = function() {
+window.closePrayerSettingsModal = function () {
   const modal = document.getElementById("prayer-settings-modal");
   if (modal) modal.classList.add("hidden");
 };
@@ -1881,7 +1880,7 @@ window.closePrayerSettingsModal = function() {
 function applyLocationModeUI() {
   const gpsBtn = document.getElementById("settings-loc-gps");
   const manualBtn = document.getElementById("settings-loc-manual");
-  
+
   const gpsInfo = document.getElementById("settings-gps-info");
   const manualInfo = document.getElementById("settings-manual-info");
 
@@ -1931,7 +1930,7 @@ function handleSettingsSave(e) {
 
   savePrayerSettings();
   updatePrayerTimes();
-  
+
   qiblaHeading = getQiblaBearing(prayerSettings.lat, prayerSettings.lng);
   updateQiblaUI();
 
@@ -1941,7 +1940,7 @@ function handleSettingsSave(e) {
 // Initial binding
 function initPrayerAndQiblaModule() {
   loadPrayerSettings();
-  
+
   // Set up event listeners for settings elements
   const gpsBtn = document.getElementById("settings-loc-gps");
   const manualBtn = document.getElementById("settings-loc-manual");
@@ -1983,7 +1982,7 @@ function initPrayerAndQiblaModule() {
   } else {
     updatePrayerTimes();
   }
-  
+
   initQiblaCompass();
 
   // Automated periodic active prayer highlight refresher (every 30 seconds)
@@ -2015,12 +2014,12 @@ let activeHadithTopic = "all";
 let audioCtx = null;
 
 // Tab Switcher
-window.switchFaithTab = function(tabId) {
-  const tabs = ['tasbeeh', 'calendar', 'books', 'hadith'];
+window.switchFaithTab = function (tabId) {
+  const tabs = ['tasbeeh', 'calendar', 'books', 'hadith', 'zakat', 'mosques'];
   tabs.forEach(t => {
     const btn = document.getElementById(`tab-btn-${t}`);
     const pane = document.getElementById(`pane-${t}`);
-    
+
     if (btn) {
       if (t === tabId) {
         btn.classList.add('tab-active');
@@ -2028,7 +2027,7 @@ window.switchFaithTab = function(tabId) {
         btn.classList.remove('tab-active');
       }
     }
-    
+
     if (pane) {
       if (t === tabId) {
         pane.classList.remove('hidden');
@@ -2037,6 +2036,10 @@ window.switchFaithTab = function(tabId) {
       }
     }
   });
+
+  if (tabId === 'mosques') {
+    window.initMosqueMap();
+  }
 };
 
 // Tasbeeh Synthesizer Audio Feedback
@@ -2054,7 +2057,7 @@ function playTallySound(type) {
 
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    
+
     osc.connect(gain);
     gain.connect(audioCtx.destination);
 
@@ -2093,9 +2096,9 @@ function triggerVibration(duration) {
 }
 
 // Tasbeeh Increment
-window.incrementTasbeeh = function() {
+window.incrementTasbeeh = function () {
   tasbeehCount++;
-  
+
   const display = document.getElementById("tasbeeh-display");
   if (display) {
     display.textContent = String(tasbeehCount).padStart(2, '0');
@@ -2105,10 +2108,10 @@ window.incrementTasbeeh = function() {
   if (tasbeehTarget !== "infinite" && tasbeehCount >= tasbeehTarget) {
     playTallySound("complete");
     triggerVibration(200);
-    
+
     // Save completion log
     saveTasbeehLog(tasbeehDhikr, tasbeehCount);
-    
+
     // Toast alert
     const targetBadge = document.getElementById("tasbeeh-target-status");
     if (targetBadge) {
@@ -2120,7 +2123,7 @@ window.incrementTasbeeh = function() {
         targetBadge.className = "text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200/50 dark:border-slate-700/50";
       }, 2000);
     }
-    
+
     tasbeehCount = 0;
     if (display) {
       setTimeout(() => {
@@ -2133,7 +2136,7 @@ window.incrementTasbeeh = function() {
   }
 };
 
-window.decrementTasbeeh = function() {
+window.decrementTasbeeh = function () {
   if (tasbeehCount > 0) {
     tasbeehCount--;
     const display = document.getElementById("tasbeeh-display");
@@ -2145,7 +2148,7 @@ window.decrementTasbeeh = function() {
   }
 };
 
-window.resetTasbeeh = function() {
+window.resetTasbeeh = function () {
   tasbeehCount = 0;
   const display = document.getElementById("tasbeeh-display");
   if (display) display.textContent = "00";
@@ -2153,11 +2156,11 @@ window.resetTasbeeh = function() {
   triggerVibration(15);
 };
 
-window.onDhikrChange = function() {
+window.onDhikrChange = function () {
   const preset = document.getElementById("tasbeeh-preset");
   const customRow = document.getElementById("tasbeeh-custom-row");
   const dhikrInputBox = document.getElementById("tasbeeh-custom-dhikr-box");
-  
+
   if (!preset) return;
 
   if (preset.value === "custom") {
@@ -2173,7 +2176,7 @@ window.onDhikrChange = function() {
   }
 };
 
-window.onTargetChange = function() {
+window.onTargetChange = function () {
   const target = document.getElementById("tasbeeh-target");
   const customRow = document.getElementById("tasbeeh-custom-row");
   const targetInputBox = document.getElementById("tasbeeh-custom-target-box");
@@ -2204,7 +2207,7 @@ window.onTargetChange = function() {
 
 function saveTasbeehLog(dhikrText, countVal) {
   const preset = document.getElementById("tasbeeh-preset");
-  
+
   let finalDhikr = dhikrText;
   if (preset && preset.value === "custom") {
     const input = document.getElementById("tasbeeh-custom-dhikr-input");
@@ -2224,12 +2227,12 @@ function saveTasbeehLog(dhikrText, countVal) {
   window.renderTasbeehHistory();
 }
 
-window.clearTasbeehHistory = function() {
+window.clearTasbeehHistory = function () {
   localStorage.removeItem("nqp_tasbeeh_logs");
   window.renderTasbeehHistory();
 };
 
-window.renderTasbeehHistory = function() {
+window.renderTasbeehHistory = function () {
   const container = document.getElementById("tasbeeh-history");
   if (!container) return;
 
@@ -2266,22 +2269,27 @@ const ISLAMIC_EVENTS = {
 
 function getHijriDetails(date) {
   try {
+    // Apply user-configured Hijri correction offset
+    const adjustedDate = new Date(date.getTime());
+    const offset = parseInt(prayerSettings.hijriAdjust) || 0;
+    adjustedDate.setDate(adjustedDate.getDate() + offset);
+
     const formatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
       day: 'numeric',
       month: 'numeric',
       year: 'numeric'
     });
-    const parts = formatter.formatToParts(date);
+    const parts = formatter.formatToParts(adjustedDate);
     const day = parseInt(parts.find(p => p.type === 'day').value);
     const month = parseInt(parts.find(p => p.type === 'month').value);
     const year = parseInt(parts.find(p => p.type === 'year').value);
-    
+
     const monthNames = [
       "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
       "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
       "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
     ];
-    
+
     return {
       day,
       month,
@@ -2294,12 +2302,12 @@ function getHijriDetails(date) {
   }
 }
 
-window.changeCalendarMonth = function(direction) {
+window.changeCalendarMonth = function (direction) {
   currentCalDate.setMonth(currentCalDate.getMonth() + direction);
   window.renderCalendar();
 };
 
-window.renderCalendar = function() {
+window.renderCalendar = function () {
   const hijriMonthLabel = document.getElementById("calendar-hijri-month");
   const gregMonthLabel = document.getElementById("calendar-gregorian-month");
   const grid = document.getElementById("calendar-grid");
@@ -2337,18 +2345,18 @@ window.renderCalendar = function() {
   for (let day = 1; day <= totalDays; day++) {
     const dateObj = new Date(yr, mo, day);
     const hijri = getHijriDetails(dateObj);
-    
+
     if (!hijri) continue;
 
     const cell = document.createElement("div");
-    
-    const isToday = dateObj.getDate() === today.getDate() && 
-                    dateObj.getMonth() === today.getMonth() && 
-                    dateObj.getFullYear() === today.getFullYear();
-    
+
+    const isToday = dateObj.getDate() === today.getDate() &&
+      dateObj.getMonth() === today.getMonth() &&
+      dateObj.getFullYear() === today.getFullYear();
+
     const holidayKey = `${hijri.month}/${hijri.day}`;
     const holiday = ISLAMIC_EVENTS[holidayKey];
-    
+
     let cellClasses = "calendar-day-cell bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 shadow-sm";
     if (isToday) cellClasses += " calendar-day-today";
     if (holiday) {
@@ -2397,12 +2405,12 @@ window.renderCalendar = function() {
   }
 };
 
-window.convertDate = function(e) {
+window.convertDate = function (e) {
   if (e) e.preventDefault();
-  
+
   const input = document.getElementById("convert-input-date");
   const resultBox = document.getElementById("convert-result");
-  
+
   if (!input || !resultBox) return;
 
   const dateVal = new Date(input.value);
@@ -2416,7 +2424,7 @@ window.convertDate = function(e) {
 };
 
 // Islamic Books shelf & Reader Implementation
-window.renderBookshelf = function() {
+window.renderBookshelf = function () {
   const shelf = document.getElementById("bookshelf-grid");
   if (!shelf) return;
 
@@ -2457,12 +2465,12 @@ window.renderBookshelf = function() {
   }).join('');
 };
 
-window.openBookReader = function(bookId, chapterId) {
+window.openBookReader = function (bookId, chapterId) {
   const book = ISLAMIC_BOOKS.find(b => b.id === bookId);
   if (!book) return;
 
   activeBook = book;
-  
+
   if (!chapterId) {
     activeChapterIndex = parseInt(localStorage.getItem(`nqp_read_progress_${bookId}`) || "0");
   } else {
@@ -2492,7 +2500,7 @@ window.openBookReader = function(bookId, chapterId) {
   loadChapterContent();
 };
 
-window.closeBookReader = function() {
+window.closeBookReader = function () {
   const modal = document.getElementById("book-reader-modal");
   if (modal) {
     modal.classList.add("hidden");
@@ -2519,7 +2527,7 @@ function loadChapterContent() {
 
   if (arabicEl) arabicEl.textContent = ch.arabic;
   if (englishEl) englishEl.textContent = ch.english;
-  
+
   if (ch.explanation) {
     if (explanationBox) explanationBox.classList.remove("hidden");
     if (explanationEl) explanationEl.textContent = ch.explanation;
@@ -2541,12 +2549,12 @@ function loadChapterContent() {
   if (container) container.scrollTop = 0;
 }
 
-window.navigateBookChapter = function(direction) {
+window.navigateBookChapter = function (direction) {
   if (!activeBook) return;
   const newIdx = activeChapterIndex + direction;
   if (newIdx >= 0 && newIdx < activeBook.chapters.length) {
     activeChapterIndex = newIdx;
-    
+
     const menu = document.getElementById("reader-chapters-menu");
     if (menu) {
       const btns = menu.querySelectorAll("button");
@@ -2563,14 +2571,14 @@ window.navigateBookChapter = function(direction) {
   }
 };
 
-window.bindReaderEvents = function() {
+window.bindReaderEvents = function () {
   const fontSlider = document.getElementById("reader-font-slider");
   if (fontSlider) {
     fontSlider.addEventListener("input", (e) => {
       const size = parseInt(e.target.value);
       const arabic = document.getElementById("reader-text-arabic");
       const english = document.getElementById("reader-text-english");
-      
+
       if (arabic) arabic.style.fontSize = `${size + 2}px`;
       if (english) english.style.fontSize = `${size - 2}px`;
     });
@@ -2578,7 +2586,7 @@ window.bindReaderEvents = function() {
 };
 
 // Hadith Search Engine Implementation
-window.searchHadith = function() {
+window.searchHadith = function () {
   const container = document.getElementById("hadith-results-container");
   const emptyLabel = document.getElementById("hadith-search-empty");
   const queryInput = document.getElementById("hadith-search-input");
@@ -2593,7 +2601,7 @@ window.searchHadith = function() {
     if (activeHadithTopic !== "all" && h.topic !== activeHadithTopic) {
       return false;
     }
-    
+
     if (collection !== "all") {
       const refLower = h.ref.toLowerCase();
       if (collection === "bukhari" && !refLower.includes("bukhari")) return false;
@@ -2603,10 +2611,10 @@ window.searchHadith = function() {
     }
 
     if (query !== "") {
-      const textMatch = h.english.toLowerCase().includes(query) || 
-                         h.arabic.includes(query) || 
-                         h.ref.toLowerCase().includes(query) ||
-                         h.tags.some(t => t.toLowerCase().includes(query));
+      const textMatch = h.english.toLowerCase().includes(query) ||
+        h.arabic.includes(query) ||
+        h.ref.toLowerCase().includes(query) ||
+        h.tags.some(t => t.toLowerCase().includes(query));
       if (!textMatch) return false;
     }
 
@@ -2631,7 +2639,7 @@ window.searchHadith = function() {
   container.innerHTML = results.map(h => {
     const highlightedEnglish = highlightText(h.english, query);
     const highlightedRef = highlightText(h.ref, query);
-    
+
     const escapedEnglish = h.english.replace(/'/g, "\\'");
     const escapedArabic = h.arabic.replace(/'/g, "\\'");
     const escapedRef = h.ref.replace(/'/g, "\\'");
@@ -2659,7 +2667,7 @@ window.searchHadith = function() {
   }).join('');
 };
 
-window.selectHadithTopicTag = function(btnEl, topicName) {
+window.selectHadithTopicTag = function (btnEl, topicName) {
   const tags = document.querySelectorAll(".hadith-topic-tag");
   tags.forEach(t => {
     t.className = "hadith-topic-tag px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 hover:text-slate-750 text-[10px] font-bold transition-all cursor-pointer";
@@ -2673,9 +2681,9 @@ window.selectHadithTopicTag = function(btnEl, topicName) {
   window.searchHadith();
 };
 
-window.copyHadith = function(ref, arabic, english, btnEl) {
+window.copyHadith = function (ref, arabic, english, btnEl) {
   const textToCopy = `Hadith [${ref}]:\n\n${arabic}\n\n"${english}"\n\n- via NurulQuran App`;
-  
+
   navigator.clipboard.writeText(textToCopy).then(() => {
     if (btnEl) {
       const originalText = btnEl.innerHTML;
@@ -2691,8 +2699,457 @@ window.copyHadith = function(ref, arabic, english, btnEl) {
   });
 };
 
-// Global initializer launcher
-window.initFaithTools = function() {
+// Global initializer launcher is moved to the bottom of the file to prevent execution before calculations load
+
+// ================= ZAKAT CALCULATOR & MOSQUE LOCATOR MODULES =================
+
+// Weight unit conversion factor
+const TOLA_TO_GRAM = 11.6638;
+
+// Zakat State variables
+let zakatWealth = 0;
+let zakatNisab = 0;
+let zakatDue = 0;
+let zakatBasisSelected = "silver";
+let zakatCurrencySelected = "USD";
+let zakatWeightUnitSelected = "gram";
+
+// Currency Configuration rates & default prices per gram
+const zakatCurrencies = {
+  USD: { symbol: "$", gold: 75, silver: 0.90 },
+  PKR: { symbol: "Rs", gold: 21000, silver: 250 },
+  SAR: { symbol: "SR", gold: 280, silver: 3.40 },
+  AED: { symbol: "AED", gold: 275, silver: 3.30 },
+  GBP: { symbol: "£", gold: 58, silver: 0.70 },
+  EUR: { symbol: "€", gold: 68, silver: 0.80 },
+  INR: { symbol: "₹", gold: 6200, silver: 75 }
+};
+
+window.changeZakatCurrency = function () {
+  const select = document.getElementById("zakat-currency");
+  if (!select) return;
+
+  const curr = select.value;
+  zakatCurrencySelected = curr;
+
+  const config = zakatCurrencies[curr] || zakatCurrencies.USD;
+
+  // If Weight Unit is Tola, scale base prices
+  let goldVal = config.gold;
+  let silverVal = config.silver;
+  if (zakatWeightUnitSelected === "tola") {
+    goldVal = Math.round(goldVal * TOLA_TO_GRAM);
+    silverVal = Math.round(silverVal * TOLA_TO_GRAM * 100) / 100;
+  }
+
+  // Update inputs values for gold and silver price
+  const goldPriceEl = document.getElementById("zakat-gold-price");
+  const silverPriceEl = document.getElementById("zakat-silver-price");
+  if (goldPriceEl) goldPriceEl.value = goldVal;
+  if (silverPriceEl) silverPriceEl.value = silverVal;
+
+  // Update all currency symbol labels in the DOM
+  const symbolSpans = document.querySelectorAll(".zakat-currency-symbol");
+  symbolSpans.forEach(span => {
+    span.textContent = config.symbol;
+  });
+
+  // Recalculate
+  window.calculateZakat();
+};
+
+window.changeZakatWeightUnit = function () {
+  const unitSelect = document.getElementById("zakat-weight-unit");
+  if (!unitSelect) return;
+
+  const newUnit = unitSelect.value;
+  if (newUnit === zakatWeightUnitSelected) return;
+
+  const factor = TOLA_TO_GRAM;
+
+  const goldWeightEl = document.getElementById("zakat-gold-weight");
+  const silverWeightEl = document.getElementById("zakat-silver-weight");
+  const goldPriceEl = document.getElementById("zakat-gold-price");
+  const silverPriceEl = document.getElementById("zakat-silver-price");
+
+  let goldWeight = parseFloat(goldWeightEl?.value) || 0;
+  let silverWeight = parseFloat(silverWeightEl?.value) || 0;
+  let goldPrice = parseFloat(goldPriceEl?.value) || 0;
+  let silverPrice = parseFloat(silverPriceEl?.value) || 0;
+
+  if (newUnit === "tola") {
+    // Gram -> Tola (Weight / factor, Price * factor)
+    if (goldWeightEl) goldWeightEl.value = parseFloat((goldWeight / factor).toFixed(4));
+    if (silverWeightEl) silverWeightEl.value = parseFloat((silverWeight / factor).toFixed(4));
+    if (goldPriceEl) goldPriceEl.value = parseFloat((goldPrice * factor).toFixed(2));
+    if (silverPriceEl) silverPriceEl.value = parseFloat((silverPrice * factor).toFixed(2));
+  } else {
+    // Tola -> Gram (Weight * factor, Price / factor)
+    if (goldWeightEl) goldWeightEl.value = parseFloat((goldWeight * factor).toFixed(4));
+    if (silverWeightEl) silverWeightEl.value = parseFloat((silverWeight * factor).toFixed(4));
+    if (goldPriceEl) goldPriceEl.value = parseFloat((goldPrice / factor).toFixed(2));
+    if (silverPriceEl) silverPriceEl.value = parseFloat((silverPrice / factor).toFixed(2));
+  }
+
+  zakatWeightUnitSelected = newUnit;
+
+  // Update DOM labels
+  const weightSpans = document.querySelectorAll(".zakat-weight-unit-label");
+  weightSpans.forEach(span => {
+    span.textContent = newUnit === "tola" ? "Tolas" : "Grams";
+  });
+
+  const priceSpans = document.querySelectorAll(".zakat-price-unit-label");
+  priceSpans.forEach(span => {
+    span.textContent = newUnit === "tola" ? "/Tola" : "/g";
+  });
+
+  window.calculateZakat();
+};
+
+window.calculateZakat = function (e) {
+  if (e) e.preventDefault();
+
+  const cash = parseFloat(document.getElementById("zakat-cash")?.value) || 0;
+  const investments = parseFloat(document.getElementById("zakat-investments")?.value) || 0;
+  const goldWeightInput = parseFloat(document.getElementById("zakat-gold-weight")?.value) || 0;
+  const silverWeightInput = parseFloat(document.getElementById("zakat-silver-weight")?.value) || 0;
+  const business = parseFloat(document.getElementById("zakat-business")?.value) || 0;
+  const receivables = parseFloat(document.getElementById("zakat-receivables")?.value) || 0;
+  const liabilities = parseFloat(document.getElementById("zakat-liabilities")?.value) || 0;
+
+  const goldPriceInput = parseFloat(document.getElementById("zakat-gold-price")?.value) || 75;
+  const silverPriceInput = parseFloat(document.getElementById("zakat-silver-price")?.value) || 0.90;
+  const basis = document.getElementById("zakat-nisab-basis")?.value || "silver";
+
+  zakatBasisSelected = basis;
+
+  const currencySelect = document.getElementById("zakat-currency");
+  zakatCurrencySelected = currencySelect ? currencySelect.value : "USD";
+  const currencySymbol = zakatCurrencies[zakatCurrencySelected]?.symbol || "$";
+
+  const unitSelect = document.getElementById("zakat-weight-unit");
+  zakatWeightUnitSelected = unitSelect ? unitSelect.value : "gram";
+
+  // Convert inputs to Grams internally for standard checks if units are in Tolas
+  let goldWeight = goldWeightInput;
+  let silverWeight = silverWeightInput;
+  let goldPrice = goldPriceInput;
+  let silverPrice = silverPriceInput;
+
+  if (zakatWeightUnitSelected === "tola") {
+    goldWeight = goldWeightInput * TOLA_TO_GRAM;
+    silverWeight = silverWeightInput * TOLA_TO_GRAM;
+    goldPrice = goldPriceInput / TOLA_TO_GRAM;
+    silverPrice = silverPriceInput / TOLA_TO_GRAM;
+  }
+
+  const goldValue = goldWeight * goldPrice;
+  const silverValue = silverWeight * silverPrice;
+  const totalAssets = cash + goldValue + silverValue + investments + business + receivables;
+  zakatWealth = totalAssets - liabilities;
+
+  if (basis === "gold") {
+    zakatNisab = 85 * goldPrice;
+  } else {
+    zakatNisab = 595 * silverPrice;
+  }
+
+  const isEligible = zakatWealth >= zakatNisab;
+  zakatDue = isEligible ? Math.max(0, zakatWealth * 0.025) : 0;
+
+  const dueEl = document.getElementById("zakat-result-due");
+  const wealthEl = document.getElementById("zakat-result-wealth");
+  const nisabEl = document.getElementById("zakat-result-nisab");
+  const statusEl = document.getElementById("zakat-result-status");
+  const explanationEl = document.getElementById("zakat-explanation");
+  const saveBtn = document.getElementById("zakat-btn-save");
+
+  if (dueEl) dueEl.textContent = `${currencySymbol}${zakatDue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (wealthEl) wealthEl.textContent = `${currencySymbol}${zakatWealth.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (nisabEl) nisabEl.textContent = `${currencySymbol}${zakatNisab.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  if (statusEl) {
+    if (isEligible) {
+      statusEl.textContent = "Eligible (Payable)";
+      statusEl.className = "inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 uppercase";
+    } else {
+      statusEl.textContent = "Below Nisab";
+      statusEl.className = "inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase";
+    }
+  }
+
+  if (explanationEl) {
+    if (isEligible) {
+      explanationEl.innerHTML = `Your assessable net wealth of <b>${currencySymbol}${zakatWealth.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b> is above the Nisab threshold of <b>${currencySymbol}${zakatNisab.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b>.<br/>You are required to pay Zakat (2.5%) of <b>${currencySymbol}${zakatDue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b>.`;
+    } else {
+      explanationEl.innerHTML = `Your assessable net wealth of <b>${currencySymbol}${zakatWealth.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b> is below the Nisab threshold of <b>${currencySymbol}${zakatNisab.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b>.<br/>No Zakat is due at this time.`;
+    }
+  }
+
+  if (saveBtn) {
+    if (isEligible && zakatDue > 0) {
+      saveBtn.classList.remove("hidden");
+    } else {
+      saveBtn.classList.add("hidden");
+    }
+  }
+};
+
+window.saveZakatCalculation = function () {
+  const currencySymbol = zakatCurrencies[zakatCurrencySelected]?.symbol || "$";
+  const newRecord = {
+    wealth: zakatWealth,
+    nisab: zakatNisab,
+    due: zakatDue,
+    basis: zakatBasisSelected,
+    symbol: currencySymbol,
+    time: new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })
+  };
+
+  const records = JSON.parse(localStorage.getItem("nqp_zakat_logs") || "[]");
+  records.unshift(newRecord);
+  if (records.length > 10) records.pop();
+  localStorage.setItem("nqp_zakat_logs", JSON.stringify(records));
+
+  window.renderZakatHistory();
+
+  const form = document.getElementById("zakat-form");
+  if (form) form.reset();
+
+  // Reset weight units to Grams
+  zakatWeightUnitSelected = "gram";
+  const weightSelect = document.getElementById("zakat-weight-unit");
+  if (weightSelect) weightSelect.value = "gram";
+
+  const weightSpans = document.querySelectorAll(".zakat-weight-unit-label");
+  weightSpans.forEach(span => span.textContent = "Grams");
+  const priceSpans = document.querySelectorAll(".zakat-price-unit-label");
+  priceSpans.forEach(span => span.textContent = "/g");
+
+  window.changeZakatCurrency();
+
+  const saveBtn = document.getElementById("zakat-btn-save");
+  if (saveBtn) saveBtn.classList.add("hidden");
+};
+
+window.clearZakatHistory = function () {
+  localStorage.removeItem("nqp_zakat_logs");
+  window.renderZakatHistory();
+};
+
+window.renderZakatHistory = function () {
+  const container = document.getElementById("zakat-history");
+  if (!container) return;
+
+  const records = JSON.parse(localStorage.getItem("nqp_zakat_logs") || "[]");
+  if (records.length === 0) {
+    container.innerHTML = '<div class="text-center py-4 text-[10px] text-slate-400">No calculation records saved.</div>';
+    return;
+  }
+
+  container.innerHTML = records.map(r => `
+    <div class="flex justify-between py-2 text-[11px] items-center">
+      <div>
+        <span class="font-semibold text-slate-700 dark:text-slate-350">${r.symbol || "$"}${r.due.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+        <span class="text-[9px] text-slate-400 ml-1">(${r.basis === "gold" ? "Gold Nisab" : "Silver Nisab"})</span>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-slate-400 text-[10px]">${r.time}</span>
+      </div>
+    </div>
+  `).join('');
+};
+
+// Mosque Locator Map & OSM Logic
+let mosqueMap = null;
+let mosqueMarkersGroup = null;
+let mosqueMarkerIcon = null;
+
+window.initMosqueMap = function () {
+  if (typeof L === "undefined") {
+    setTimeout(window.initMosqueMap, 500);
+    return;
+  }
+
+  const mapStatus = document.getElementById("map-status");
+  const lat = prayerSettings.lat || 24.8607;
+  const lng = prayerSettings.lng || 67.0011;
+
+  if (mosqueMap) {
+    mosqueMap.invalidateSize();
+    return;
+  }
+
+  try {
+    mosqueMap = L.map('mosque-map').setView([lat, lng], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(mosqueMap);
+
+    mosqueMarkersGroup = L.layerGroup().addTo(mosqueMap);
+
+    mosqueMarkerIcon = new L.Icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    L.marker([lat, lng])
+      .addTo(mosqueMap)
+      .bindPopup(`<b>Your Location</b><br/>${prayerSettings.cityName || "Detected City"}`)
+      .openPopup();
+
+    if (mapStatus) mapStatus.textContent = "Map Initialized";
+
+    window.findNearbyMosques();
+  } catch (err) {
+    console.error("Leaflet Map init failed:", err);
+    if (mapStatus) mapStatus.textContent = "Map load error";
+  }
+};
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+window.findNearbyMosques = function () {
+  const sidebar = document.getElementById("mosques-sidebar-list");
+  const mapStatus = document.getElementById("map-status");
+
+  if (!sidebar) return;
+
+  const lat = prayerSettings.lat || 24.8607;
+  const lng = prayerSettings.lng || 67.0011;
+  const radius = 5000;
+
+  sidebar.innerHTML = '<div class="text-[10px] text-slate-400 text-center py-10 animate-pulse">Searching nearby mosques using Overpass API...</div>';
+  if (mapStatus) mapStatus.textContent = "Querying Overpass API...";
+
+  const overpassQuery = `[out:json][timeout:25];(node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lng});way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lng}););out center;`;
+  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error("Overpass query failed");
+      return res.json();
+    })
+    .then(data => {
+      if (mosqueMarkersGroup) mosqueMarkersGroup.clearLayers();
+
+      const mosques = [];
+      const elements = data.elements || [];
+
+      elements.forEach(el => {
+        const mLat = el.lat || (el.center && el.center.lat);
+        const mLng = el.lon || (el.center && el.center.lon);
+        const name = (el.tags && el.tags.name) || "Unnamed Masjid / Mosque";
+
+        if (mLat && mLng) {
+          const dist = calculateDistance(lat, lng, mLat, mLng);
+          mosques.push({ name, lat: mLat, lng: mLng, distance: dist });
+        }
+      });
+
+      mosques.sort((a, b) => a.distance - b.distance);
+
+      if (mosques.length === 0) {
+        loadMockMosques(lat, lng);
+        return;
+      }
+
+      renderMosqueListAndMarkers(mosques);
+      if (mapStatus) mapStatus.textContent = `Found ${mosques.length} mosques`;
+    })
+    .catch(err => {
+      console.warn("Overpass API failed, loading local mocks:", err);
+      loadMockMosques(lat, lng);
+    });
+};
+
+function renderMosqueListAndMarkers(mosques) {
+  const sidebar = document.getElementById("mosques-sidebar-list");
+  if (!sidebar) return;
+
+  sidebar.innerHTML = "";
+
+  mosques.forEach((m, idx) => {
+    if (mosqueMap && mosqueMarkersGroup && mosqueMarkerIcon) {
+      const marker = L.marker([m.lat, m.lng], { icon: mosqueMarkerIcon })
+        .bindPopup(`<b>${m.name}</b><br/>Distance: ${m.distance.toFixed(2)} km`);
+      mosqueMarkersGroup.addLayer(marker);
+    }
+
+    const item = document.createElement("div");
+    item.className = "py-3 flex justify-between items-start gap-2.5 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/40 px-2 rounded-xl border-b border-slate-100 dark:border-slate-800/20";
+    item.innerHTML = `
+      <div class="min-w-0">
+        <h5 class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate" title="${m.name}">${m.name}</h5>
+        <span class="text-[9px] text-slate-400 font-mono">${m.distance.toFixed(2)} km away</span>
+      </div>
+      <button type="button" onclick="window.focusMosque(${m.lat}, ${m.lng}, '${m.name.replace(/'/g, "\\'")}', ${m.distance})" class="px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-600 hover:text-white text-emerald-700 dark:text-emerald-450 text-[9px] font-bold transition-all cursor-pointer">
+        View
+      </button>
+    `;
+    sidebar.appendChild(item);
+  });
+}
+
+window.focusMosque = function (lat, lng, name, dist) {
+  if (mosqueMap) {
+    mosqueMap.setView([lat, lng], 17);
+
+    if (mosqueMarkersGroup) {
+      mosqueMarkersGroup.eachLayer(layer => {
+        const coords = layer.getLatLng();
+        if (coords.lat === lat && coords.lng === lng) {
+          layer.openPopup();
+        }
+      });
+    }
+  }
+};
+
+function loadMockMosques(userLat, userLng) {
+  const mapStatus = document.getElementById("map-status");
+  if (mapStatus) mapStatus.textContent = "Offline/Mock Mode";
+
+  const mockNames = [
+    "Jamia Masjid Al-Noor",
+    "Madina Mosque & Community Center",
+    "Masjid Umar Al-Farooq",
+    "Baitul Mukarram Mosque"
+  ];
+
+  const mocks = mockNames.map((name, idx) => {
+    const latOffset = (idx + 1) * 0.004 * (idx % 2 === 0 ? 1 : -1);
+    const lngOffset = (idx + 1) * 0.005 * (idx % 2 === 1 ? 1 : -1);
+    const mLat = userLat + latOffset;
+    const mLng = userLng + lngOffset;
+    const dist = calculateDistance(userLat, userLng, mLat, mLng);
+
+    return { name, lat: mLat, lng: mLng, distance: dist };
+  });
+
+  mocks.sort((a, b) => a.distance - b.distance);
+  renderMosqueListAndMarkers(mocks);
+}
+
+// Global initializer launcher (Placed at bottom to guarantee all calculations register beforehand)
+window.initFaithTools = function () {
   if (!document.getElementById("bookshelf-grid")) return;
 
   window.switchFaithTab('tasbeeh');
@@ -2700,6 +3157,7 @@ window.initFaithTools = function() {
   window.searchHadith();
   window.renderCalendar();
   window.renderTasbeehHistory();
+  window.renderZakatHistory();
   window.bindReaderEvents();
 };
 
@@ -2709,6 +3167,7 @@ if (document.readyState === "loading") {
 } else {
   window.initFaithTools();
 }
+
 
 
 

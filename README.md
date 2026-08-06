@@ -250,6 +250,8 @@ This module integrates daily faith-building utilities and educational references
 *   **Dynamic Hijri Calendar**: Maps Gregorian days to their correct Hijri calendar positions client-side. Highlights major Islamic holidays (e.g. Ramadan, Eid, Ashura) on calendar cells with tooltip details, and offers a Gregorian-to-Hijri converter.
 *   **Islamic Books Section**: A bookshelf grid displaying reading percentages. Features a fullscreen responsive reader pane with page navigations, text scaling controls, and persistent progress bookmarking.
 *   **Hadith Search Directory**: A keyword lookup scanning 60+ authentic Hadiths by book collection or topic tag. Highlights search terms and formats copying parameters to the clipboard.
+*   **Zakat Calculator**: Evaluates assessable net wealth (Cash, Gold, Silver, Investments, Business assets, Receivables minus Liabilities) against standard Gold (85g) or Silver (595g) Nisab thresholds. Dynamically tracks Gold/Silver prices, supports multi-currency valuations (USD, PKR, SAR, AED, GBP, EUR, INR) with automatic gold/silver pricing presets, supports Gram vs Tola weight unit toggling with live conversions, calculates Zakat due at a 2.5% rate, and persists logs in browser storage.
+*   **Mosque Locator**: Geopositioning map rendering utilizing Leaflet.js and real-time OpenStreetMap Overpass queries. Automatically parses local mosques within a 5km radius, lists distances, centers coordinates, and opens popups. Displays city-level mock locations if coordinates are denied.
 
 ---
 
