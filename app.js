@@ -130,7 +130,10 @@ function setupAuthObserver() {
 }
 
 // 5. Update UI States
+let currentUserSession = null;
+
 function updateUIForLoggedInUser(user) {
+  currentUserSession = user;
   // Elements on both Pages
   const loggedInDivs = document.querySelectorAll("#auth-logged-in");
   const loggedOutDivs = document.querySelectorAll("#auth-logged-out");
@@ -1710,48 +1713,56 @@ function initQiblaCompass() {
   qiblaHeading = getQiblaBearing(prayerSettings.lat, prayerSettings.lng);
   updateQiblaUI();
 
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const desktopCtrls = document.getElementById("qibla-desktop-controls");
+  const statusText = document.getElementById("qibla-status-text");
 
-  if (!isMobile) {
-    // Show manual slider for desktop fallback
-    if (desktopCtrls) {
-      desktopCtrls.classList.remove("hidden");
-      const slider = document.getElementById("qibla-manual-slider");
-      const sliderVal = document.getElementById("qibla-slider-value");
-      if (slider && sliderVal) {
-        slider.addEventListener("input", (e) => {
-          manualHeading = parseInt(e.target.value);
-          sliderVal.textContent = `${manualHeading}°`;
-          updateQiblaUI();
-        });
-      }
+  // Show manual controls by default (hidden class removed)
+  if (desktopCtrls) {
+    desktopCtrls.classList.remove("hidden");
+    const slider = document.getElementById("qibla-manual-slider");
+    const sliderVal = document.getElementById("qibla-slider-value");
+    if (slider && sliderVal) {
+      slider.addEventListener("input", (e) => {
+        manualHeading = parseInt(e.target.value);
+        sliderVal.textContent = `${manualHeading}°`;
+        updateQiblaUI();
+      });
     }
-
-    const statusText = document.getElementById("qibla-status-text");
-    if (statusText) statusText.textContent = "Adjust compass manually using slider";
-    return;
   }
 
-  // Device orientation checking for mobile
-  const statusText = document.getElementById("qibla-status-text");
-  if (statusText) statusText.textContent = "Align device to North";
+  if (statusText) statusText.textContent = "Adjust manually or tilt device to calibrate";
 
   const handleOrientation = (e) => {
-    if (e.webkitCompassHeading !== undefined) {
-      compassHeading = e.webkitCompassHeading;
-    } else if (e.alpha !== null) {
-      compassHeading = 360 - e.alpha;
+    let heading = null;
+    if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+      heading = e.webkitCompassHeading;
+    } else if (e.alpha !== null && e.alpha !== undefined) {
+      heading = 360 - e.alpha;
     }
-    updateQiblaUI();
+
+    if (heading !== null && !isNaN(heading)) {
+      compassHeading = heading;
+      
+      // Auto-compass active: hide manual controls and update status
+      if (desktopCtrls) desktopCtrls.classList.add("hidden");
+      if (statusText) statusText.textContent = "Auto Compass Active";
+      
+      updateQiblaUI();
+    }
   };
 
-  // Check absolute orientation events (mainly for Android)
-  if (window.DeviceOrientationEvent) {
-    window.addEventListener("deviceorientationabsolute", handleOrientation, true);
-    window.addEventListener("deviceorientation", handleOrientation, true);
+  const registerOrientation = () => {
+    if ("ondeviceorientationabsolute" in window) {
+      window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+    } else {
+      window.addEventListener("deviceorientation", handleOrientation, true);
+    }
+  };
 
-    // Compass click prompt to request permission (required for newer iOS versions)
+  if (window.DeviceOrientationEvent) {
+    registerOrientation();
+    
+    // Compass click prompt to request permission (required for iOS)
     const compassBox = document.getElementById("qibla-compass-dial");
     if (compassBox) {
       compassBox.style.cursor = "pointer";
@@ -1760,10 +1771,10 @@ function initQiblaCompass() {
           try {
             const permissionState = await DeviceOrientationEvent.requestPermission();
             if (permissionState === "granted") {
-              window.addEventListener("deviceorientation", handleOrientation, true);
-              if (statusText) statusText.textContent = "Orientation active";
+              registerOrientation();
+              if (statusText) statusText.textContent = "Auto Compass Active";
             } else {
-              alert("Compass orientation permission denied. You can still use the manual slider if available.");
+              alert("Compass permission denied. Using manual mode.");
             }
           } catch (error) {
             console.error("Error requesting DeviceOrientation permission:", error);
@@ -1771,6 +1782,58 @@ function initQiblaCompass() {
         }
       });
     }
+
+    // Auto-request compass permission on first click/interaction anywhere on document for automatic activation
+    const requestCompassPermissionAuto = async () => {
+      if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        try {
+          const permissionState = await DeviceOrientationEvent.requestPermission();
+          if (permissionState === "granted") {
+            registerOrientation();
+            if (statusText) statusText.textContent = "Auto Compass Active";
+          }
+        } catch (err) {
+          console.warn("Auto compass activation request failed:", err);
+        }
+      }
+      document.removeEventListener("click", requestCompassPermissionAuto);
+      document.removeEventListener("touchstart", requestCompassPermissionAuto);
+    };
+    document.addEventListener("click", requestCompassPermissionAuto);
+    document.addEventListener("touchstart", requestCompassPermissionAuto);
+  }
+}
+
+// Unified Location State & Map Updates
+function updateLocationState(lat, lng, cityName) {
+  prayerSettings.lat = lat;
+  prayerSettings.lng = lng;
+  if (cityName) {
+    prayerSettings.cityName = cityName;
+  }
+  savePrayerSettings();
+  updatePrayerTimes();
+  qiblaHeading = getQiblaBearing(lat, lng);
+  updateQiblaUI();
+
+  // If leaflet map is initialized, update center and re-run mosque locator
+  if (typeof L !== "undefined" && mosqueMap) {
+    mosqueMap.setView([lat, lng], 14);
+    
+    // Clear old user location markers
+    mosqueMap.eachLayer((layer) => {
+      if (layer instanceof L.Marker && layer.options.icon !== mosqueMarkerIcon) {
+        mosqueMap.removeLayer(layer);
+      }
+    });
+
+    // Draw user location marker
+    L.marker([lat, lng])
+      .addTo(mosqueMap)
+      .bindPopup(`<b>Your Location</b><br/>${prayerSettings.cityName || "Detected Location"}`)
+      .openPopup();
+
+    window.findNearbyMosques();
   }
 }
 
@@ -1785,14 +1848,7 @@ async function detectIPLocation() {
 
         // Auto update if user is in GPS mode and hasn't received higher precision GPS coordinates yet
         if (prayerSettings.locMode === "gps" && (prayerSettings.lat === 24.8607 && prayerSettings.lng === 67.0011)) {
-          prayerSettings.lat = ipData.lat;
-          prayerSettings.lng = ipData.lon;
-          prayerSettings.cityName = `${ipData.city}, ${ipData.countryCode || ""}`;
-          savePrayerSettings();
-
-          updatePrayerTimes();
-          qiblaHeading = getQiblaBearing(ipData.lat, ipData.lon);
-          updateQiblaUI();
+          updateLocationState(ipData.lat, ipData.lon, `${ipData.city}, ${ipData.countryCode || ""}`);
         }
       }
     }
@@ -1825,12 +1881,7 @@ function detectGPSLocation() {
       if (gpsLng) gpsLng.textContent = lng.toFixed(4);
 
       if (prayerSettings.locMode === "gps") {
-        prayerSettings.lat = lat;
-        prayerSettings.lng = lng;
-        savePrayerSettings();
-        updatePrayerTimes();
-        qiblaHeading = getQiblaBearing(lat, lng);
-        updateQiblaUI();
+        updateLocationState(lat, lng, null);
       }
     },
     (err) => {
@@ -2281,7 +2332,7 @@ function getHijriDetails(date) {
     });
     const parts = formatter.formatToParts(adjustedDate);
     const day = parseInt(parts.find(p => p.type === 'day').value);
-    const month = parseInt(parts.find(p => p.type === 'month').value);
+    const monthPartValue = parts.find(p => p.type === 'month').value;
     const year = parseInt(parts.find(p => p.type === 'year').value);
 
     const monthNames = [
@@ -2289,6 +2340,17 @@ function getHijriDetails(date) {
       "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
       "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
     ];
+
+    let month = parseInt(monthPartValue);
+    if (isNaN(month)) {
+      // Handle textual month name fallback gracefully
+      const cleanVal = monthPartValue.toLowerCase().replace(/[^a-z']/g, "");
+      const matchedIdx = monthNames.findIndex(name => {
+        const cleanName = name.toLowerCase().replace(/[^a-z']/g, "");
+        return cleanName.includes(cleanVal) || cleanVal.includes(cleanName);
+      });
+      month = matchedIdx !== -1 ? matchedIdx + 1 : 1;
+    }
 
     return {
       day,
@@ -2327,10 +2389,19 @@ window.renderCalendar = function () {
   const totalDays = new Date(yr, mo + 1, 0).getDate();
   const firstDayIndex = new Date(yr, mo, 1).getDay();
 
-  const middleDate = new Date(yr, mo, 15);
-  const midHijri = getHijriDetails(middleDate);
-  if (midHijri && hijriMonthLabel) {
-    hijriMonthLabel.textContent = `${midHijri.monthName} ${midHijri.year} AH`;
+  const firstHijri = getHijriDetails(new Date(yr, mo, 1));
+  const lastHijri = getHijriDetails(new Date(yr, mo, totalDays));
+
+  if (firstHijri && lastHijri && hijriMonthLabel) {
+    if (firstHijri.month === lastHijri.month) {
+      hijriMonthLabel.textContent = `${firstHijri.monthName} ${firstHijri.year} AH`;
+    } else {
+      if (firstHijri.year === lastHijri.year) {
+        hijriMonthLabel.textContent = `${firstHijri.monthName} - ${lastHijri.monthName} ${firstHijri.year} AH`;
+      } else {
+        hijriMonthLabel.textContent = `${firstHijri.monthName} ${firstHijri.year} - ${lastHijri.monthName} ${lastHijri.year} AH`;
+      }
+    }
   }
 
   for (let i = 0; i < firstDayIndex; i++) {
@@ -3148,6 +3219,331 @@ function loadMockMosques(userLat, userLng) {
   renderMosqueListAndMarkers(mocks);
 }
 
+// ================= USER PROFILE & SETTINGS MODULE =================
+
+// Dynamic Custom Toast Notification
+function showToast(msg, type = "success") {
+  let toast = document.getElementById("nqp-toast-notify");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "nqp-toast-notify";
+    toast.className = "fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-10 opacity-0 text-xs font-bold border";
+    document.body.appendChild(toast);
+  }
+  
+  if (type === "success") {
+    toast.className = "fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-0 opacity-100 text-xs font-bold border bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400";
+  } else {
+    toast.className = "fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-0 opacity-100 text-xs font-bold border bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400";
+  }
+  
+  toast.textContent = msg;
+  
+  setTimeout(() => {
+    toast.classList.add("translate-y-10", "opacity-0");
+    toast.classList.remove("translate-y-0", "opacity-100");
+  }, 3000);
+}
+
+// Switch dashboard main sections
+window.switchMainSection = function(section) {
+  const panes = {
+    overview: document.getElementById("main-pane-overview"),
+    profile: document.getElementById("main-pane-profile"),
+    settings: document.getElementById("main-pane-settings")
+  };
+
+  for (let name in panes) {
+    if (panes[name]) {
+      if (name === section) {
+        panes[name].classList.remove("hidden");
+      } else {
+        panes[name].classList.add("hidden");
+      }
+    }
+  }
+
+  const navItems = {
+    overview: { desktop: "nav-dash", mobile: "mobile-nav-dash" },
+    profile: { desktop: "nav-profile", mobile: "mobile-nav-profile" },
+    settings: { desktop: "nav-settings", mobile: "mobile-nav-settings" }
+  };
+
+  for (let name in navItems) {
+    const dEl = document.getElementById(navItems[name].desktop);
+    const mEl = document.getElementById(navItems[name].mobile);
+
+    if (name === section) {
+      if (dEl) {
+        dEl.className = "text-sm font-semibold text-emerald-700 dark:text-emerald-400 font-bold transition-colors cursor-pointer focus:outline-none";
+      }
+      if (mEl) {
+        mEl.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-bold bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 cursor-pointer focus:outline-none";
+      }
+    } else {
+      if (dEl) {
+        dEl.className = "text-sm font-semibold text-slate-605 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer focus:outline-none";
+      }
+      if (mEl) {
+        mEl.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-605 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer focus:outline-none";
+      }
+    }
+  }
+
+  if (section === "overview") {
+    setTimeout(() => {
+      if (window.mosqueMap) window.mosqueMap.invalidateSize();
+    }, 100);
+  }
+
+  if (section === "profile") {
+    window.populateProfileStats();
+  }
+};
+
+// Profile Stats Populate
+window.populateProfileStats = function() {
+  const nameInput = document.getElementById("profile-edit-name");
+  const emailInput = document.getElementById("profile-edit-email");
+  
+  if (nameInput && currentUserSession) {
+    nameInput.value = currentUserSession.displayName || "Brother/Sister";
+  }
+  if (emailInput && currentUserSession) {
+    emailInput.value = currentUserSession.email || "email@domain.com";
+  }
+
+  // Update profile header details
+  const paneAvatar = document.getElementById("profile-pane-avatar");
+  const paneNameHeader = document.getElementById("profile-pane-name-header");
+  const paneEmailHeader = document.getElementById("profile-pane-email-header");
+
+  if (paneAvatar && currentUserSession) {
+    paneAvatar.textContent = currentUserSession.displayName ? currentUserSession.displayName.charAt(0).toUpperCase() : "U";
+  }
+  if (paneNameHeader && currentUserSession) {
+    paneNameHeader.textContent = currentUserSession.displayName || "Brother/Sister";
+  }
+  if (paneEmailHeader && currentUserSession) {
+    paneEmailHeader.textContent = currentUserSession.email || "email@domain.com";
+  }
+
+  // Set Summary Stats
+  const streakEl = document.getElementById("profile-stat-streak");
+  const hifzEl = document.getElementById("profile-stat-hifz");
+  const zakatEl = document.getElementById("profile-stat-zakat");
+  const tasbeehEl = document.getElementById("profile-stat-tasbeeh");
+
+  // Read logs size
+  const zakatLogs = JSON.parse(localStorage.getItem("nqp_zakat_logs") || "[]");
+  const tasbeehLogs = JSON.parse(localStorage.getItem("nqp_tasbeeh_logs") || "[]");
+
+  if (zakatEl) zakatEl.textContent = `${zakatLogs.length} Records`;
+  if (tasbeehEl) tasbeehEl.textContent = `${tasbeehLogs.length} Sessions`;
+
+  // Read reading streak (default 5 if absent)
+  const readingStreak = localStorage.getItem("nqp_reading_streak") || "5";
+  if (streakEl) streakEl.textContent = `${readingStreak} Days`;
+
+  // Read memorized count (default 12 if absent)
+  const hifzCount = localStorage.getItem("nqp_memorized_surahs") || "12";
+  if (hifzEl) hifzEl.textContent = `${hifzCount} Surahs`;
+};
+
+// Profile updates
+window.updateProfile = function(e) {
+  if (e) e.preventDefault();
+  const nameInput = document.getElementById("profile-edit-name");
+  if (!nameInput || !currentUserSession) return;
+
+  const newName = nameInput.value.trim();
+  if (!newName) return;
+
+  currentUserSession.displayName = newName;
+
+  // Save to mock database if active
+  if (isMockAuth) {
+    const mockUserJson = localStorage.getItem("mock_user");
+    if (mockUserJson) {
+      const user = JSON.parse(mockUserJson);
+      user.displayName = newName;
+      localStorage.setItem("mock_user", JSON.stringify(user));
+    }
+
+    const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+    const found = mockUsers.find(u => u.email === currentUserSession.email);
+    if (found) {
+      found.displayName = newName;
+      localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+    }
+  }
+
+  // Refresh all layout header labels
+  updateUIForLoggedInUser(currentUserSession);
+  
+  // Refresh profile tab elements
+  window.populateProfileStats();
+
+  showToast("Profile details updated successfully!");
+};
+
+// Password updates
+window.updatePassword = function(e) {
+  if (e) e.preventDefault();
+  const newPass = document.getElementById("profile-new-pass")?.value;
+  const confirmPass = document.getElementById("profile-confirm-pass")?.value;
+
+  if (!newPass || !confirmPass) return;
+
+  if (newPass !== confirmPass) {
+    showToast("Passwords do not match!", "error");
+    return;
+  }
+
+  // Save to mock database
+  if (isMockAuth && currentUserSession) {
+    const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+    const found = mockUsers.find(u => u.email === currentUserSession.email);
+    if (found) {
+      found.password = newPass;
+      localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+    }
+  }
+
+  // Clear password inputs
+  const passInput = document.getElementById("profile-new-pass");
+  const confirmInput = document.getElementById("profile-confirm-pass");
+  if (passInput) passInput.value = "";
+  if (confirmInput) confirmInput.value = "";
+
+  showToast("Password updated successfully!");
+};
+
+// Toggle Dark Mode Settings
+window.toggleDarkModeSetting = function() {
+  const isDark = document.documentElement.classList.contains("dark");
+  const btn = document.getElementById("settings-dark-mode-btn");
+
+  if (isDark) {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("nqp_theme", "light");
+    if (btn) btn.textContent = "Dark Mode";
+  } else {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("nqp_theme", "dark");
+    if (btn) btn.textContent = "Light Mode";
+  }
+};
+
+// Theme Accent Customizer style injection override
+window.applyAccentColor = function(colorName) {
+  const root = document.documentElement;
+  const colors = {
+    emerald: { primary: "#047857", light: "#059669", dark: "#064e3b", deep: "#022c22" },
+    amber: { primary: "#b45309", light: "#d97706", dark: "#78350f", deep: "#451a03" },
+    blue: { primary: "#1d4ed8", light: "#3b82f6", dark: "#1e3a8a", deep: "#172554" },
+    purple: { primary: "#6d28d9", light: "#8b5cf6", dark: "#4c1d95", deep: "#2e1065" }
+  };
+  
+  const theme = colors[colorName] || colors.emerald;
+  root.style.setProperty('--primary', theme.primary);
+  root.style.setProperty('--primary-light', theme.light);
+  root.style.setProperty('--primary-dark', theme.dark);
+  root.style.setProperty('--primary-deep', theme.deep);
+  
+  localStorage.setItem("nqp_accent_theme", colorName);
+
+  let styleEl = document.getElementById("theme-override-styles");
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = "theme-override-styles";
+    document.head.appendChild(styleEl);
+  }
+  styleEl.innerHTML = `
+    .text-emerald-600 { color: ${theme.light} !important; }
+    .text-emerald-700 { color: ${theme.primary} !important; }
+    .text-emerald-800 { color: ${theme.dark} !important; }
+    .bg-emerald-50 { background-color: ${colorName === 'emerald' ? '#ecfdf5' : theme.light + '0f'} !important; }
+    .bg-emerald-500 { background-color: ${theme.light} !important; }
+    .bg-emerald-650, .bg-emerald-600 { background-color: ${theme.light} !important; }
+    .bg-emerald-750, .bg-emerald-700 { background-color: ${theme.primary} !important; }
+    .hover\\:bg-emerald-600:hover { background-color: ${theme.light} !important; }
+    .hover\\:bg-emerald-700:hover { background-color: ${theme.primary} !important; }
+    .bg-emerald-900\\/40 { background-color: ${theme.dark}66 !important; }
+    .bg-emerald-950 { background-color: ${theme.deep} !important; }
+    .from-emerald-950 { --tw-gradient-from: ${theme.deep} !important; }
+    .via-emerald-900 { --tw-gradient-via: ${theme.dark} !important; }
+    .to-emerald-850 { --tw-gradient-to: ${theme.primary} !important; }
+    .border-emerald-500\\/15 { border-color: ${theme.light}26 !important; }
+    .border-emerald-500\\/10 { border-color: ${theme.light}1a !important; }
+    .border-emerald-800\\/35 { border-color: ${theme.dark}59 !important; }
+    .focus\\:ring-emerald-500:focus { --tw-ring-color: ${theme.light} !important; }
+  `;
+};
+
+// Data Exports
+window.exportData = function() {
+  const backup = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("nqp_") || key === "mock_user" || key === "mock_users") {
+      backup[key] = localStorage.getItem(key);
+    }
+  }
+  
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", url);
+  dlAnchor.setAttribute("download", "nurulquran_backup.json");
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+  URL.revokeObjectURL(url);
+  
+  showToast("Backup exported successfully!");
+};
+
+// Data Imports
+window.importData = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const backup = JSON.parse(e.target.result);
+      for (let key in backup) {
+        localStorage.setItem(key, backup[key]);
+      }
+      showToast("Backup imported! Reloading...", "success");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (err) {
+      showToast("Invalid backup file format!", "error");
+    }
+  };
+  reader.readAsText(file);
+};
+
+// Data Reset
+window.resetAllData = function() {
+  if (confirm("Are you sure you want to clear all data? This will reset all streaks, bookmarks, history, and theme settings.")) {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith("nqp_")) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    showToast("Data reset completed! Reloading...", "success");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  }
+};
+
 // Global initializer launcher (Placed at bottom to guarantee all calculations register beforehand)
 window.initFaithTools = function () {
   if (!document.getElementById("bookshelf-grid")) return;
@@ -3159,6 +3555,15 @@ window.initFaithTools = function () {
   window.renderTasbeehHistory();
   window.renderZakatHistory();
   window.bindReaderEvents();
+
+  // Initialize Dark Mode button label
+  const isDark = document.documentElement.classList.contains("dark");
+  const darkBtn = document.getElementById("settings-dark-mode-btn");
+  if (darkBtn) darkBtn.textContent = isDark ? "Light Mode" : "Dark Mode";
+
+  // Initialize Accent Color Theme
+  const savedAccent = localStorage.getItem("nqp_accent_theme") || "emerald";
+  window.applyAccentColor(savedAccent);
 };
 
 // Hook into ready listeners

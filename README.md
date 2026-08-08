@@ -235,11 +235,11 @@ This module integrates public Quranic scripture database streams, collapsible ex
 This module integrates real-time prayer calculations, location detection, customizable calculation parameters, and an interactive compass to determine the Qibla bearing toward the Kaaba in Makkah:
 
 *   **Aladhan Prayer Times API Integration**: Interfaces with the Aladhan REST API to fetch accurate prayer times dynamically using date-seeded requests (`GET /timings/{date}`).
-*   **GPS Geolocation Detection**: Auto-detects the user's latitude and longitude using standard browser APIs (`navigator.geolocation.getCurrentPosition`), falling back gracefully to manual presets or custom inputs when permissions are denied.
+*   **GPS Geolocation Detection**: Auto-detects the user's latitude and longitude on boot using standard browser APIs (`navigator.geolocation.getCurrentPosition`) and silent IP fallback. Coordinates dynamically bind to the Leaflet map and Overpass query, instantly updating the map view and center markers when changes are detected.
 *   **Sleek Location Settings Panel**: Glassmorphic modal allowing user configuration of calculations, including Juristic School adjustments (Hanafi vs Shafi'i for Asr) and Method selections (MWL, ISNA, Umm Al-Qura, Karachi, etc.). Settings persist locally in the user's browser.
 *   **Active Prayer Identification**: Runs inline calculations checking system clocks against loaded prayer hours to identify, highlight, and style the active prayer card and next upcoming prayer.
 *   **Local Tracker & Checklists**: An interactive checklist row container on the user dashboard. Toggling checkboxes check off completed prayers and records progress in local storage mapped by date.
-*   **Interactive Qibla Compass**: A beautifully styled CSS compass rose dial displaying the precise bearing to Makkah. It leverages absolute mobile orientation sensors (`deviceorientationabsolute`) for dynamic movement and includes a manual adjustment slider fallback for desktop users.
+*   **Interactive Qibla Compass**: A beautifully styled CSS compass rose dial displaying the precise bearing to Makkah. It leverages absolute mobile orientation sensors (`deviceorientationabsolute`) for dynamic movement and includes a manual adjustment slider fallback. Compass permissions are automatically prompted on the user's first document interaction (click/touchstart) for seamless auto-activation.
 
 ---
 
@@ -247,11 +247,17 @@ This module integrates real-time prayer calculations, location detection, custom
 This module integrates daily faith-building utilities and educational references (Tasbeeh counters, dynamic lunar calendars, and curated text libraries) into the protected companion dashboard:
 
 *   **Tactile Tasbeeh Counter**: A glassmorphic clicker dial containing custom target limits (33, 99, 100, custom, or infinite), presets, click sound synthesizers, device vibrations, and completion ledgers.
-*   **Dynamic Hijri Calendar**: Maps Gregorian days to their correct Hijri calendar positions client-side. Highlights major Islamic holidays (e.g. Ramadan, Eid, Ashura) on calendar cells with tooltip details, and offers a Gregorian-to-Hijri converter.
+*   **Dynamic Hijri Calendar**: Maps Gregorian days to their correct Hijri calendar positions client-side. The monthly calendar header dynamically computes and displays spanned Hijri months (e.g. `Safar - Rabi' al-Awwal 1448 AH`), utilizing a robust text fallback parser mapping string month representations back to indices across custom browser environments. It highlights major Islamic holidays (e.g. Ramadan, Eid, Ashura) on calendar cells with tooltip details, and offers a Gregorian-to-Hijri converter.
 *   **Islamic Books Section**: A bookshelf grid displaying reading percentages. Features a fullscreen responsive reader pane with page navigations, text scaling controls, and persistent progress bookmarking.
 *   **Hadith Search Directory**: A keyword lookup scanning 60+ authentic Hadiths by book collection or topic tag. Highlights search terms and formats copying parameters to the clipboard.
 *   **Zakat Calculator**: Evaluates assessable net wealth (Cash, Gold, Silver, Investments, Business assets, Receivables minus Liabilities) against standard Gold (85g) or Silver (595g) Nisab thresholds. Dynamically tracks Gold/Silver prices, supports multi-currency valuations (USD, PKR, SAR, AED, GBP, EUR, INR) with automatic gold/silver pricing presets, supports Gram vs Tola weight unit toggling with live conversions, calculates Zakat due at a 2.5% rate, and persists logs in browser storage.
 *   **Mosque Locator**: Geopositioning map rendering utilizing Leaflet.js and real-time OpenStreetMap Overpass queries. Automatically parses local mosques within a 5km radius, lists distances, centers coordinates, and opens popups. Displays city-level mock locations if coordinates are denied.
+
+## 👤 Module 5: User Profile & Custom Settings
+This module introduces comprehensive account details summary stats and personalized client themes management:
+
+*   **Interactive User Profile**: A profile card showing the registered display name, email, and verification indicators. Details editable display names that sync automatically across dashboard greeting banners, and statistics grids summarizing streaks, memorization count, zakat calculations logs, and tasbeeh counter logs.
+*   **Custom Settings Page**: Incorporates custom preference selectors including manual dark/light interface toggles, active theme accent selectors (Emerald Green, Gold, Royal Blue, Purple) applying dynamic color shifts across headers and buttons, notification configurations (Reading & Prayer times), data export tools (local JSON backup file downloads), data import uploads, and local storage data clear reset options.
 
 ---
 
