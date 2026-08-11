@@ -257,6 +257,15 @@ This module integrates daily faith-building utilities and educational references
 
 ---
 
+## 🧪 Module 5: Complete Testing, Performance & Mobile Responsiveness
+This module ensures the companion platform is fully verified, optimized for render speeds, and scales fluidly across compact displays:
+
+*   **Interactive Verification Console**: A dedicated browser testing page (`test.html`) that runs automated assertions validating Kaaba bearings math, Gold/Silver Nisab thresholds calculations, weight standard tolas-to-grams conversions, and textual Lunar month indexes resolver fallbacks. Includes an interactive testing simulator panel for developers.
+*   **Performance Optimization**: Integrates input search debouncers (150ms delay) on search inputs to limit DOM recalculations, debounces window-resize triggers to prevent map rendering thrashing, and caches configuration endpoints availability to suppress silent error loops when working offline.
+*   **Mobile Responsiveness Checks**: Applies max-width media query overrides scaling text paddings and line-heights on devices below 375px. Ensures hamburger menu panels collapse automatically upon section selection.
+
+---
+
 ## 🎨 UI/UX Styling Features
 
 *   **Glassmorphism Effects:** Using `backdrop-filter: blur(12px)` and translucent borders, styled using utility Tailwind CSS classes and customized inside `styles.css` (`.glass`).

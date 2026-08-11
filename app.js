@@ -24,6 +24,7 @@ let firebaseConfig = {
 let app;
 let auth;
 let isMockAuth = false;
+let isBackendOffline = false;
 
 async function initFirebase() {
   try {
@@ -36,6 +37,7 @@ async function initFirebase() {
       }
     }
   } catch (error) {
+    isBackendOffline = true;
     console.warn("Express backend not running or unreachable. Running in client-fallback mode.", error);
   } finally {
     if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("mock")) {
@@ -61,6 +63,7 @@ async function initFirebase() {
 
 // 3. Sync profile updates with MongoDB
 async function syncUserToMongoDB(user) {
+  if (isBackendOffline) return;
   try {
     let idToken = "mock-id-token";
     if (!isMockAuth && typeof user.getIdToken === "function") {
@@ -2657,85 +2660,96 @@ window.bindReaderEvents = function () {
 };
 
 // Hadith Search Engine Implementation
-window.searchHadith = function () {
-  const container = document.getElementById("hadith-results-container");
-  const emptyLabel = document.getElementById("hadith-search-empty");
-  const queryInput = document.getElementById("hadith-search-input");
-  const collFilter = document.getElementById("hadith-filter-collection");
+let searchHadithTimeout = null;
+window.searchHadith = function (immediate = false) {
+  if (searchHadithTimeout) clearTimeout(searchHadithTimeout);
 
-  if (!container) return;
+  const runSearch = () => {
+    const container = document.getElementById("hadith-results-container");
+    const emptyLabel = document.getElementById("hadith-search-empty");
+    const queryInput = document.getElementById("hadith-search-input");
+    const collFilter = document.getElementById("hadith-filter-collection");
 
-  const query = queryInput ? queryInput.value.trim().toLowerCase() : "";
-  const collection = collFilter ? collFilter.value : "all";
+    if (!container) return;
 
-  const results = HADITH_SEARCH_COLLECTION.filter(h => {
-    if (activeHadithTopic !== "all" && h.topic !== activeHadithTopic) {
-      return false;
+    const query = queryInput ? queryInput.value.trim().toLowerCase() : "";
+    const collection = collFilter ? collFilter.value : "all";
+
+    const results = HADITH_SEARCH_COLLECTION.filter(h => {
+      if (activeHadithTopic !== "all" && h.topic !== activeHadithTopic) {
+        return false;
+      }
+
+      if (collection !== "all") {
+        const refLower = h.ref.toLowerCase();
+        if (collection === "bukhari" && !refLower.includes("bukhari")) return false;
+        if (collection === "muslim" && !refLower.includes("muslim")) return false;
+        if (collection === "abudawud" && !refLower.includes("dawud")) return false;
+        if (collection === "tirmidhi" && !refLower.includes("tirmidhi")) return false;
+      }
+
+      if (query !== "") {
+        const textMatch = h.english.toLowerCase().includes(query) ||
+          h.arabic.includes(query) ||
+          h.ref.toLowerCase().includes(query) ||
+          h.tags.some(t => t.toLowerCase().includes(query));
+        if (!textMatch) return false;
+      }
+
+      return true;
+    });
+
+    if (results.length === 0) {
+      container.innerHTML = "";
+      if (emptyLabel) emptyLabel.classList.remove("hidden");
+      return;
     }
 
-    if (collection !== "all") {
-      const refLower = h.ref.toLowerCase();
-      if (collection === "bukhari" && !refLower.includes("bukhari")) return false;
-      if (collection === "muslim" && !refLower.includes("muslim")) return false;
-      if (collection === "abudawud" && !refLower.includes("dawud")) return false;
-      if (collection === "tirmidhi" && !refLower.includes("tirmidhi")) return false;
+    if (emptyLabel) emptyLabel.classList.add("hidden");
+
+    function highlightText(text, keyword) {
+      if (!keyword) return text;
+      const escapedKwd = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(${escapedKwd})`, 'gi');
+      return text.replace(regex, '<mark class="bg-yellow-250 dark:bg-amber-900/60 rounded px-0.5 text-slate-900 dark:text-slate-100">$1</mark>');
     }
 
-    if (query !== "") {
-      const textMatch = h.english.toLowerCase().includes(query) ||
-        h.arabic.includes(query) ||
-        h.ref.toLowerCase().includes(query) ||
-        h.tags.some(t => t.toLowerCase().includes(query));
-      if (!textMatch) return false;
-    }
+    container.innerHTML = results.map(h => {
+      const highlightedEnglish = highlightText(h.english, query);
+      const highlightedRef = highlightText(h.ref, query);
 
-    return true;
-  });
+      const escapedEnglish = h.english.replace(/'/g, "\\'");
+      const escapedArabic = h.arabic.replace(/'/g, "\\'");
+      const escapedRef = h.ref.replace(/'/g, "\\'");
 
-  if (results.length === 0) {
-    container.innerHTML = "";
-    if (emptyLabel) emptyLabel.classList.remove("hidden");
-    return;
-  }
-
-  if (emptyLabel) emptyLabel.classList.add("hidden");
-
-  function highlightText(text, keyword) {
-    if (!keyword) return text;
-    const escapedKwd = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`(${escapedKwd})`, 'gi');
-    return text.replace(regex, '<mark class="bg-yellow-250 dark:bg-amber-900/60 rounded px-0.5 text-slate-900 dark:text-slate-100">$1</mark>');
-  }
-
-  container.innerHTML = results.map(h => {
-    const highlightedEnglish = highlightText(h.english, query);
-    const highlightedRef = highlightText(h.ref, query);
-
-    const escapedEnglish = h.english.replace(/'/g, "\\'");
-    const escapedArabic = h.arabic.replace(/'/g, "\\'");
-    const escapedRef = h.ref.replace(/'/g, "\\'");
-
-    return `
-      <div class="p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm space-y-4 flex flex-col justify-between">
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 text-[9px] font-bold uppercase tracking-wider">${h.topic}</span>
-            <span class="text-[10px] font-bold text-slate-400 font-mono">${highlightedRef}</span>
+      return `
+        <div class="p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 text-[9px] font-bold uppercase tracking-wider">${h.topic}</span>
+              <span class="text-[10px] font-bold text-slate-400 font-mono">${highlightedRef}</span>
+            </div>
+            <div class="quran-text text-lg text-slate-800 dark:text-slate-200 leading-normal text-right select-all">${h.arabic}</div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${highlightedEnglish}</p>
           </div>
-          <div class="quran-text text-lg text-slate-800 dark:text-slate-200 leading-normal text-right select-all">${h.arabic}</div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${highlightedEnglish}</p>
-        </div>
-        <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800/80">
-          <div class="flex gap-1.5 overflow-hidden">
-            ${h.tags.map(t => `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md uppercase tracking-wider truncate max-w-[60px]">${t}</span>`).join('')}
+          <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="flex gap-1.5 overflow-hidden">
+              ${h.tags.map(t => `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md uppercase tracking-wider truncate max-w-[60px]">${t}</span>`).join('')}
+            </div>
+            <button onclick="window.copyHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
+              📋 Copy Hadith
+            </button>
           </div>
-          <button onclick="window.copyHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
-            📋 Copy Hadith
-          </button>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  };
+
+  if (immediate) {
+    runSearch();
+  } else {
+    searchHadithTimeout = setTimeout(runSearch, 150);
+  }
 };
 
 window.selectHadithTopicTag = function (btnEl, topicName) {
@@ -2749,7 +2763,7 @@ window.selectHadithTopicTag = function (btnEl, topicName) {
   }
 
   activeHadithTopic = topicName;
-  window.searchHadith();
+  window.searchHadith(true);
 };
 
 window.copyHadith = function (ref, arabic, english, btnEl) {
@@ -3263,6 +3277,12 @@ window.switchMainSection = function(section) {
     }
   }
 
+  // Automatically hide mobile navigation drawer menu when switching sections
+  const mobileMenu = document.getElementById("mobile-menu");
+  if (mobileMenu) {
+    mobileMenu.classList.add("hidden");
+  }
+
   const navItems = {
     overview: { desktop: "nav-dash", mobile: "mobile-nav-dash" },
     profile: { desktop: "nav-profile", mobile: "mobile-nav-profile" },
@@ -3572,6 +3592,17 @@ if (document.readyState === "loading") {
 } else {
   window.initFaithTools();
 }
+
+// Debounced map resize listener
+let mapResizeTimeout;
+window.addEventListener("resize", () => {
+  clearTimeout(mapResizeTimeout);
+  mapResizeTimeout = setTimeout(() => {
+    if (window.mosqueMap) {
+      window.mosqueMap.invalidateSize();
+    }
+  }, 150);
+});
 
 
 

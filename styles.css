@@ -333,4 +333,18 @@ body {
   }
 }
 
+/* Responsive overrides for ultra-small screens */
+@media (max-width: 375px) {
+  .glass {
+    padding: 1rem !important;
+  }
+  h2, h3 {
+    font-size: 1.1rem !important;
+  }
+  .quran-text {
+    font-size: 1.4rem !important;
+    line-height: 1.8 !important;
+  }
+}
+
 

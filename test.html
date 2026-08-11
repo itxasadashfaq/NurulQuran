@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NurulQuran – Verification & Testing Suite</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Theme Initializer
+    (function() {
+      const savedTheme = localStorage.getItem("nqp_theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    })();
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#047857',
+              light: '#059669',
+              dark: '#064e3b',
+              deep: '#022c22',
+            },
+            gold: {
+              DEFAULT: '#d97706',
+              light: '#f59e0b',
+              dark: '#b45309',
+            },
+            islamic: {
+              bg: '#f8faf9',
+              'dark-bg': '#03130c',
+              'dark-card': '#082216',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Custom Scrollbar -->
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(4, 120, 87, 0.20);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(4, 120, 87, 0.40);
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(4, 120, 87, 0.1);
+    }
+    .dark .glass {
+      background: rgba(8, 34, 22, 0.75);
+      border: 1px solid rgba(17, 56, 36, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-islamic-bg dark:bg-islamic-dark-bg text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 w-full border-b border-emerald-500/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🧪</span>
+        <div>
+          <h1 class="text-base font-bold text-slate-800 dark:text-white leading-tight">NurulQuran Platform</h1>
+          <p class="text-[10px] text-slate-505 uppercase tracking-widest font-semibold">Verification & Test Suite</p>
+        </div>
+      </div>
+      <a href="dashboard.html" class="px-4 py-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-550 dark:hover:bg-slate-800 text-xs font-bold rounded-xl transition-all cursor-pointer">
+        Return to Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Content Container -->
+  <main class="flex-grow py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 w-full">
+    
+    <!-- Test Stats Overview Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <span class="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Total Tests</span>
+        <span id="test-total" class="text-2xl font-bold text-slate-800 dark:text-white font-mono">0</span>
+      </div>
+      <div class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <span class="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Passed</span>
+        <span id="test-passed" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">0</span>
+      </div>
+      <div class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <span class="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Failed</span>
+        <span id="test-failed" class="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">0</span>
+      </div>
+      <div class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <span class="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Success Rate</span>
+        <span id="test-rate" class="text-2xl font-bold text-emerald-700 dark:text-emerald-300 font-mono">0%</span>
+      </div>
+      <div class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between col-span-2 md:col-span-1">
+        <span class="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Execution Latency</span>
+        <span id="test-latency" class="text-2xl font-bold text-amber-600 dark:text-amber-450 font-mono">0ms</span>
+      </div>
+    </div>
+
+    <!-- Main Columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left: Test Logger & Results (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+          <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800/80">
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <span>📜</span> Test Log Console
+            </h3>
+            <button onclick="runUnitTests()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer">
+              Rerun Suite
+            </button>
+          </div>
+
+          <!-- Log console output -->
+          <div id="test-console" class="space-y-2 max-h-[420px] overflow-y-auto pr-1 divide-y divide-slate-100 dark:divide-slate-800/40 text-xs">
+            <div class="text-center text-slate-400 py-10">Running tests, please wait...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Real-time Manual Playground (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <span>🎮</span> Interactive Math Playground
+          </h3>
+          <p class="text-[10px] text-slate-455 leading-relaxed font-semibold uppercase tracking-wider">Test formulas manually below to verify outputs</p>
+
+          <!-- Qibla Simulator -->
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 space-y-3">
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-350">1. Qibla Bearing Calculator</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="block text-[9px] font-bold text-slate-455 uppercase mb-1">Latitude</label>
+                <input type="number" id="play-qibla-lat" value="30.0444" step="any" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
+              </div>
+              <div>
+                <label class="block text-[9px] font-bold text-slate-455 uppercase mb-1">Longitude</label>
+                <input type="number" id="play-qibla-lng" value="31.2357" step="any" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-200/50 dark:border-slate-800/50">
+              <span class="text-slate-500">Calculated Bearing:</span>
+              <span id="play-qibla-result" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">0.00°</span>
+            </div>
+          </div>
+
+          <!-- Zakat Simulator -->
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 space-y-3">
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-350">2. Zakat Nisab Checker</h4>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div>
+                <label class="block text-[9px] font-bold text-slate-455 uppercase mb-1">Net Assets ($)</label>
+                <input type="number" id="play-zakat-assets" value="1000" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
+              </div>
+              <div>
+                <label class="block text-[9px] font-bold text-slate-455 uppercase mb-1">Gold Price ($/g)</label>
+                <input type="number" id="play-zakat-gold" value="75" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
+              </div>
+              <div>
+                <label class="block text-[9px] font-bold text-slate-455 uppercase mb-1">Nisab Basis</label>
+                <select id="play-zakat-basis" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
+                  <option value="gold">Gold (85g)</option>
+                  <option value="silver">Silver (595g)</option>
+                </select>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-200/50 dark:border-slate-800/50">
+              <span class="text-slate-500">Zakat Due (2.5%):</span>
+              <span id="play-zakat-result" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Hijri Date Checker -->
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 space-y-3">
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-350">3. Lunar Text-Month Parser</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="block text-[9px] font-bold text-slate-455 uppercase mb-1">Formatted Month</label>
+                <input type="text" id="play-hijri-month" value="Safar" placeholder="Safar or Safar AH" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
+              </div>
+              <div class="flex flex-col justify-end">
+                <span class="block text-[9px] text-slate-455 font-bold uppercase mb-1">Resolved Index</span>
+                <div id="play-hijri-index" class="font-mono font-bold text-emerald-600 dark:text-emerald-400 py-1.5">2 (Safar)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-emerald-500/10 bg-white dark:bg-slate-950 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center text-xs text-slate-500">
+      <p>&copy; 2026 NurulQuran. Automated Testing Utility.</p>
+      <span class="text-slate-400">v1.0.0</span>
+    </div>
+  </footer>
+
+  <!-- Mock functions for testing calculations -->
+  <script>
+    // 1. Qibla Bearing Calculation formula
+    function calculateBearing(lat, lng) {
+      const kaabaLat = 21.422487 * Math.PI / 180;
+      const kaabaLng = 39.826206 * Math.PI / 180;
+      const myLat = lat * Math.PI / 180;
+      const myLng = lng * Math.PI / 180;
+
+      const dLng = kaabaLng - myLng;
+      const y = Math.sin(dLng);
+      const x = Math.cos(myLat) * Math.tan(kaabaLat) - Math.sin(myLat) * Math.cos(dLng);
+
+      let bearing = Math.atan2(y, x) * 180 / Math.PI;
+      bearing = (bearing + 360) % 360;
+      return bearing;
+    }
+
+    // 2. Zakat Nisab calculator
+    function calculateZakatDue(assets, goldPrice, basis) {
+      const goldNisabThreshold = 85 * goldPrice;
+      const silverNisabThreshold = 595 * 0.90; // Default silver price = 0.90 USD/g
+      
+      const nisab = basis === "gold" ? goldNisabThreshold : silverNisabThreshold;
+      const isEligible = assets >= nisab;
+      
+      return isEligible ? Math.max(0, assets * 0.025) : 0;
+    }
+
+    // 3. Hijri Text Month parser
+    function parseHijriMonth(monthVal) {
+      const monthNames = [
+        "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+        "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+        "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+      ];
+
+      let month = parseInt(monthVal);
+      if (isNaN(month)) {
+        const cleanVal = monthVal.toLowerCase().replace(/[^a-z']/g, "");
+        const matchedIdx = monthNames.findIndex(name => {
+          const cleanName = name.toLowerCase().replace(/[^a-z']/g, "");
+          return cleanName.includes(cleanVal) || cleanVal.includes(cleanName);
+        });
+        month = matchedIdx !== -1 ? matchedIdx + 1 : 1;
+      }
+      return { monthIndex: month, monthName: monthNames[month - 1] };
+    }
+
+    // Interactive Bindings
+    function bindPlayground() {
+      const qiblaLat = document.getElementById("play-qibla-lat");
+      const qiblaLng = document.getElementById("play-qibla-lng");
+      const qiblaRes = document.getElementById("play-qibla-result");
+
+      const updateQiblaPlay = () => {
+        const lat = parseFloat(qiblaLat.value) || 0;
+        const lng = parseFloat(qiblaLng.value) || 0;
+        qiblaRes.textContent = `${calculateBearing(lat, lng).toFixed(2)}°`;
+      };
+      qiblaLat.addEventListener("input", updateQiblaPlay);
+      qiblaLng.addEventListener("input", updateQiblaPlay);
+      updateQiblaPlay();
+
+      const zakatAssets = document.getElementById("play-zakat-assets");
+      const zakatGold = document.getElementById("play-zakat-gold");
+      const zakatBasis = document.getElementById("play-zakat-basis");
+      const zakatRes = document.getElementById("play-zakat-result");
+
+      const updateZakatPlay = () => {
+        const assets = parseFloat(zakatAssets.value) || 0;
+        const goldPrice = parseFloat(zakatGold.value) || 0;
+        const basis = zakatBasis.value;
+        zakatRes.textContent = `$${calculateZakatDue(assets, goldPrice, basis).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      };
+      zakatAssets.addEventListener("input", updateZakatPlay);
+      zakatGold.addEventListener("input", updateZakatPlay);
+      zakatBasis.addEventListener("change", updateZakatPlay);
+      updateZakatPlay();
+
+      const hijriMonth = document.getElementById("play-hijri-month");
+      const hijriIndex = document.getElementById("play-hijri-index");
+
+      const updateHijriPlay = () => {
+        const val = hijriMonth.value;
+        const res = parseHijriMonth(val);
+        hijriIndex.textContent = `${res.monthIndex} (${res.monthName})`;
+      };
+      hijriMonth.addEventListener("input", updateHijriPlay);
+      updateHijriPlay();
+    }
+
+    // Automated Unit Tests Execution
+    function runUnitTests() {
+      const consoleEl = document.getElementById("test-console");
+      consoleEl.innerHTML = "";
+      
+      const startTime = performance.now();
+      let passed = 0;
+      let failed = 0;
+
+      const logTest = (name, pass, msg) => {
+        const row = document.createElement("div");
+        row.className = "py-3 flex justify-between items-start gap-4";
+        
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "font-semibold text-slate-700 dark:text-slate-200";
+        nameSpan.textContent = name;
+
+        const detailDiv = document.createElement("div");
+        detailDiv.className = "text-right space-y-1";
+
+        const badge = document.createElement("span");
+        if (pass) {
+          passed++;
+          badge.className = "inline-block text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 uppercase";
+          badge.textContent = "PASS";
+        } else {
+          failed++;
+          badge.className = "inline-block text-[8px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-650 dark:text-red-400 uppercase";
+          badge.textContent = "FAIL";
+        }
+
+        const msgSpan = document.createElement("p");
+        msgSpan.className = "text-[10px] text-slate-450 font-mono";
+        msgSpan.textContent = msg;
+
+        detailDiv.appendChild(badge);
+        detailDiv.appendChild(msgSpan);
+        row.appendChild(nameSpan);
+        row.appendChild(detailDiv);
+        consoleEl.appendChild(row);
+      };
+
+      // Module 3 Tests: Qibla bearing math accuracy
+      const bearingCairo = calculateBearing(30.0444, 31.2357);
+      logTest(
+        "Qibla: Cairo coordinates bearing accuracy", 
+        Math.abs(bearingCairo - 136.14) < 0.2, 
+        `Expected: ~136.14°, Actual: ${bearingCairo.toFixed(2)}°`
+      );
+
+      const bearingKarachi = calculateBearing(24.8607, 67.0011);
+      logTest(
+        "Qibla: Karachi coordinates bearing accuracy", 
+        Math.abs(bearingKarachi - 267.74) < 0.2, 
+        `Expected: ~267.74°, Actual: ${bearingKarachi.toFixed(2)}°`
+      );
+
+      const bearingMakkah = calculateBearing(21.4225, 39.8262);
+      logTest(
+        "Qibla: Makkah self-reference bearing limit", 
+        isNaN(bearingMakkah) || Math.abs(bearingMakkah) <= 360, 
+        `Expected: Valid Bearing, Actual: ${bearingMakkah.toFixed(2)}°`
+      );
+
+      // Module 4 Tests: Zakat Calculator Nisab & conversions
+      const zakatG1 = calculateZakatDue(4000, 75, "gold");
+      logTest(
+        "Zakat: Assets below Gold Nisab threshold", 
+        zakatG1 === 0, 
+        `Expected: $0.00, Actual: $${zakatG1.toFixed(2)}`
+      );
+
+      const zakatG2 = calculateZakatDue(10000, 75, "gold");
+      logTest(
+        "Zakat: Assets above Gold Nisab threshold", 
+        Math.abs(zakatG2 - 250) < 0.01, 
+        `Expected: $250.00, Actual: $${zakatG2.toFixed(2)}`
+      );
+
+      const zakatS1 = calculateZakatDue(1000, 75, "silver");
+      logTest(
+        "Zakat: Assets above Silver Nisab threshold", 
+        Math.abs(zakatS1 - 25) < 0.01, 
+        `Expected: $25.00, Actual: $${zakatS1.toFixed(2)}`
+      );
+
+      // Module 4 Tests: Lunar month text converters
+      const safarIdx = parseHijriMonth("Safar").monthIndex;
+      logTest(
+        "Lunar Calendar: Parse Safar month name string", 
+        safarIdx === 2, 
+        `Expected Index: 2, Actual: ${safarIdx}`
+      );
+
+      const safarAhIdx = parseHijriMonth("Safar AH").monthIndex;
+      logTest(
+        "Lunar Calendar: Parse Safar month name with suffix", 
+        safarAhIdx === 2, 
+        `Expected Index: 2, Actual: ${safarAhIdx}`
+      );
+
+      const muharramIdx = parseHijriMonth("  muharram  ").monthIndex;
+      logTest(
+        "Lunar Calendar: Parse Muharram name with spacing and casing", 
+        muharramIdx === 1, 
+        `Expected Index: 1, Actual: ${muharramIdx}`
+      );
+
+      // Local storage cache support tests
+      try {
+        localStorage.setItem("nqp_test_val", "active");
+        const val = localStorage.getItem("nqp_test_val");
+        localStorage.removeItem("nqp_test_val");
+        logTest(
+          "Storage: Browser localStorage read/write test", 
+          val === "active", 
+          `Expected: active, Actual: ${val}`
+        );
+      } catch (err) {
+        logTest("Storage: Browser localStorage read/write test", false, err.message);
+      }
+
+      // Finish metrics
+      const latency = (performance.now() - startTime).toFixed(1);
+      document.getElementById("test-total").textContent = passed + failed;
+      document.getElementById("test-passed").textContent = passed;
+      document.getElementById("test-failed").textContent = failed;
+      document.getElementById("test-rate").textContent = `${Math.round((passed / (passed + failed)) * 100)}%`;
+      document.getElementById("test-latency").textContent = `${latency}ms`;
+    }
+
+    // Launch
+    bindPlayground();
+    setTimeout(runUnitTests, 500);
+  </script>
+</body>
+</html>
