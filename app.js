@@ -26,6 +26,17 @@ let auth;
 let isMockAuth = false;
 let isBackendOffline = false;
 
+// HTML Sanitization Escaper for XSS Mitigation
+function escapeHTML(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 async function initFirebase() {
   try {
     const response = await fetch("http://localhost:5000/api/config");
@@ -480,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const matches = body.data.matches;
 
           if (count === 0 || !matches || matches.length === 0) {
-            searchResultsContainer.innerHTML = `<div class="text-center py-8 text-slate-400">No verses found matching &ldquo;${query}&rdquo;.</div>`;
+            searchResultsContainer.innerHTML = `<div class="text-center py-8 text-slate-400">No verses found matching &ldquo;${escapeHTML(query)}&rdquo;.</div>`;
             return;
           }
 
@@ -2298,7 +2309,7 @@ window.renderTasbeehHistory = function () {
 
   container.innerHTML = logs.map(l => `
     <div class="flex justify-between py-1.5 text-[11px]">
-      <span class="font-semibold text-slate-700 dark:text-slate-350">${l.dhikr}</span>
+      <span class="font-semibold text-slate-700 dark:text-slate-350">${escapeHTML(l.dhikr)}</span>
       <div class="flex gap-2">
         <span class="font-mono text-emerald-600 dark:text-emerald-450 font-bold">${l.count}x</span>
         <span class="text-slate-400 font-mono">${l.time}</span>
@@ -3414,6 +3425,13 @@ window.updatePassword = function(e) {
   const confirmPass = document.getElementById("profile-confirm-pass")?.value;
 
   if (!newPass || !confirmPass) return;
+
+  // Enforce strong password complexity rule
+  const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passRegex.test(newPass)) {
+    showToast("Password must be at least 8 characters, and contain uppercase, lowercase, digit, and special symbol.", "error");
+    return;
+  }
 
   if (newPass !== confirmPass) {
     showToast("Passwords do not match!", "error");
