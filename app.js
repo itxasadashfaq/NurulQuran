@@ -197,6 +197,12 @@ function updateUIForLoggedInUser(user) {
   if (dashEmail) dashEmail.textContent = user.email;
   if (dashUid) dashUid.textContent = user.uid;
   if (dashVerified) dashVerified.textContent = user.emailVerified ? "Verified Account" : "Pending Verification";
+
+  const sideAvatar = document.getElementById("side-user-avatar");
+  const sideName = document.getElementById("side-user-name");
+  if (sideAvatar) sideAvatar.textContent = initial;
+  if (sideName) sideName.textContent = name;
+
   updateDashboardWidgets();
 }
 
@@ -3274,6 +3280,12 @@ function showToast(msg, type = "success") {
 window.switchMainSection = function(section) {
   const panes = {
     overview: document.getElementById("main-pane-overview"),
+    tasbeeh: document.getElementById("main-pane-tasbeeh"),
+    calendar: document.getElementById("main-pane-calendar"),
+    books: document.getElementById("main-pane-books"),
+    hadith: document.getElementById("main-pane-hadith"),
+    zakat: document.getElementById("main-pane-zakat"),
+    mosques: document.getElementById("main-pane-mosques"),
     profile: document.getElementById("main-pane-profile"),
     settings: document.getElementById("main-pane-settings")
   };
@@ -3294,32 +3306,37 @@ window.switchMainSection = function(section) {
     mobileMenu.classList.add("hidden");
   }
 
-  const navItems = {
-    overview: { desktop: "nav-dash", mobile: "mobile-nav-dash" },
-    profile: { desktop: "nav-profile", mobile: "mobile-nav-profile" },
-    settings: { desktop: "nav-settings", mobile: "mobile-nav-settings" }
-  };
+  // If loading mosques map view, initialize Map
+  if (section === 'mosques') {
+    window.initMosqueMap();
+  }
 
-  for (let name in navItems) {
-    const dEl = document.getElementById(navItems[name].desktop);
-    const mEl = document.getElementById(navItems[name].mobile);
+  // Update navigation button active styles
+  const allNavs = [
+    'overview', 'tasbeeh', 'calendar', 'books', 'hadith', 'zakat', 'mosques', 'profile', 'settings'
+  ];
 
-    if (name === section) {
-      if (dEl) {
-        dEl.className = "text-sm font-semibold text-emerald-700 dark:text-emerald-400 font-bold transition-colors cursor-pointer focus:outline-none";
-      }
-      if (mEl) {
-        mEl.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-bold bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 cursor-pointer focus:outline-none";
-      }
-    } else {
-      if (dEl) {
-        dEl.className = "text-sm font-semibold text-slate-605 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer focus:outline-none";
-      }
-      if (mEl) {
-        mEl.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-605 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer focus:outline-none";
+  allNavs.forEach(nav => {
+    // 1. Sidebar Nav Highlights
+    const sideBtn = document.getElementById(`side-nav-${nav}`);
+    if (sideBtn) {
+      if (nav === section) {
+        sideBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/20 text-left cursor-pointer transition-all focus:outline-none";
+      } else {
+        sideBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none";
       }
     }
-  }
+
+    // 2. Mobile Drawer Nav Highlights
+    const mobileBtn = document.getElementById(`mobile-nav-${nav}`);
+    if (mobileBtn) {
+      if (nav === section) {
+        mobileBtn.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-bold bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 cursor-pointer focus:outline-none";
+      } else {
+        mobileBtn.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-650 dark:text-slate-305 hover:bg-slate-50 dark:hover:bg-slate-850/40 cursor-pointer focus:outline-none";
+      }
+    }
+  });
 
   if (section === "overview") {
     setTimeout(() => {
