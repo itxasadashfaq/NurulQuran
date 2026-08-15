@@ -136,14 +136,6 @@ body {
   }
 }
 
-/* Qibla Compass Animations & Styles */
-.qibla-compass-dial {
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.qibla-needle {
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
 
 /* Modal and layout improvements */
 .modal-backdrop {
@@ -153,8 +145,8 @@ body {
 
 /* Smooth transition for active prayer row */
 .prayer-active-row {
-  background-color: rgba(16, 185, 129, 0.15) !important;
-  border-color: rgba(16, 185, 129, 0.6) !important;
+  background-color: rgba(4, 120, 87, 0.15) !important;
+  border-color: rgba(4, 120, 87, 0.6) !important;
 }
 
 @keyframes pulse-ring {
@@ -181,12 +173,12 @@ body {
   left: 50%;
   width: 0;
   height: 2.5px;
-  background: #10b981;
+  background: #047857;
   transition: all 0.3s ease;
   transform: translateX(-50%);
 }
 .tab-btn.tab-active {
-  color: #10b981 !important;
+  color: #047857 !important;
   font-weight: 700;
 }
 .tab-btn.tab-active::after {
@@ -195,28 +187,28 @@ body {
 
 /* Tasbeeh Counter Button */
 .tasbeeh-btn {
-  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.1) 0%, rgba(4, 120, 87, 0.02) 100%);
-  border: 2px solid rgba(16, 185, 129, 0.2);
-  box-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.05), inset 0 2px 10px rgba(255, 255, 255, 0.6);
+  background: radial-gradient(circle at center, rgba(4, 120, 87, 0.1) 0%, rgba(6, 95, 70, 0.02) 100%);
+  border: 2px solid rgba(4, 120, 87, 0.2);
+  box-shadow: 0 10px 25px -5px rgba(6, 95, 70, 0.05), inset 0 2px 10px rgba(255, 255, 255, 0.6);
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .tasbeeh-btn:hover {
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 12px 30px -5px rgba(4, 120, 87, 0.1), inset 0 2px 10px rgba(255, 255, 255, 0.8);
+  border-color: rgba(4, 120, 87, 0.4);
+  box-shadow: 0 12px 30px -5px rgba(6, 95, 70, 0.1), inset 0 2px 10px rgba(255, 255, 255, 0.8);
 }
 .tasbeeh-btn:active {
   transform: scale(0.96) translateY(2px);
-  box-shadow: 0 5px 15px -3px rgba(4, 120, 87, 0.08);
+  box-shadow: 0 5px 15px -3px rgba(6, 95, 70, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   .tasbeeh-btn {
-    background: radial-gradient(circle at center, rgba(16, 185, 129, 0.12) 0%, rgba(3, 19, 12, 0.2) 100%);
-    border-color: rgba(16, 185, 129, 0.25);
+    background: radial-gradient(circle at center, rgba(4, 120, 87, 0.12) 0%, rgba(15, 23, 42, 0.2) 100%);
+    border-color: rgba(4, 120, 87, 0.25);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.05);
   }
   .tasbeeh-btn:hover {
-    border-color: rgba(16, 185, 129, 0.45);
+    border-color: rgba(4, 120, 87, 0.45);
   }
 }
 
@@ -233,11 +225,11 @@ body {
   transition: all 0.2s ease;
 }
 .calendar-day-cell:hover:not(.calendar-empty) {
-  background-color: rgba(16, 185, 129, 0.08);
+  background-color: rgba(4, 120, 87, 0.08);
 }
 .calendar-day-today {
-  border: 1.5px solid #10b981;
-  background-color: rgba(16, 185, 129, 0.05) !important;
+  border: 1.5px solid #047857;
+  background-color: rgba(4, 120, 87, 0.05) !important;
 }
 .calendar-day-event {
   background-color: rgba(217, 119, 6, 0.05);
@@ -289,8 +281,8 @@ body {
 
 /* Zakat Calculator & Mosque Locator Styles */
 .zakat-result-card {
-  background: linear-gradient(135deg, rgba(4, 120, 87, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-  border: 1.5px solid rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, rgba(6, 95, 70, 0.05) 0%, rgba(4, 120, 87, 0.05) 100%);
+  border: 1.5px solid rgba(4, 120, 87, 0.2);
 }
 .zakat-history-log {
   max-height: 180px;
@@ -301,7 +293,7 @@ body {
   height: 380px;
   border-radius: 20px;
   z-index: 10;
-  border: 1px solid rgba(4, 120, 87, 0.1);
+  border: 1px solid rgba(6, 95, 70, 0.1);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 @media (prefers-color-scheme: dark) {

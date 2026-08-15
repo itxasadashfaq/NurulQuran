@@ -27,7 +27,12 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true, lowercase: true, trim: true },
     displayName: { type: String, default: "" },
     photoURL: { type: String, default: "" },
-    lastLoginAt: { type: Date, default: Date.now }
+    lastLoginAt: { type: Date, default: Date.now },
+    readingStreak: { type: Number, default: 5 },
+    memorizedSurahs: { type: Number, default: 12 },
+    bookmarks: { type: [String], default: [] },
+    zakatHistory: { type: [mongoose.Schema.Types.Mixed], default: [] },
+    tasbeehHistory: { type: [mongoose.Schema.Types.Mixed], default: [] }
   },
   { timestamps: true }
 );
@@ -83,6 +88,73 @@ app.post("/api/auth/sync", async (req, res) => {
   } catch (error) {
     console.error("Database synchronization failed:", error);
     res.status(500).json({ error: "Database synchronization failed", details: error.message });
+  }
+});
+
+// API to retrieve full user companion data (streaks, bookmarks, histories)
+app.get("/api/user/data/:uid", async (req, res) => {
+  try {
+    const { uid } = req.params;
+    if (!uid) {
+      return res.status(400).json({ error: "Missing required parameter: uid" });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "MongoDB connection is currently offline." });
+    }
+
+    const user = await User.findOne({ uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        readingStreak: user.readingStreak,
+        memorizedSurahs: user.memorizedSurahs,
+        bookmarks: user.bookmarks,
+        zakatHistory: user.zakatHistory,
+        tasbeehHistory: user.tasbeehHistory
+      }
+    });
+  } catch (error) {
+    console.error("Failed to retrieve user data:", error);
+    res.status(500).json({ error: "Failed to retrieve user data", details: error.message });
+  }
+});
+
+// API to dynamically sync full user companion data to MongoDB
+app.post("/api/user/data/sync", async (req, res) => {
+  try {
+    const { uid, readingStreak, memorizedSurahs, bookmarks, zakatHistory, tasbeehHistory } = req.body;
+
+    if (!uid) {
+      return res.status(400).json({ error: "Missing required field: uid" });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "MongoDB connection is currently offline." });
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { uid },
+      {
+        $set: {
+          readingStreak: readingStreak !== undefined ? readingStreak : 5,
+          memorizedSurahs: memorizedSurahs !== undefined ? memorizedSurahs : 12,
+          bookmarks: bookmarks || [],
+          zakatHistory: zakatHistory || [],
+          tasbeehHistory: tasbeehHistory || []
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    res.json({ success: true, data: updatedUser });
+  } catch (error) {
+    console.error("Failed to sync user data:", error);
+    res.status(500).json({ error: "Failed to sync user data", details: error.message });
   }
 });
 

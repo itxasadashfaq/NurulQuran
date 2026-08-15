@@ -103,6 +103,128 @@ async function syncUserToMongoDB(user) {
   }
 }
 
+// Sync status update helper
+function updateCloudSyncBadge(status) {
+  const badge = document.getElementById("cloud-sync-status");
+  const dot = document.getElementById("cloud-sync-dot");
+  const text = document.getElementById("cloud-sync-text");
+  if (!badge || !dot || !text) return;
+
+  if (status === "synced") {
+    badge.className = "flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 text-emerald-650 dark:text-emerald-400 rounded-xl text-[10px] font-bold";
+    dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
+    text.textContent = "Cloud Synced";
+  } else if (status === "syncing") {
+    badge.className = "flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/10 text-amber-650 dark:text-amber-400 rounded-xl text-[10px] font-bold";
+    dot.className = "w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse";
+    text.textContent = "Syncing...";
+  } else if (status === "offline" || isBackendOffline) {
+    badge.className = "flex items-center gap-1.5 px-3 py-1.5 bg-slate-500/5 dark:bg-slate-550/10 border border-slate-200/60 dark:border-slate-800/50 text-slate-500 dark:text-slate-400 rounded-xl text-[10px] font-bold";
+    dot.className = "w-1.5 h-1.5 rounded-full bg-slate-400";
+    text.textContent = "Offline Mode";
+  }
+}
+
+// Debounced sync function
+let syncTimeout = null;
+
+async function triggerCloudSync() {
+  if (!currentUserSession || isBackendOffline) {
+    updateCloudSyncBadge("offline");
+    return;
+  }
+
+  updateCloudSyncBadge("syncing");
+
+  if (syncTimeout) clearTimeout(syncTimeout);
+
+  syncTimeout = setTimeout(async () => {
+    try {
+      const u = currentUserSession;
+      
+      const tasbeehHistory = JSON.parse(localStorage.getItem("nqp_tasbeeh_logs") || "[]");
+      const zakatHistory = JSON.parse(localStorage.getItem("nqp_zakat_logs") || "[]");
+      const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
+
+      const payload = {
+        uid: u.uid,
+        readingStreak: 5,
+        memorizedSurahs: 12,
+        bookmarks: bookmarks.map(b => `${b.surahNumber}:${b.verseNumber}:${b.surahName}`),
+        zakatHistory,
+        tasbeehHistory
+      };
+
+      const response = await fetch("http://localhost:5000/api/user/data/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        console.log("Dashboard progress data successfully backed up to MongoDB.");
+        updateCloudSyncBadge("synced");
+      } else {
+        console.error("Cloud backup failed:", await response.text());
+        updateCloudSyncBadge("offline");
+      }
+    } catch (e) {
+      console.warn("Cloud backup request failed:", e);
+      updateCloudSyncBadge("offline");
+    }
+  }, 1200);
+}
+
+// Fetch user data from Cloud on login
+async function fetchUserDataFromCloud(uid) {
+  if (isBackendOffline) {
+    updateCloudSyncBadge("offline");
+    return;
+  }
+
+  updateCloudSyncBadge("syncing");
+  try {
+    const res = await fetch(`http://localhost:5000/api/user/data/${uid}`);
+    if (res.ok) {
+      const result = await res.json();
+      if (result && result.success && result.data) {
+        const cloud = result.data;
+        console.log("Successfully fetched companion data from MongoDB:", cloud);
+
+        if (cloud.tasbeehHistory && cloud.tasbeehHistory.length > 0) {
+          localStorage.setItem("nqp_tasbeeh_logs", JSON.stringify(cloud.tasbeehHistory));
+          if (window.renderTasbeehHistory) window.renderTasbeehHistory();
+        }
+        if (cloud.zakatHistory && cloud.zakatHistory.length > 0) {
+          localStorage.setItem("nqp_zakat_logs", JSON.stringify(cloud.zakatHistory));
+          if (window.renderZakatHistory) window.renderZakatHistory();
+        }
+        if (cloud.bookmarks && cloud.bookmarks.length > 0) {
+          const parsedBookmarks = cloud.bookmarks.map(str => {
+            const parts = str.split(':');
+            return {
+              surahNumber: parseInt(parts[0]),
+              verseNumber: parseInt(parts[1]),
+              surahName: parts[2]
+            };
+          });
+          localStorage.setItem("quran_bookmarks", JSON.stringify(parsedBookmarks));
+          if (window.updateDashboardWidgets) window.updateDashboardWidgets();
+        }
+        
+        updateCloudSyncBadge("synced");
+      }
+    } else {
+      updateCloudSyncBadge("offline");
+    }
+  } catch (e) {
+    console.warn("Could not retrieve user stats from cloud:", e);
+    updateCloudSyncBadge("offline");
+  }
+}
+
 // 4. State Listener
 function setupAuthObserver() {
   if (isMockAuth) {
@@ -204,6 +326,7 @@ function updateUIForLoggedInUser(user) {
   if (sideName) sideName.textContent = name;
 
   updateDashboardWidgets();
+  fetchUserDataFromCloud(user.uid);
 }
 
 function updateUIForLoggedOutUser() {
@@ -1267,6 +1390,72 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ================= DASHBOARD WIDGET UPDATERS =================
+window.renderWeeklyTasbeehChart = function () {
+  const chartContainer = document.getElementById("analytics-tasbeeh-chart");
+  if (!chartContainer) return;
+
+  const logs = JSON.parse(localStorage.getItem("nqp_tasbeeh_logs") || "[]");
+  const weeklyTally = [33, 99, 33, 0, 66, 33, 0];
+  
+  const todayDay = new Date().getDay();
+  let todaySum = 0;
+  logs.forEach(l => {
+    todaySum += l.count;
+  });
+  if (todaySum > 0) {
+    weeklyTally[todayDay] = todaySum;
+  }
+
+  const maxVal = Math.max(...weeklyTally, 100);
+
+  chartContainer.innerHTML = weeklyTally.map((val, idx) => {
+    const heightPercent = Math.min(100, Math.round((val / maxVal) * 100));
+    const isToday = idx === todayDay;
+    const activeBarClass = isToday 
+      ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700" 
+      : "bg-emerald-500/30 dark:bg-emerald-500/20 hover:bg-emerald-500/50";
+
+    return `
+      <div class="flex flex-col items-center group select-none relative h-full justify-end">
+        <div class="absolute -top-6 bg-slate-950/85 text-white text-[9px] font-mono px-1.5 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">${val}x</div>
+        <div class="w-full max-w-[20px] rounded-t-lg transition-all duration-300 ${activeBarClass}" style="height: ${heightPercent}%"></div>
+      </div>
+    `;
+  }).join('');
+};
+
+window.renderActivityHeatmap = function () {
+  const heatmapContainer = document.getElementById("analytics-heatmap");
+  if (!heatmapContainer) return;
+
+  const activity = JSON.parse(localStorage.getItem("nqp_activity_logs") || "[]");
+  
+  const cells = [];
+  const now = new Date();
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(now.getDate() - i);
+    const dateStr = d.toDateString();
+    const isActive = activity.includes(dateStr);
+    cells.push({
+      dateStr,
+      isActive,
+      level: isActive ? 3 : (Math.random() > 0.65 ? Math.floor(Math.random() * 3) : 0)
+    });
+  }
+
+  heatmapContainer.innerHTML = cells.map(c => {
+    let bgClass = "bg-slate-200 dark:bg-slate-800";
+    if (c.level === 1) bgClass = "bg-emerald-500/20 dark:bg-emerald-500/10";
+    if (c.level === 2) bgClass = "bg-emerald-500/50 dark:bg-emerald-500/30";
+    if (c.level === 3) bgClass = "bg-emerald-600 dark:bg-emerald-500";
+
+    return `
+      <div class="rounded-[3px] transition-all cursor-pointer ${bgClass}" style="aspect-ratio: 1/1;" title="${c.dateStr}"></div>
+    `;
+  }).join('');
+};
+
 function updateDashboardWidgets() {
   const dashLastReadCard = document.getElementById("dash-last-read-card");
   const dashLastReadRef = document.getElementById("dash-last-read-ref");
@@ -1329,6 +1518,7 @@ window.removeBookmarkFromDashboard = function (surahNumber, verseNumber) {
     bookmarks.splice(bIndex, 1);
     localStorage.setItem("quran_bookmarks", JSON.stringify(bookmarks));
     updateDashboardWidgets();
+    triggerCloudSync();
   }
 };
 
@@ -1535,6 +1725,103 @@ async function updatePrayerTimes() {
   }
 }
 
+// Prayer countdown and alert alarms
+let countdownInterval = null;
+
+function triggerPrayerAlarm(prayerName) {
+  const isEnabled = document.getElementById("settings-remind-prayer")?.checked;
+  if (!isEnabled) return;
+
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const playTone = (freq, time, duration) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, time);
+      gain.gain.setValueAtTime(0.15, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+      osc.start(time);
+      osc.stop(time + duration);
+    };
+
+    playTone(659.25, audioCtx.currentTime, 0.4); // E5 Chime
+    playTone(880.00, audioCtx.currentTime + 0.3, 0.6); // A5 Chime
+    
+    if (Notification.permission === "granted") {
+      new Notification("NurulQuran Companion", {
+        body: `It's time for ${prayerName} prayer!`,
+        icon: "assets/logo.png"
+      });
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
+  } catch (e) {
+    console.warn("Audio Context playback failed:", e);
+  }
+}
+
+function startPrayerCountdown(timings) {
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  const prayers = [
+    { name: "Fajr", time: timings.Fajr },
+    { name: "Dhuhr", time: timings.Dhuhr },
+    { name: "Asr", time: timings.Asr },
+    { name: "Maghrib", time: timings.Maghrib },
+    { name: "Isha", time: timings.Isha }
+  ];
+
+  const countdownEl = document.getElementById("dash-prayer-countdown");
+  if (!countdownEl) return;
+
+  let lastPrayerTriggered = "";
+
+  const tick = () => {
+    const activeObj = getActivePrayer(prayers);
+    const nextPrayerName = activeObj.next;
+    const nextPrayerTimeStr = timings[nextPrayerName];
+
+    if (!nextPrayerTimeStr) {
+      countdownEl.textContent = "";
+      return;
+    }
+
+    const now = new Date();
+    const parts = nextPrayerTimeStr.split(':');
+    const targetDate = new Date();
+    targetDate.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+
+    if (nextPrayerName === "Fajr" && targetDate < now) {
+      targetDate.setDate(targetDate.getDate() + 1);
+    }
+
+    let diffMs = targetDate - now;
+    if (diffMs < 0) diffMs = 0;
+
+    const diffSecs = Math.floor(diffMs / 1000);
+    const h = Math.floor(diffSecs / 3600);
+    const m = Math.floor((diffSecs % 3600) / 60);
+    const s = diffSecs % 60;
+
+    let timeString = "";
+    if (h > 0) timeString += `${h}h `;
+    timeString += `${m}m ${s}s`;
+
+    countdownEl.textContent = `${nextPrayerName} in ${timeString}`;
+
+    if (diffSecs === 0 && lastPrayerTriggered !== nextPrayerName) {
+      lastPrayerTriggered = nextPrayerName;
+      triggerPrayerAlarm(nextPrayerName);
+    }
+  };
+
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
 // Render values into elements
 function renderPrayerTimes(timings) {
   // Normalize prayer values
@@ -1632,6 +1919,8 @@ function renderPrayerTimes(timings) {
       dashList.appendChild(row);
     });
   }
+
+  startPrayerCountdown(timings);
 }
 
 // Toggle prayer checkoff
@@ -1705,125 +1994,6 @@ function getActivePrayer(prayers) {
   };
 }
 
-// Qibla Compass logic
-let compassHeading = 0; // Device orientation heading
-let qiblaHeading = 0; // Computed Qibla bearing
-let manualHeading = 0; // Manually adjusted heading
-
-function updateQiblaUI() {
-  const dial = document.getElementById("qibla-compass-dial");
-  const needle = document.getElementById("qibla-needle");
-
-  const bearingText = document.getElementById("qibla-bearing-text");
-  const coordsText = document.getElementById("qibla-coords-text");
-
-  if (bearingText) bearingText.textContent = `Qibla Direction: ${qiblaHeading.toFixed(1)}°`;
-  if (coordsText) coordsText.textContent = `Coordinates: ${prayerSettings.lat.toFixed(4)}°, ${prayerSettings.lng.toFixed(4)}°`;
-
-  // Total dial rotation includes device heading or manual slider heading
-  const dialRotation = compassHeading !== 0 ? -compassHeading : -manualHeading;
-  const needleRotation = qiblaHeading + dialRotation;
-
-  if (dial) dial.style.transform = `rotate(${dialRotation}deg)`;
-  if (needle) needle.style.transform = `rotate(${needleRotation}deg)`;
-}
-
-// Setup orientation sensors
-function initQiblaCompass() {
-  qiblaHeading = getQiblaBearing(prayerSettings.lat, prayerSettings.lng);
-  updateQiblaUI();
-
-  const desktopCtrls = document.getElementById("qibla-desktop-controls");
-  const statusText = document.getElementById("qibla-status-text");
-
-  // Show manual controls by default (hidden class removed)
-  if (desktopCtrls) {
-    desktopCtrls.classList.remove("hidden");
-    const slider = document.getElementById("qibla-manual-slider");
-    const sliderVal = document.getElementById("qibla-slider-value");
-    if (slider && sliderVal) {
-      slider.addEventListener("input", (e) => {
-        manualHeading = parseInt(e.target.value);
-        sliderVal.textContent = `${manualHeading}°`;
-        updateQiblaUI();
-      });
-    }
-  }
-
-  if (statusText) statusText.textContent = "Adjust manually or tilt device to calibrate";
-
-  const handleOrientation = (e) => {
-    let heading = null;
-    if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
-      heading = e.webkitCompassHeading;
-    } else if (e.alpha !== null && e.alpha !== undefined) {
-      heading = 360 - e.alpha;
-    }
-
-    if (heading !== null && !isNaN(heading)) {
-      compassHeading = heading;
-      
-      // Auto-compass active: hide manual controls and update status
-      if (desktopCtrls) desktopCtrls.classList.add("hidden");
-      if (statusText) statusText.textContent = "Auto Compass Active";
-      
-      updateQiblaUI();
-    }
-  };
-
-  const registerOrientation = () => {
-    if ("ondeviceorientationabsolute" in window) {
-      window.addEventListener("deviceorientationabsolute", handleOrientation, true);
-    } else {
-      window.addEventListener("deviceorientation", handleOrientation, true);
-    }
-  };
-
-  if (window.DeviceOrientationEvent) {
-    registerOrientation();
-    
-    // Compass click prompt to request permission (required for iOS)
-    const compassBox = document.getElementById("qibla-compass-dial");
-    if (compassBox) {
-      compassBox.style.cursor = "pointer";
-      compassBox.addEventListener("click", async () => {
-        if (typeof DeviceOrientationEvent.requestPermission === "function") {
-          try {
-            const permissionState = await DeviceOrientationEvent.requestPermission();
-            if (permissionState === "granted") {
-              registerOrientation();
-              if (statusText) statusText.textContent = "Auto Compass Active";
-            } else {
-              alert("Compass permission denied. Using manual mode.");
-            }
-          } catch (error) {
-            console.error("Error requesting DeviceOrientation permission:", error);
-          }
-        }
-      });
-    }
-
-    // Auto-request compass permission on first click/interaction anywhere on document for automatic activation
-    const requestCompassPermissionAuto = async () => {
-      if (typeof DeviceOrientationEvent.requestPermission === "function") {
-        try {
-          const permissionState = await DeviceOrientationEvent.requestPermission();
-          if (permissionState === "granted") {
-            registerOrientation();
-            if (statusText) statusText.textContent = "Auto Compass Active";
-          }
-        } catch (err) {
-          console.warn("Auto compass activation request failed:", err);
-        }
-      }
-      document.removeEventListener("click", requestCompassPermissionAuto);
-      document.removeEventListener("touchstart", requestCompassPermissionAuto);
-    };
-    document.addEventListener("click", requestCompassPermissionAuto);
-    document.addEventListener("touchstart", requestCompassPermissionAuto);
-  }
-}
-
 // Unified Location State & Map Updates
 function updateLocationState(lat, lng, cityName) {
   prayerSettings.lat = lat;
@@ -1833,8 +2003,6 @@ function updateLocationState(lat, lng, cityName) {
   }
   savePrayerSettings();
   updatePrayerTimes();
-  qiblaHeading = getQiblaBearing(lat, lng);
-  updateQiblaUI();
 
   // If leaflet map is initialized, update center and re-run mosque locator
   if (typeof L !== "undefined" && mosqueMap) {
@@ -1928,12 +2096,14 @@ window.openPrayerSettingsModal = function () {
   const citySelect = document.getElementById("settings-city-preset");
   const manualLatInput = document.getElementById("settings-manual-lat");
   const manualLngInput = document.getElementById("settings-manual-lng");
+  const hijriAdjustSelect = document.getElementById("settings-hijri-adjust");
 
   if (methodSelect) methodSelect.value = prayerSettings.calcMethod;
   if (schoolSelect) schoolSelect.value = prayerSettings.asrSchool;
   if (citySelect) citySelect.value = prayerSettings.manualPreset;
   if (manualLatInput) manualLatInput.value = prayerSettings.lat;
   if (manualLngInput) manualLngInput.value = prayerSettings.lng;
+  if (hijriAdjustSelect) hijriAdjustSelect.value = String(prayerSettings.hijriAdjust || 0);
 
   applyLocationModeUI();
   detectGPSLocation(); // Probe GPS details
@@ -1979,9 +2149,11 @@ function handleSettingsSave(e) {
   const citySelect = document.getElementById("settings-city-preset");
   const manualLatInput = document.getElementById("settings-manual-lat");
   const manualLngInput = document.getElementById("settings-manual-lng");
+  const hijriAdjustSelect = document.getElementById("settings-hijri-adjust");
 
   if (methodSelect) prayerSettings.calcMethod = methodSelect.value;
   if (schoolSelect) prayerSettings.asrSchool = schoolSelect.value;
+  if (hijriAdjustSelect) prayerSettings.hijriAdjust = parseInt(hijriAdjustSelect.value) || 0;
 
   if (prayerSettings.locMode === "manual") {
     const preset = citySelect ? citySelect.value : "karachi";
@@ -2001,9 +2173,7 @@ function handleSettingsSave(e) {
 
   savePrayerSettings();
   updatePrayerTimes();
-
-  qiblaHeading = getQiblaBearing(prayerSettings.lat, prayerSettings.lng);
-  updateQiblaUI();
+  if (window.renderCalendar) window.renderCalendar();
 
   window.closePrayerSettingsModal();
 }
@@ -2053,8 +2223,6 @@ function initPrayerAndQiblaModule() {
   } else {
     updatePrayerTimes();
   }
-
-  initQiblaCompass();
 
   // Automated periodic active prayer highlight refresher (every 30 seconds)
   setInterval(() => {
@@ -2296,11 +2464,15 @@ function saveTasbeehLog(dhikrText, countVal) {
   if (logs.length > 15) logs.pop();
   localStorage.setItem("nqp_tasbeeh_logs", JSON.stringify(logs));
   window.renderTasbeehHistory();
+  if (window.renderWeeklyTasbeehChart) window.renderWeeklyTasbeehChart();
+  triggerCloudSync();
 }
 
 window.clearTasbeehHistory = function () {
   localStorage.removeItem("nqp_tasbeeh_logs");
   window.renderTasbeehHistory();
+  if (window.renderWeeklyTasbeehChart) window.renderWeeklyTasbeehChart();
+  triggerCloudSync();
 };
 
 window.renderTasbeehHistory = function () {
@@ -2383,13 +2555,17 @@ function getHijriDetails(date) {
     return null;
   }
 }
+window.getHijriDetails = getHijriDetails;
 
 window.changeCalendarMonth = function (direction) {
   currentCalDate.setMonth(currentCalDate.getMonth() + direction);
   window.renderCalendar();
 };
 
-window.renderCalendar = function () {
+// Cache for calendar API responses to prevent redundant requests
+let apiCalendarCache = {};
+
+window.renderCalendar = async function () {
   const hijriMonthLabel = document.getElementById("calendar-hijri-month");
   const gregMonthLabel = document.getElementById("calendar-gregorian-month");
   const grid = document.getElementById("calendar-grid");
@@ -2409,25 +2585,31 @@ window.renderCalendar = function () {
   const totalDays = new Date(yr, mo + 1, 0).getDate();
   const firstDayIndex = new Date(yr, mo, 1).getDay();
 
-  const firstHijri = getHijriDetails(new Date(yr, mo, 1));
-  const lastHijri = getHijriDetails(new Date(yr, mo, totalDays));
-
-  if (firstHijri && lastHijri && hijriMonthLabel) {
-    if (firstHijri.month === lastHijri.month) {
-      hijriMonthLabel.textContent = `${firstHijri.monthName} ${firstHijri.year} AH`;
-    } else {
-      if (firstHijri.year === lastHijri.year) {
-        hijriMonthLabel.textContent = `${firstHijri.monthName} - ${lastHijri.monthName} ${firstHijri.year} AH`;
-      } else {
-        hijriMonthLabel.textContent = `${firstHijri.monthName} ${firstHijri.year} - ${lastHijri.monthName} ${lastHijri.year} AH`;
-      }
-    }
-  }
-
   for (let i = 0; i < firstDayIndex; i++) {
     const emptyCell = document.createElement("div");
     emptyCell.className = "calendar-day-cell calendar-empty";
     grid.appendChild(emptyCell);
+  }
+
+  // Load Hijri details for the entire month from Aladhan API or fallback
+  let monthlyData = null;
+  const cacheKey = `${yr}_${mo + 1}_${prayerSettings.hijriAdjust || 0}`;
+
+  if (apiCalendarCache[cacheKey]) {
+    monthlyData = apiCalendarCache[cacheKey];
+  } else {
+    try {
+      const response = await fetch(`https://api.aladhan.com/v1/hijriCalendarByGregorian/${yr}/${mo + 1}?adjustment=${prayerSettings.hijriAdjust || 0}`);
+      if (response.ok) {
+        const json = await response.json();
+        if (json && json.data) {
+          monthlyData = json.data;
+          apiCalendarCache[cacheKey] = monthlyData;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch monthly Hijri calendar from API, falling back to local calculation.", e);
+    }
   }
 
   const eventsInThisMonth = [];
@@ -2435,9 +2617,41 @@ window.renderCalendar = function () {
 
   for (let day = 1; day <= totalDays; day++) {
     const dateObj = new Date(yr, mo, day);
-    const hijri = getHijriDetails(dateObj);
+    let hijri = null;
+
+    if (monthlyData && monthlyData[day - 1]) {
+      const dayData = monthlyData[day - 1].hijri;
+      hijri = {
+        day: parseInt(dayData.day),
+        month: parseInt(dayData.month.number),
+        year: parseInt(dayData.year),
+        monthName: dayData.month.en
+      };
+    } else {
+      hijri = getHijriDetails(dateObj);
+    }
 
     if (!hijri) continue;
+
+    if (day === 1 && hijriMonthLabel) {
+      hijriMonthLabel.textContent = `${hijri.monthName} ${hijri.year} AH`;
+    }
+    
+    if (day === totalDays && hijriMonthLabel && monthlyData) {
+      const firstHijri = monthlyData[0] ? monthlyData[0].hijri : null;
+      const lastHijri = monthlyData[totalDays - 1] ? monthlyData[totalDays - 1].hijri : null;
+      if (firstHijri && lastHijri) {
+        if (firstHijri.month.number === lastHijri.month.number) {
+          hijriMonthLabel.textContent = `${firstHijri.month.en} ${firstHijri.year} AH`;
+        } else {
+          if (firstHijri.year === lastHijri.year) {
+            hijriMonthLabel.textContent = `${firstHijri.month.en} - ${lastHijri.month.en} ${firstHijri.year} AH`;
+          } else {
+            hijriMonthLabel.textContent = `${firstHijri.month.en} ${firstHijri.year} - ${lastHijri.month.en} ${lastHijri.year} AH`;
+          }
+        }
+      }
+    }
 
     const cell = document.createElement("div");
 
@@ -2496,7 +2710,7 @@ window.renderCalendar = function () {
   }
 };
 
-window.convertDate = function (e) {
+window.convertDate = async function (e) {
   if (e) e.preventDefault();
 
   const input = document.getElementById("convert-input-date");
@@ -2507,10 +2721,30 @@ window.convertDate = function (e) {
   const dateVal = new Date(input.value);
   if (isNaN(dateVal.getTime())) return;
 
+  resultBox.textContent = "🕋 Converting...";
+  resultBox.classList.remove("hidden");
+
+  try {
+    const dd = String(dateVal.getDate()).padStart(2, '0');
+    const mm = String(dateVal.getMonth() + 1).padStart(2, '0');
+    const yyyy = dateVal.getFullYear();
+    
+    const response = await fetch(`https://api.aladhan.com/v1/gregorianToHijri/${dd}-${mm}-${yyyy}?adjustment=${prayerSettings.hijriAdjust || 0}`);
+    if (response.ok) {
+      const json = await response.json();
+      if (json && json.data && json.data.hijri) {
+        const hijri = json.data.hijri;
+        resultBox.textContent = `🕋 ${hijri.month.en} ${hijri.day}, ${hijri.year} AH`;
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Single conversion API failed, falling back to local calculation.", err);
+  }
+
   const hijri = getHijriDetails(dateVal);
   if (hijri) {
     resultBox.textContent = `🕋 ${hijri.monthName} ${hijri.day}, ${hijri.year} AH`;
-    resultBox.classList.remove("hidden");
   }
 };
 
@@ -2749,13 +2983,18 @@ window.searchHadith = function (immediate = false) {
             <div class="quran-text text-lg text-slate-800 dark:text-slate-200 leading-normal text-right select-all">${h.arabic}</div>
             <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${highlightedEnglish}</p>
           </div>
-          <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800/80">
-            <div class="flex gap-1.5 overflow-hidden">
+          <div class="flex flex-col sm:flex-row gap-3 justify-between sm:items-center pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="flex gap-1.5 overflow-hidden flex-wrap">
               ${h.tags.map(t => `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md uppercase tracking-wider truncate max-w-[60px]">${t}</span>`).join('')}
             </div>
-            <button onclick="window.copyHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
-              📋 Copy Hadith
-            </button>
+            <div class="flex gap-2 justify-end w-full sm:w-auto">
+              <button onclick="window.speakHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-450 text-slate-500 cursor-pointer flex items-center justify-center" title="Read Aloud">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+              </button>
+              <button onclick="window.copyHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-450 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
+                📋 Copy
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -2793,12 +3032,58 @@ window.copyHadith = function (ref, arabic, english, btnEl) {
       btnEl.className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
       setTimeout(() => {
         btnEl.innerHTML = originalText;
-        btnEl.className = "px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
+        btnEl.className = "px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-450 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
       }, 1500);
     }
   }).catch(e => {
     console.error("Clipboard copy failed:", e);
   });
+};
+
+function speakSynthesizedText(btn, text) {
+  if (!('speechSynthesis' in window)) {
+    alert("Text-to-speech is not supported in your browser.");
+    return;
+  }
+
+  const originalIcon = `<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    btn.innerHTML = originalIcon;
+    return;
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+  const voice = voices.find(v => v.lang.startsWith('ar') || v.lang.startsWith('en'));
+  if (voice) utterance.voice = voice;
+
+  btn.innerHTML = `<span class="text-[8px] font-sans font-bold text-amber-500 animate-pulse">Playing...</span>`;
+
+  utterance.onend = () => {
+    btn.innerHTML = originalIcon;
+  };
+
+  utterance.onerror = () => {
+    btn.innerHTML = originalIcon;
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+window.speakLastReadVerse = function (btn) {
+  const arabicEl = document.getElementById("dash-last-read-arabic");
+  const translationEl = document.getElementById("dash-last-read-translation");
+  if (!arabicEl) return;
+
+  const text = arabicEl.textContent + " . " + (translationEl ? translationEl.textContent : "");
+  speakSynthesizedText(btn, text);
+};
+
+window.speakHadith = function (ref, arabic, english, btn) {
+  const text = `${ref} . ${arabic} . ${english}`;
+  speakSynthesizedText(btn, text);
 };
 
 // Global initializer launcher is moved to the bottom of the file to prevent execution before calculations load
@@ -3015,6 +3300,7 @@ window.saveZakatCalculation = function () {
   localStorage.setItem("nqp_zakat_logs", JSON.stringify(records));
 
   window.renderZakatHistory();
+  triggerCloudSync();
 
   const form = document.getElementById("zakat-form");
   if (form) form.reset();
@@ -3038,6 +3324,7 @@ window.saveZakatCalculation = function () {
 window.clearZakatHistory = function () {
   localStorage.removeItem("nqp_zakat_logs");
   window.renderZakatHistory();
+  triggerCloudSync();
 };
 
 window.renderZakatHistory = function () {
@@ -3286,6 +3573,7 @@ window.switchMainSection = function(section) {
     hadith: document.getElementById("main-pane-hadith"),
     zakat: document.getElementById("main-pane-zakat"),
     mosques: document.getElementById("main-pane-mosques"),
+    salahguide: document.getElementById("main-pane-salahguide"),
     profile: document.getElementById("main-pane-profile"),
     settings: document.getElementById("main-pane-settings")
   };
@@ -3311,9 +3599,16 @@ window.switchMainSection = function(section) {
     window.initMosqueMap();
   }
 
+  // If loading salah guide, initialize general step view
+  if (section === 'salahguide') {
+    const selector = document.getElementById("salah-guide-selector");
+    if (selector) selector.value = "general";
+    window.switchSalahSteps('general');
+  }
+
   // Update navigation button active styles
   const allNavs = [
-    'overview', 'tasbeeh', 'calendar', 'books', 'hadith', 'zakat', 'mosques', 'profile', 'settings'
+    'overview', 'tasbeeh', 'calendar', 'books', 'hadith', 'zakat', 'mosques', 'salahguide', 'profile', 'settings'
   ];
 
   allNavs.forEach(nav => {
@@ -3347,6 +3642,185 @@ window.switchMainSection = function(section) {
   if (section === "profile") {
     window.populateProfileStats();
   }
+};
+
+window.switchSalahSteps = function (type) {
+  const container = document.getElementById("salah-steps-container");
+  if (!container) return;
+
+  const generalSteps = [
+    {
+      title: "1. Intention (Niyyah) & Opening Takbeer",
+      arabic: "أَللّٰهُ أَكْبَرُ",
+      translit: "Allahu Akbar",
+      meaning: "Allah is the Greatest"
+    },
+    {
+      title: "2. Standing Position (Qiyam)",
+      recitations: [
+        {
+          name: "1. Sana (Opening Supplication - Recited once at start)",
+          arabic: "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا إِلَهَ غَيْرُكَ",
+          translit: "Subhanaka Allahumma wa bihamdika, wa tabarakas-muka, wa ta'ala jadduka, wa la ilaha ghairuk",
+          meaning: "Glory be to You, O Allah, and all praise. Blessed is Your name, and exalted is Your majesty, and there is no deity worthy of worship besides You."
+        },
+        {
+          name: "2. Surah Al-Fatiha (Obligatory in every Rakat)",
+          arabic: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ ۝ الرَّحْمَنِ الرَّحِيمِ ۝ مَالِكِ يَوْمِ الدِّينِ ۝ إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ۝ اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ ۝ صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+          translit: "Alhamdu lillahi Rabbil-'Alamin. Ar-Rahmanir-Rahim. Maliki Yawmid-Din. Iyyaka na'budu wa iyyaka nasta'in. Ihdinas-Siratal-Mustaqim. Siratal-ladhina an'amta 'alayhim, ghairil-maghdubi 'alayhim walad-dallin.",
+          meaning: "[All] praise is [due] to Allah, Lord of the worlds. The Entirely Merciful, the Especially Merciful. Sovereign of the Day of Recompense. It is You we worship and You we ask for help. Guide us to the straight path. The path of those upon whom You have bestowed favor, not of those who have earned [Your] anger or of those who are astray."
+        },
+        {
+          name: "3. Surah Al-Ikhlas (Example Surah read after Fatiha in first 2 Rakats)",
+          arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",
+          translit: "Qul huwallahu ahad. Allahus-samad. Lam yalid wa lam yulad. Wa lam yakul-lahu kufuwan ahad.",
+          meaning: "Say, 'He is Allah, [who is] One. Allah, the Eternal Refuge. He neither begets nor is born. Nor is there to Him any equivalent.'"
+        },
+        {
+          name: "4. Surah Al-Kawthar (Alternative Surah option)",
+          arabic: "إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ ۝ فَصَلِّ لِرَبِّكَ وَانْحَرْ ۝ إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ",
+          translit: "Inna a'tainakal-kawthar. Fasalli li-rabbika wanhar. Inna shani'aka huwal-abtar.",
+          meaning: "Indeed, We have granted you, [O Muhammad], al-Kawthar. So pray to your Lord and sacrifice [to Him alone]. Indeed, your enemy is the one cut off."
+        }
+      ]
+    },
+    {
+      title: "3. Bowing Position (Ruku)",
+      arabic: "سُبْحَانَ رَبِّيَ الْعَظِيمِ",
+      translit: "Subhana Rabbiyal 'Adheem (3 times)",
+      meaning: "Glory be to my Lord, the Almighty",
+      recitations: [
+        {
+          name: "Bowing Recitation (While Bowing)",
+          arabic: "سُبْحَانَ رَبِّيَ الْعَظِيمِ",
+          translit: "Subhana Rabbiyal 'Adheem (3 times)",
+          meaning: "Glory be to my Lord, the Almighty"
+        },
+        {
+          name: "Rising Supplication (While Standing up from Ruku)",
+          arabic: "سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ ۝ رَبَّنَا وَلَكَ الْحَمْدُ",
+          translit: "Sami' Allahu Liman Hamidah. Rabbana wa Lakal Hamd.",
+          meaning: "Allah hears those who praise Him. Our Lord, and to You belongs all praise."
+        }
+      ]
+    },
+    {
+      title: "4. Prostration (Sajdah)",
+      arabic: "سُبْحَانَ رَبِّيَ الْأَعْلَى",
+      translit: "Subhana Rabbiyal A'la (3 times)",
+      meaning: "Glory be to my Lord, the Most High",
+      recitations: [
+        {
+          name: "Prostration Recitation (While Prostrating)",
+          arabic: "سُبْحَانَ رَبِّيَ الْأَعْلَى",
+          translit: "Subhana Rabbiyal A'la (3 times)",
+          meaning: "Glory be to my Lord, the Most High"
+        },
+        {
+          name: "Between Sajdahs Supplication (Jalsah Sitting)",
+          arabic: "اللَّهُمَّ اغْفِرْ لِي وَارْحَمْنِي وَاهْدِنِي وَارْزُقْنِي",
+          translit: "Allahummagh-fir li, war-hamni, wah-dini, war-zuqni",
+          meaning: "O Allah, forgive me, have mercy on me, guide me, and provide for me."
+        }
+      ]
+    },
+    {
+      title: "5. Sitting for Tashahhud (Qadah) & Salam",
+      recitations: [
+        {
+          name: "1. Tashahhud (Attahiyyat - Recited in sitting position)",
+          arabic: "التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ",
+          translit: "At-tahiyyatu lillahi was-salawatu wat-tayyibatu. As-salamu 'alayka ayyuhan-Nabiyyu wa rahmatullahi wa barakatuhu. As-salamu 'alayna wa 'ala 'ibadillahis-salihin. Ash-hadu an la ilaha illallahu wa ash-hadu anna Muhammadan 'abduhu wa Rasuluhu.",
+          meaning: "All compliments, prayers and pure words are due to Allah. Peace be upon you, O Prophet, and the mercy of Allah and His blessings. Peace be upon us and upon the righteous servants of Allah. I bear witness that there is no deity worthy of worship except Allah, and I bear witness that Muhammad is His servant and Messenger."
+        },
+        {
+          name: "2. Durood Ibrahim (Read after Tashahhud in final Rakat)",
+          arabic: "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ",
+          translit: "Allahumma salli 'ala Muhammadin wa 'ala ali Muhammadin, kama sallayta 'ala Ibrahima wa 'ala ali Ibrahima, innaka Hamidun Majid. Allahumma barik 'ala Muhammadin wa 'ala ali Muhammadin, kama barakta 'ala Ibrahima wa 'ala ali Ibrahima, innaka Hamidun Majid.",
+          meaning: "O Allah, send prayers upon Muhammad and upon the family of Muhammad, as You sent prayers upon Abraham and upon the family of Abraham; indeed, You are Praiseworthy and Glorious. O Allah, bless Muhammad and the family of Muhammad, as You blessed Abraham and the family of Abraham; indeed, You are Praiseworthy and Glorious."
+        },
+        {
+          name: "3. Dua after Durood (Rabbij'alni)",
+          arabic: "رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِنْ ذُرِّيَّتِي رَبَّنَا وَتَقَبَّلْ دُعَاءِ رَبَّنَا اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ",
+          translit: "Rabbij-'alni muqimas-salati wa min dhurriyyati Rabbana wa taqabbal du'a. Rabbanagh-fir li wa li-walidayya wa lil-mu'minina yawma yaqumul-hisab.",
+          meaning: "My Lord, make me an establisher of prayer, and [many] from my descendants. Our Lord, and accept my supplication. Our Lord, forgive me and my parents and the believers the Day the account is established."
+        }
+      ]
+    }
+  ];
+
+  const fajrSteps = [
+    { title: "Rakat 1 (First Unit)", desc: "1. Lift hands and say opening Takbeer ('Allahu Akbar').<br/>2. Qiyam: Recite <b>Sana</b>, then <b>Surah Al-Fatiha</b>, then <b>Surah Al-Ikhlas</b> (or other Surah).<br/>3. Say 'Allahu Akbar', go to Ruku (say Bowing Recitation 3x). Stand up ('Sami' Allahu Liman Hamidah').<br/>4. Say 'Allahu Akbar', perform 2 Sajdahs (say Prostration Recitation 3x in each) with brief sitting in between." },
+    { title: "Rakat 2 (Second Unit)", desc: "1. Stand back up for Rakat 2.<br/>2. Qiyam: Recite <b>Surah Al-Fatiha</b>, then <b>Surah Al-Kawthar</b> (or another Surah).<br/>3. Go to Ruku, stand back up, then perform 2 Sajdahs." },
+    { title: "Final Sitting (Attahiyyat & Salam)", desc: "After the second Sajdah of Rakat 2, remain sitting. Recite: 1. <b>Tashahhud (Attahiyyat)</b>, 2. <b>Durood Ibrahim</b>, 3. <b>Dua (Rabbij'alni)</b>. Then turn your head to the right and say 'Assalamu Alaikum wa Rahmatullah', then turn left and say the same to complete the Fajr prayer." }
+  ];
+
+  const dhuhrSteps = [
+    { title: "Rakat 1 & 2 (First Two Units)", desc: "Perform standard Rakat 1 (reciting Sana + Surah Al-Fatiha + Surah) and standard Rakat 2 (reciting Surah Al-Fatiha + Surah)." },
+    { title: "First Sitting (Tashahhud Only)", desc: "After Rakat 2's prostrations, sit and recite ONLY the <b>Tashahhud (Attahiyyat)</b>. Do NOT read Durood or say Salam yet. Raise your index finger during the Shahadah, then stand up saying 'Allahu Akbar'." },
+    { title: "Rakat 3 & 4 (Remaining Units)", desc: "Perform Rakat 3 and Rakat 4. <b>Important Recitation Rule:</b> During Qiyam (standing) of Rakat 3 and 4 in Fard prayers, recite ONLY <b>Surah Al-Fatiha</b> (do NOT recite any additional surah)." },
+    { title: "Final Sitting & Salam", desc: "After the second Sajdah of Rakat 4, remain sitting. Recite <b>Tashahhud</b>, <b>Durood Ibrahim</b>, and <b>Dua</b>. Complete the prayer with Salam to the right and left." }
+  ];
+
+  const maghribSteps = [
+    { title: "Rakat 1 & 2 (First Two Units)", desc: "Perform standard Rakat 1 and Rakat 2 (both with Surah Al-Fatiha + another Surah, recited aloud for Maghrib)." },
+    { title: "First Sitting (Tashahhud Only)", desc: "After Rakat 2's prostrations, sit and recite ONLY the <b>Tashahhud (Attahiyyat)</b>. Stand back up while saying 'Allahu Akbar'." },
+    { title: "Rakat 3 (Third Unit)", desc: "Stand up and recite ONLY <b>Surah Al-Fatiha</b> silently. Perform Ruku, stand up, and perform 2 Sajdahs." },
+    { title: "Final Sitting & Salam", desc: "After Rakat 3's prostrations, remain sitting. Recite <b>Tashahhud</b>, <b>Durood Ibrahim</b>, and <b>Dua</b>. End the prayer with Salam to both sides." }
+  ];
+
+  let selectedSteps = [];
+  if (type === "fajr") selectedSteps = fajrSteps;
+  else if (type === "dhuhr") selectedSteps = dhuhrSteps;
+  else if (type === "maghrib") selectedSteps = maghribSteps;
+  else selectedSteps = generalSteps;
+
+  container.innerHTML = selectedSteps.map((step, idx) => {
+    let recitationsHtml = "";
+    if (step.recitations && step.recitations.length > 0) {
+      recitationsHtml = `
+        <div class="space-y-4">
+          ${step.recitations.map(r => `
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 space-y-3 flex flex-col items-center text-center shadow-sm">
+              <span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-450 uppercase tracking-wider">${r.name}</span>
+              <div class="quran-text text-xl sm:text-2xl text-slate-855 dark:text-slate-100 font-normal leading-loose select-all my-1.5">${r.arabic}</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-2.5 border-t border-slate-100 dark:border-slate-800/40 w-full text-left">
+                <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Pronunciation</span><br/><span class="italic text-slate-700 dark:text-slate-300 font-semibold">${r.translit}</span></div>
+                <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Translation</span><br/><span class="text-slate-650 dark:text-slate-400 font-medium">"${r.meaning}"</span></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    let directRecitationHtml = "";
+    if (step.translit && !step.recitations) {
+      directRecitationHtml = `
+        <div class="flex flex-col items-center text-center space-y-3 mt-2">
+          ${step.arabic ? `<div class="quran-text text-xl sm:text-2xl text-slate-855 dark:text-slate-100 font-normal leading-loose select-all">${step.arabic}</div>` : ''}
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-2.5 border-t border-slate-100 dark:border-slate-800/40 w-full text-left">
+            <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Pronunciation</span><span class="italic text-slate-700 dark:text-slate-300 font-semibold">${step.translit}</span></div>
+            <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Translation</span><span class="text-slate-655 dark:text-slate-400 font-medium">"${step.meaning}"</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    let outlineHtml = "";
+    if (step.desc && !step.recitations && !step.translit) {
+      outlineHtml = `<p class="text-xs text-slate-600 dark:text-slate-350 leading-relaxed font-medium">${step.desc}</p>`;
+    }
+
+    return `
+      <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 space-y-4">
+        <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-450 uppercase tracking-wider text-center border-b border-slate-200/50 dark:border-slate-700/50 pb-2">${step.title}</h4>
+        ${outlineHtml}
+        ${directRecitationHtml}
+        ${recitationsHtml}
+      </div>
+    `;
+  }).join('');
 };
 
 // Profile Stats Populate
@@ -3603,13 +4077,31 @@ window.resetAllData = function() {
 window.initFaithTools = function () {
   if (!document.getElementById("bookshelf-grid")) return;
 
-  window.switchFaithTab('tasbeeh');
+  // Track daily login activity for heatmap chart
+  try {
+    const activity = JSON.parse(localStorage.getItem("nqp_activity_logs") || "[]");
+    const todayDateStr = new Date().toDateString();
+    if (!activity.includes(todayDateStr)) {
+      activity.push(todayDateStr);
+      localStorage.setItem("nqp_activity_logs", JSON.stringify(activity));
+    }
+  } catch (e) {
+    console.warn("Could not record active session:", e);
+  }
+
   window.renderBookshelf();
   window.searchHadith();
   window.renderCalendar();
   window.renderTasbeehHistory();
   window.renderZakatHistory();
   window.bindReaderEvents();
+  
+  // Render Analytics charts
+  window.renderWeeklyTasbeehChart();
+  window.renderActivityHeatmap();
+
+  // Refresh Clock with Hijri date immediately
+  if (window.updateClock) window.updateClock();
 
   // Initialize Dark Mode button label
   const isDark = document.documentElement.classList.contains("dark");

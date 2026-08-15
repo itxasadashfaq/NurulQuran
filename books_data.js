@@ -1,6 +1,6 @@
 // NurulQuran Faith & Knowledge Local Database
 
-const ISLAMIC_BOOKS = [
+var ISLAMIC_BOOKS = [
   {
     id: "nawawi",
     title: "Forty Hadith of Imam Al-Nawawi",
@@ -151,7 +151,7 @@ const ISLAMIC_BOOKS = [
   }
 ];
 
-const HADITH_SEARCH_COLLECTION = [
+var HADITH_SEARCH_COLLECTION = [
   {
     ref: "Sahih Bukhari 1",
     arabic: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى",
