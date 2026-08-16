@@ -339,4 +339,61 @@ body {
   }
 }
 
+/* Logo hover & micro-animations */
+.logo-ray {
+  transition: transform 0.3s ease, stroke 0.3s ease, color 0.3s ease;
+  transform-origin: 12px 8.5px;
+}
+.group:hover .logo-ray {
+  transform: translateY(-1.5px) scaleY(1.15);
+  stroke: #f59e0b !important;
+  color: #f59e0b !important;
+}
+.logo-book {
+  transition: transform 0.3s ease;
+  transform-origin: 12px 19.5px;
+}
+.group:hover .logo-book {
+  transform: scaleX(1.03);
+}
+
+/* Sidebar Button Premium Styles */
+.sidebar-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-btn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, rgba(4, 120, 87, 0.08) 0%, rgba(4, 120, 87, 0.02) 100%);
+  border-left: 3.5px solid #047857;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  opacity: 0;
+  border-radius: 0 8px 8px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sidebar-btn::before {
+    background: linear-gradient(90deg, rgba(5, 150, 105, 0.15) 0%, rgba(5, 150, 105, 0.03) 100%);
+    border-left-color: #059669;
+  }
+}
+
+.sidebar-btn:hover::before {
+  width: 100%;
+  opacity: 1;
+}
+
+.sidebar-btn > span {
+  position: relative;
+  z-index: 10;
+}
+
+
 

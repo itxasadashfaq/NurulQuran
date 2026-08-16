@@ -72,12 +72,11 @@
               <!-- Quran Open Book with Light Rays SVG -->
               <svg width="22" height="22" class="w-5.5 h-5.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
                 <!-- Inner glow shape representing Nur/Light -->
-                <path d="M12 3a3 3 0 0 0 0 6 3 3 0 0 0 0-6Z" fill="currentColor" stroke="none" class="text-amber-400" opacity="0.15"/>
                 <!-- Open Book Pages (Left & Right) -->
-                <path d="M12 19.5V8.5C10.5 7.5 6 7.5 3 9v10.5c3-1.5 7.5-1.5 9 0Z" class="text-amber-400"/>
-                <path d="M12 19.5V8.5C13.5 7.5 18 7.5 21 9v10.5c-3-1.5-7.5-1.5-9 0Z" class="text-amber-400"/>
+                <path d="M12 19.5V8.5C10.5 7.5 6 7.5 3 9v10.5c3-1.5 7.5-1.5 9 0Z" class="text-amber-400 logo-book"/>
+                <path d="M12 19.5V8.5C13.5 7.5 18 7.5 21 9v10.5c-3-1.5-7.5-1.5-9 0Z" class="text-amber-400 logo-book"/>
                 <!-- Light rays rising from the book -->
-                <path d="M12 6V3M9.5 4.5l1.5 1.5M14.5 4.5L13 6" class="text-amber-400" opacity="0.85" stroke-width="1.5"/>
+                <path d="M12 6V3M9.5 4.5l1.5 1.5M14.5 4.5L13 6" class="text-amber-400 logo-ray" opacity="0.85" stroke-width="1.5"/>
               </svg>
             </div>
             <span
@@ -137,7 +136,7 @@
         <!-- Mobile Toggle -->
         <div class="flex md:hidden">
           <button onclick="toggleMobileMenu()"
-            class="inline-flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-650 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            class="inline-flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
             <svg width="24" height="24" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -177,6 +176,8 @@
         class="w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer focus:outline-none">📍 Mosque Locator</button>
       <button id="mobile-nav-salahguide" onclick="window.switchMainSection('salahguide')"
         class="w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer focus:outline-none">🕌 Namaz Guide</button>
+      <button id="mobile-nav-azkar" onclick="window.switchMainSection('azkar')"
+        class="w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer focus:outline-none">🤲 Daily Azkar</button>
       <hr class="border-slate-100 dark:border-slate-800/80 my-1">
       <div id="mobile-auth-logged-in" class="space-y-2">
         <div class="flex items-center gap-3 px-3 py-2">
@@ -243,44 +244,48 @@
       <!-- Navigation Links -->
       <div class="space-y-1.5 flex-grow">
         <button id="side-nav-overview" onclick="window.switchMainSection('overview')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 text-left cursor-pointer transition-all focus:outline-none border-l-4 border-emerald-700 dark:border-emerald-500 pl-3">
           <span>📊</span> Overview
         </button>
         <button id="side-nav-tasbeeh" onclick="window.switchMainSection('tasbeeh')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>🕋</span> Tasbeeh Clicker
         </button>
         <button id="side-nav-calendar" onclick="window.switchMainSection('calendar')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>📅</span> Hijri Calendar
         </button>
         <button id="side-nav-books" onclick="window.switchMainSection('books')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>📖</span> Islamic Books
         </button>
         <button id="side-nav-hadith" onclick="window.switchMainSection('hadith')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>🔍</span> Hadith Search
         </button>
         <button id="side-nav-zakat" onclick="window.switchMainSection('zakat')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>💰</span> Zakat Calculator
         </button>
         <button id="side-nav-mosques" onclick="window.switchMainSection('mosques')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>📍</span> Mosque Locator
         </button>
         <button id="side-nav-salahguide" onclick="window.switchMainSection('salahguide')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>🕌</span> Namaz Guide
+        </button>
+        <button id="side-nav-azkar" onclick="window.switchMainSection('azkar')"
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
+          <span>🤲</span> Daily Azkar
         </button>
         <hr class="border-slate-100 dark:border-slate-800/80 my-3">
         <button id="side-nav-profile" onclick="window.switchMainSection('profile')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>👤</span> My Profile
         </button>
         <button id="side-nav-settings" onclick="window.switchMainSection('settings')"
-          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none">
+          class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn">
           <span>⚙️</span> App Settings
         </button>
       </div>
@@ -296,9 +301,7 @@
         <!-- Welcome Banner -->
       <div
         class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 md:p-8 rounded-3xl bg-gradient-to-r from-emerald-950 to-emerald-850 text-white shadow-lg relative overflow-hidden">
-        <div
-          class="absolute inset-0 opacity-5 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none">
-        </div>
+        <div class="absolute inset-0 opacity-[0.035] pointer-events-none bg-repeat bg-[size:40px_40px]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 0 L26 14 L40 20 L26 26 L20 40 L14 26 L0 20 L14 14 Z M20 7 L24 16 L33 20 L24 24 L20 33 L16 24 L7 20 L16 16 Z' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E&quot;);"></div>
         <div class="space-y-1 relative z-10">
           <h1 class="text-2xl md:text-3xl font-bold">
             Assalamu Alaikum, <span id="dash-greeting-name">Brother/Sister</span>
@@ -413,7 +416,7 @@
                   <span class="text-emerald-600 dark:text-emerald-400">65%</span>
                 </div>
                 <div class="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div class="h-full bg-emerald-600 dark:bg-emerald-505 rounded-full" style="width: 65%"></div>
+                  <div class="h-full bg-emerald-600 dark:bg-emerald-500 rounded-full" style="width: 65%"></div>
                 </div>
               </div>
             </div>
@@ -449,7 +452,7 @@
                 <span id="dash-prayer-location" class="text-[10px] text-slate-400 italic max-w-[90px] truncate"
                   title="Detecting...">Detecting...</span>
                 <button onclick="window.openPrayerSettingsModal()"
-                  class="p-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-550 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-450 transition-all cursor-pointer focus:outline-none"
+                  class="p-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-550 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all cursor-pointer focus:outline-none"
                   title="Prayer Settings">
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -610,7 +613,7 @@
 
                 <div class="flex gap-4">
                   <button onclick="window.decrementTasbeeh()"
-                    class="px-4 py-2 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-355 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+                    class="px-4 py-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-355 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
                     ➖ Subtract
                   </button>
                   <button onclick="window.resetTasbeeh()"
@@ -679,7 +682,7 @@
                   class="flex items-center gap-6 p-3 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/80">
                   <div class="flex items-center gap-2">
                     <input type="checkbox" id="tasbeeh-sound" checked
-                      class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-850 cursor-pointer">
+                      class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 cursor-pointer">
                     <label for="tasbeeh-sound"
                       class="text-xs font-semibold text-slate-600 dark:text-slate-350 cursor-pointer select-none">🔊
                       Click Sounds</label>
@@ -727,7 +730,7 @@
                 <div
                   class="flex items-center justify-between p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/15">
                   <button onclick="window.changeCalendarMonth(-1)"
-                    class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-650 dark:text-slate-250 cursor-pointer focus:outline-none">
+                    class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-600 dark:text-slate-300 cursor-pointer focus:outline-none">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -741,7 +744,7 @@
                   </div>
 
                   <button onclick="window.changeCalendarMonth(1)"
-                    class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-650 dark:text-slate-250 cursor-pointer focus:outline-none">
+                    class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-600 dark:text-slate-300 cursor-pointer focus:outline-none">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
@@ -750,7 +753,7 @@
 
                 <!-- Calendar Grid Container -->
                 <div
-                  class="overflow-x-auto bg-slate-50 dark:bg-slate-850/40 p-4 border border-slate-100 dark:border-slate-800/80 rounded-2xl">
+                  class="overflow-x-auto bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-100 dark:border-slate-800/80 rounded-2xl">
                   <div
                     class="grid grid-cols-7 gap-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pb-2 border-b border-slate-155 dark:border-slate-800/80 mb-2 min-w-[320px]">
                     <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
@@ -1040,17 +1043,17 @@
                     </div>
                     <div class="flex justify-between">
                       <span class="text-slate-500">Calculated Rate:</span>
-                      <span class="font-bold text-emerald-600 dark:text-emerald-450">2.5%</span>
+                      <span class="font-bold text-emerald-600 dark:text-emerald-400">2.5%</span>
                     </div>
                   </div>
 
                   <div id="zakat-explanation"
-                    class="text-[10px] text-slate-500 leading-normal text-center bg-slate-50 dark:bg-slate-850/40 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/60">
+                    class="text-[10px] text-slate-500 leading-normal text-center bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/60">
                     Enter your asset values on the left and click calculate to check your Zakat status.
                   </div>
 
                   <button id="zakat-btn-save" onclick="window.saveZakatCalculation()"
-                    class="w-full py-2 bg-emerald-600 hover:bg-emerald-505 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm text-center hidden">
+                    class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm text-center hidden">
                     Save Calculation Record
                   </button>
                 </div>
@@ -1058,7 +1061,7 @@
                 <!-- Calculations Logs -->
                 <div class="space-y-2">
                   <div
-                    class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-505">
+                    class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     <span>Zakat History Logs</span>
                     <button onclick="window.clearZakatHistory()" class="text-[9px] text-red-500 hover:underline">Clear
                       History</button>
@@ -1086,7 +1089,7 @@
                 <div id="mosque-map"></div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold px-1">
                   <span>ℹ️ Uses Leaflet Maps & OpenStreetMap Overpass Interpreter</span>
-                  <span id="map-status" class="text-emerald-600 dark:text-emerald-450 font-bold">Ready</span>
+                  <span id="map-status" class="text-emerald-600 dark:text-emerald-400 font-bold">Ready</span>
                 </div>
               </div>
 
@@ -1159,50 +1162,50 @@
                   <tbody class="divide-y divide-slate-100 dark:divide-slate-800/40 font-medium text-slate-700 dark:text-slate-350">
                     <tr>
                       <td class="py-3 font-bold text-emerald-600 dark:text-emerald-400">Fajr</td>
-                      <td class="py-3 text-center text-slate-450">2</td>
+                      <td class="py-3 text-center text-slate-400">2</td>
                       <td class="py-3 text-center font-bold text-slate-800 dark:text-white">2</td>
-                      <td class="py-3 text-center text-slate-450">-</td>
-                      <td class="py-3 text-center text-slate-450">-</td>
+                      <td class="py-3 text-center text-slate-400">-</td>
+                      <td class="py-3 text-center text-slate-400">-</td>
                       <td class="py-3 text-right font-bold">4</td>
                     </tr>
                     <tr>
                       <td class="py-3 font-bold text-emerald-600 dark:text-emerald-400">Dhuhr</td>
-                      <td class="py-3 text-center text-slate-450">4 + 2</td>
+                      <td class="py-3 text-center text-slate-400">4 + 2</td>
                       <td class="py-3 text-center font-bold text-slate-800 dark:text-white">4</td>
-                      <td class="py-3 text-center text-slate-450">-</td>
-                      <td class="py-3 text-center text-slate-450">2</td>
+                      <td class="py-3 text-center text-slate-400">-</td>
+                      <td class="py-3 text-center text-slate-400">2</td>
                       <td class="py-3 text-right font-bold">12</td>
                     </tr>
                     <tr>
                       <td class="py-3 font-bold text-emerald-600 dark:text-emerald-400">Asr</td>
-                      <td class="py-3 text-center text-slate-450">4 (Ghair M.)</td>
+                      <td class="py-3 text-center text-slate-400">4 (Ghair M.)</td>
                       <td class="py-3 text-center font-bold text-slate-800 dark:text-white">4</td>
-                      <td class="py-3 text-center text-slate-450">-</td>
-                      <td class="py-3 text-center text-slate-450">-</td>
+                      <td class="py-3 text-center text-slate-400">-</td>
+                      <td class="py-3 text-center text-slate-400">-</td>
                       <td class="py-3 text-right font-bold">8</td>
                     </tr>
                     <tr>
                       <td class="py-3 font-bold text-emerald-600 dark:text-emerald-400">Maghrib</td>
-                      <td class="py-3 text-center text-slate-450">2</td>
+                      <td class="py-3 text-center text-slate-400">2</td>
                       <td class="py-3 text-center font-bold text-slate-800 dark:text-white">3</td>
-                      <td class="py-3 text-center text-slate-450">-</td>
-                      <td class="py-3 text-center text-slate-450">2</td>
+                      <td class="py-3 text-center text-slate-400">-</td>
+                      <td class="py-3 text-center text-slate-400">2</td>
                       <td class="py-3 text-right font-bold">7</td>
                     </tr>
                     <tr>
                       <td class="py-3 font-bold text-emerald-600 dark:text-emerald-400">Isha</td>
-                      <td class="py-3 text-center text-slate-450">4 (Ghair M.) + 2</td>
+                      <td class="py-3 text-center text-slate-400">4 (Ghair M.) + 2</td>
                       <td class="py-3 text-center font-bold text-slate-800 dark:text-white">4</td>
                       <td class="py-3 text-center font-bold text-amber-600 dark:text-amber-400">3</td>
-                      <td class="py-3 text-center text-slate-450">2 + 2</td>
+                      <td class="py-3 text-center text-slate-400">2 + 2</td>
                       <td class="py-3 text-right font-bold">17</td>
                     </tr>
                     <tr>
                       <td class="py-3 font-bold text-emerald-600 dark:text-emerald-400">Jumu'ah</td>
-                      <td class="py-3 text-center text-slate-450">4 + 2 + 2</td>
+                      <td class="py-3 text-center text-slate-400">4 + 2 + 2</td>
                       <td class="py-3 text-center font-bold text-slate-800 dark:text-white">2</td>
-                      <td class="py-3 text-center text-slate-450">-</td>
-                      <td class="py-3 text-center text-slate-450">2</td>
+                      <td class="py-3 text-center text-slate-400">-</td>
+                      <td class="py-3 text-center text-slate-400">2</td>
                       <td class="py-3 text-right font-bold">14</td>
                     </tr>
                   </tbody>
@@ -1218,7 +1221,7 @@
               <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
                 <span>📋</span> Conditions (Shuroot) of Salah
               </h3>
-              <ul class="space-y-2.5 text-xs text-slate-650 dark:text-slate-350 list-disc list-inside">
+              <ul class="space-y-2.5 text-xs text-slate-600 dark:text-slate-350 list-disc list-inside">
                 <li><b>Islam & Sanity:</b> Must be a Muslim and of sound mind.</li>
                 <li><b>Cleanliness (Taharah):</b> Body, clothing, and place of prayer must be clean. Perform Wudu or Ghusl.</li>
                 <li><b>Covering Awrah:</b> Men must cover navel to knee; women must cover everything except face and hands.</li>
@@ -1236,7 +1239,7 @@
                 <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <span>📖</span> Step-by-Step Salah Method
                 </h3>
-                <select id="salah-guide-selector" onchange="window.switchSalahSteps(this.value)" class="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-850 dark:text-slate-200">
+                <select id="salah-guide-selector" onchange="window.switchSalahSteps(this.value)" class="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
                   <option value="general">General Method (1 Rakat)</option>
                   <option value="fajr">Fajr Prayer (2 Rakats)</option>
                   <option value="dhuhr">Dhuhr/Asr/Isha (4 Rakats)</option>
@@ -1250,6 +1253,41 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ================= MAIN PANE: DAILY AZKAR ================= -->
+      <div id="main-pane-azkar" class="main-pane space-y-8 hidden">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <span>🤲</span> Daily Azkar & Duas
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Recite daily protection prayers, track counts, and listen to spoken translations.
+            </p>
+          </div>
+
+          <!-- Category Selector Tabs -->
+          <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto">
+            <button onclick="window.switchAzkarCategory('morning')" id="btn-azkar-morning" class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-emerald-600 text-white shadow-sm">
+              🌅 Morning
+            </button>
+            <button onclick="window.switchAzkarCategory('evening')" id="btn-azkar-evening" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700/50 transition-all cursor-pointer">
+              🌃 Evening
+            </button>
+            <button onclick="window.switchAzkarCategory('daily')" id="btn-azkar-daily" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700/50 transition-all cursor-pointer">
+              🕌 Daily Duas
+            </button>
+            <button onclick="window.switchAzkarCategory('favorites')" id="btn-azkar-favorites" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700/50 transition-all cursor-pointer flex items-center gap-1.5">
+              ⭐ Favorites
+            </button>
+          </div>
+        </div>
+
+        <!-- Azkar Cards List Container -->
+        <div id="azkar-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Dynamically populated by JS -->
         </div>
       </div>
 
@@ -1289,7 +1327,7 @@
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-555 uppercase tracking-wider mb-1.5">Email Address (Read-only)</label>
-                    <input type="email" id="profile-edit-email" class="w-full px-3 py-2.5 text-xs bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-xl text-slate-450 dark:text-slate-550 cursor-not-allowed" readonly>
+                    <input type="email" id="profile-edit-email" class="w-full px-3 py-2.5 text-xs bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-xl text-slate-400 dark:text-slate-550 cursor-not-allowed" readonly>
                   </div>
                 </div>
                 <div class="flex justify-end">
@@ -1339,7 +1377,7 @@
                 </div>
                 <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800/80">
                   <span class="text-xs text-slate-500">Surahs Memorized</span>
-                  <span class="text-xs font-bold text-emerald-600 dark:text-emerald-450" id="profile-stat-hifz">12 Surahs</span>
+                  <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400" id="profile-stat-hifz">12 Surahs</span>
                 </div>
                 <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800/80">
                   <span class="text-xs text-slate-500">Zakat Calculations Saved</span>
@@ -1414,8 +1452,8 @@
                 <!-- Dark Mode toggle -->
                 <div class="flex items-center justify-between">
                   <div class="space-y-0.5">
-                    <h4 class="text-xs font-bold text-slate-755 dark:text-slate-300 uppercase tracking-wider">Interface Theme</h4>
-                    <p class="text-[10px] text-slate-505">Enable dark background panels for comfortable night reading.</p>
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Interface Theme</h4>
+                    <p class="text-[10px] text-slate-500">Enable dark background panels for comfortable night reading.</p>
                   </div>
                   <button onclick="window.toggleDarkModeSetting()" id="settings-dark-mode-btn" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
                     Dark Mode
@@ -1425,8 +1463,8 @@
                 <!-- Accent colors selection -->
                 <div class="space-y-2.5">
                   <div>
-                    <h4 class="text-xs font-bold text-slate-755 dark:text-slate-300 uppercase tracking-wider">Primary Accent Color</h4>
-                    <p class="text-[10px] text-slate-505">Pick a custom highlights color tone for active states across dashboard widgets.</p>
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Primary Accent Color</h4>
+                    <p class="text-[10px] text-slate-500">Pick a custom highlights color tone for active states across dashboard widgets.</p>
                   </div>
                   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <!-- Emerald Accent -->
@@ -1460,15 +1498,15 @@
                 <label class="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" id="settings-remind-reading" checked class="mt-0.5 w-4 h-4 rounded text-emerald-600 bg-slate-50 border-slate-200 focus:ring-emerald-500">
                   <div>
-                    <h4 class="text-xs font-bold text-slate-755 dark:text-slate-300">Quran Reading Reminders</h4>
-                    <p class="text-[9px] text-slate-505">Receive dashboard greeting headers recommending daily targets.</p>
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Quran Reading Reminders</h4>
+                    <p class="text-[9px] text-slate-500">Receive dashboard greeting headers recommending daily targets.</p>
                   </div>
                 </label>
                 <!-- Prayer Times -->
                 <label class="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" id="settings-remind-prayer" checked class="mt-0.5 w-4 h-4 rounded text-emerald-600 bg-slate-50 border-slate-200 focus:ring-emerald-500">
                   <div>
-                    <h4 class="text-xs font-bold text-slate-755 dark:text-slate-300">Prayer Time Notification Sounds</h4>
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Prayer Time Notification Sounds</h4>
                     <p class="text-[9px] text-slate-550">Synthesize alert alarms or beep indicators upon active prayer schedules transition.</p>
                   </div>
                 </label>
@@ -1486,16 +1524,16 @@
               </h3>
               <div class="space-y-4">
                 <div>
-                  <h4 class="text-xs font-bold text-slate-755 dark:text-slate-300">Backup Dashboard Configs</h4>
-                  <p class="text-[9px] text-slate-505 leading-normal mb-3">Download settings, reading histories, and zakat files locally to restore them later.</p>
+                  <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Backup Dashboard Configs</h4>
+                  <p class="text-[9px] text-slate-500 leading-normal mb-3">Download settings, reading histories, and zakat files locally to restore them later.</p>
                   <button onclick="window.exportData()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer text-center">
                     Export Backup (JSON)
                   </button>
                 </div>
                 
                 <div class="border-t border-slate-100 dark:border-slate-800/80 pt-4">
-                  <h4 class="text-xs font-bold text-slate-755 dark:text-slate-300">Restore Backup Configs</h4>
-                  <p class="text-[9px] text-slate-505 leading-normal mb-3">Select a previously exported JSON backup file to overwrite current app settings.</p>
+                  <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Restore Backup Configs</h4>
+                  <p class="text-[9px] text-slate-500 leading-normal mb-3">Select a previously exported JSON backup file to overwrite current app settings.</p>
                   <label class="block w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold text-center border border-slate-200/50 cursor-pointer">
                     <span>Choose Backup File</span>
                     <input type="file" id="settings-import-file" onchange="window.importData(this)" accept=".json" class="hidden">
@@ -1503,7 +1541,7 @@
                 </div>
 
                 <div class="border-t border-slate-100 dark:border-slate-800/80 pt-4">
-                  <h4 class="text-xs font-bold text-slate-755 dark:text-slate-300 text-red-500">Reset Local App Cache</h4>
+                  <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 text-red-500">Reset Local App Cache</h4>
                   <p class="text-[9px] text-slate-550 leading-normal mb-3">Clear all saved reading histories, bookmarks, and parameters. This cannot be undone.</p>
                   <button onclick="window.resetAllData()" class="w-full py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-600 rounded-xl text-xs font-bold transition-all cursor-pointer text-center">
                     Clear Cache & Reset
@@ -1544,7 +1582,7 @@
 
       <!-- Close Button -->
       <button onclick="window.closePrayerSettingsModal()"
-        class="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none cursor-pointer">
+        class="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none cursor-pointer">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -1575,7 +1613,7 @@
 
           <!-- GPS Location status info -->
           <div id="settings-gps-info"
-            class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-150 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-450 space-y-1">
+            class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-150 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
             <div class="flex justify-between"><span>GPS Status:</span> <span id="settings-gps-status"
                 class="font-bold">Detecting...</span></div>
             <div class="flex justify-between"><span>Latitude:</span> <span id="settings-gps-lat"
@@ -1685,7 +1723,7 @@
         class="px-6 py-4 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/20 flex items-center justify-between">
         <div class="space-y-0.5">
           <h2 id="reader-book-title"
-            class="text-sm font-bold text-emerald-800 dark:text-emerald-450 truncate max-w-[250px] sm:max-w-[400px]">
+            class="text-sm font-bold text-emerald-800 dark:text-emerald-400 truncate max-w-[250px] sm:max-w-[400px]">
             Book Title</h2>
           <p id="reader-chapter-title"
             class="text-xs text-slate-500 dark:text-slate-400 font-semibold truncate max-w-[200px] sm:max-w-[300px]">
@@ -1694,14 +1732,14 @@
 
         <div class="flex items-center gap-3">
           <!-- Text Scale slider -->
-          <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-850 rounded-xl">
+          <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl">
             <span class="text-[10px] font-bold text-slate-400 uppercase">Size</span>
             <input type="range" id="reader-font-slider" min="14" max="28" value="18"
               class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
           </div>
           <!-- Close Button -->
           <button onclick="window.closeBookReader()"
-            class="p-1.5 text-slate-400 hover:text-slate-655 dark:hover:text-slate-250 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer">
+            class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -1732,7 +1770,7 @@
             </div>
             <!-- English Text card -->
             <div class="space-y-4">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-450 select-none">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 select-none">
                 English Translation</h4>
               <p id="reader-text-english" class="text-slate-700 dark:text-slate-350 leading-relaxed"
                 style="font-size: 16px">
@@ -1744,7 +1782,7 @@
               class="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/10 space-y-3">
               <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 select-none">
                 Guidance & Commentary</h4>
-              <p id="reader-text-explanation" class="text-slate-650 dark:text-slate-400 text-xs leading-relaxed">
+              <p id="reader-text-explanation" class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
                 Loading...
               </p>
             </div>
@@ -1756,14 +1794,14 @@
       <div
         class="px-6 py-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/20 flex items-center justify-between">
         <button id="reader-btn-prev" onclick="window.navigateBookChapter(-1)"
-          class="px-4 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850/80 text-slate-655 dark:text-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer">
+          class="px-4 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer">
           &larr; Prev Chapter
         </button>
 
         <span id="reader-page-indicator" class="text-xs font-semibold text-slate-400">Chapter 1 of 8</span>
 
         <button id="reader-btn-next" onclick="window.navigateBookChapter(1)"
-          class="px-4 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850/80 text-slate-655 dark:text-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer">
+          class="px-4 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer">
           Next Chapter &rarr;
         </button>
       </div>

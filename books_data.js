@@ -293,3 +293,76 @@ var HADITH_SEARCH_COLLECTION = [
     tags: ["distress", "help", "brotherhood"]
   }
 ];
+
+var DAILY_AZKAR = [
+  {
+    id: "ayat_kursi",
+    categories: ["morning", "evening", "daily"],
+    title: "Ayat al-Kursi (The Verse of the Throne)",
+    arabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+    transliteration: "Allahu la ilaha illa Huwal-Hayyul-Qayyum. La ta'khudhuhu sinatun wa la nawm. Lahu ma fis-samawati wa ma fil-ard. Man dhal-ladhi yashfa'u 'indahu illa bi-idhnih. Ya'lamu ma bayna aydihim wa ma khalfahum. Wa la yuhituna bi-shay'im-min 'ilmihi illa bi-ma sha'. Wasi'a kursiyyuhus-samawati wal-ard, wa la ya'uduhu hifdhuhuma, wa Huwal-'Aliyyul-'Adheem.",
+    english: "Allah! There is no deity worthy of worship except Him, the Ever-Living, the Sustainer of all existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
+    explanation: "Recited in the morning and evening for divine protection. The Prophet (PBUH) said that whoever recites this after every prayer, nothing stands between him and entering Paradise except death.",
+    targetCount: 1
+  },
+  {
+    id: "three_quls",
+    categories: ["morning", "evening"],
+    title: "The Three Quls (Sura Al-Ikhlas, Al-Falaq, An-Nas)",
+    arabic: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ ۞ اللَّهُ الصَّمَدُ ۞ لَمْ يَلِدْ وَلَمْ يُولَدْ ۞ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ\n\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۞ مِن شَرِّ مَا خَلَقَ ۞ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۞ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۞ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ\n\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ ۞ مَلِكِ النَّاسِ ۞ إِلَٰهِ النَّاسِ ۞ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۞ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۞ مِنَ الْجِنَّةِ وَالنَّاسِ",
+    transliteration: "Bismillahir-Rahmanir-Rahim. Qul Huwal-lahu Ahad... Qul A'udhu bi-Rabbil-Falaq... Qul A'udhu bi-Rabbin-Nas...",
+    english: "Say, 'He is Allah, [who is] One...' Say, 'I seek refuge in the Lord of daybreak...' Say, 'I seek refuge in the Lord of mankind...'",
+    explanation: "Recite 3 times in the morning and 3 times in the evening. The Prophet (PBUH) said: 'Recite them; they will suffice you against everything.'",
+    targetCount: 3
+  },
+  {
+    id: "bismillah_la_yadurru",
+    categories: ["morning", "evening"],
+    title: "Protection Against All Harm",
+    arabic: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+    transliteration: "Bismillahil-ladhi la yadurru ma'as-mihi shay'un fil-ardi wa la fis-sama'i wa Huwas-Sami'ul-'Alim.",
+    english: "In the name of Allah, with whose name nothing can cause harm on earth or in the heaven, and He is the All-Hearing, the All-Knowing.",
+    explanation: "Recited 3 times. Prophet Muhammad (PBUH) said: 'He who recites it three times in the morning will not be afflicted by any calamity until evening, and he who recites it three times in the evening will not be afflicted by any calamity until morning.'",
+    targetCount: 3
+  },
+  {
+    id: "raditu_billah",
+    categories: ["morning", "evening"],
+    title: "Contentment with Allah, Islam, and the Prophet",
+    arabic: "رَضِيتُ بِاللَّهِ رَبَّا وَبِالْإِسْلَامِ دِينًا وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيَّا",
+    transliteration: "Raditu billahi Rabba, wa bil-Islami dina, wa bi-Muhammadin (sallallahu 'alayhi wa sallam) Nabiyya.",
+    english: "I am pleased with Allah as my Lord, with Islam as my religion, and with Muhammad (PBUH) as my Prophet.",
+    explanation: "Recited 3 times. The Prophet (PBUH) said: 'Whoever says this three times in the morning and evening, it is a duty upon Allah to make him pleased on the Day of Resurrection.'",
+    targetCount: 3
+  },
+  {
+    id: "sayyidul_istighfar",
+    categories: ["morning", "evening", "daily"],
+    title: "Sayyidul Istighfar (The Master Supplication for Forgiveness)",
+    arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ ، خَلَقْتَنِي وَأَنَا عَبْدُكَ ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أنتَ",
+    transliteration: "Allahumma Anta Rabbi la ilaha illa Ant. Khalaqtani wa ana 'abduk, wa ana 'ala 'ahdika wa wa'dika mas-tata't. A'udhu bika min sharri ma sana't. Abu'u laka bi-ni'matika 'alayy, wa abu'u laka bi-dhanbi faghfir li, fa-innahu la yaghfirudh-dhunuba illa Ant.",
+    english: "O Allah, You are my Lord, there is no deity worthy of worship except You. You created me and I am Your servant, and I am faithful to my covenant and my promise to You as much as I am able. I seek refuge in You from the evil of what I have done. I acknowledge to You Your favor upon me, and I acknowledge to You my sin, so forgive me, for indeed, none can forgive sins except You.",
+    explanation: "Recited 1 time. The Prophet (PBUH) said: 'If somebody recites it during the day with firm faith in it, and dies on the same day before the evening, he will be from the people of Paradise; and if somebody recites it at night with firm faith in it, and dies before the morning, he will be from the people of Paradise.'",
+    targetCount: 1
+  },
+  {
+    id: "tasbih_fatima",
+    categories: ["daily"],
+    title: "Tasbih of Fatima (SubhanAllah, Alhamdulillah, Allahu Akbar)",
+    arabic: "سُبْحَانَ اللَّهِ (٣٣) ۞ الْحَمْدُ لِلَّهِ (٣٣) ۞ اللَّهُ أَكْبَرُ (٣٤)",
+    transliteration: "SubhanAllah (33x), Alhamdulillah (33x), Allahu Akbar (34x)",
+    english: "Glory be to Allah (33 times), Praise be to Allah (33 times), Allah is the Greatest (34 times).",
+    explanation: "Recited daily, especially before going to sleep or after obligatory prayers. It brings immense spiritual strength, peace, and replaces physical fatigue with divine energy.",
+    targetCount: 100
+  },
+  {
+    id: "la_ilaha_illallah_wahdahu",
+    categories: ["morning", "daily"],
+    title: "Dhikr of High Reward & Protection",
+    arabic: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+    transliteration: "La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu, wa Huwa 'ala kulli shay'in Qadir.",
+    english: "There is no deity worthy of worship except Allah alone, without partner. To Him belongs dominion, and to Him belongs praise, and He has power over all things.",
+    explanation: "Recited 10 or 100 times daily. The Prophet (PBUH) said that whoever recites it 100 times in a day will have a reward equal to freeing ten slaves, one hundred good deeds will be written for him, one hundred bad deeds will be wiped out from his record, and it will be a shield for him from Satan that day until night.",
+    targetCount: 10
+  }
+];

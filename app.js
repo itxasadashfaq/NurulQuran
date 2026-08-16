@@ -642,7 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
             matchRow.innerHTML = `
               <div class="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-1">
                 <span>Surah ${m.surah.englishName}</span>
-                <span class="text-emerald-600 dark:text-emerald-450">${m.surah.number}:${m.numberInSurah}</span>
+                <span class="text-emerald-600 dark:text-emerald-400">${m.surah.number}:${m.numberInSurah}</span>
               </div>
               <div class="text-slate-700 dark:text-slate-300 leading-normal whitespace-normal ${textDir}">
                 ${m.text}
@@ -722,7 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
       list.forEach((s) => {
         const btn = document.createElement("button");
         btn.className = `w-full p-3 flex items-center justify-between text-left rounded-xl transition-all border ${currentSurahNumber === s.number
-            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-450 font-semibold"
+            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-400 font-semibold"
             : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40"
           }`;
         btn.onclick = () => {
@@ -898,7 +898,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="flex items-start justify-between gap-4">
             <!-- Verse marker badge & play action & bookmark action -->
             <div class="flex items-center gap-1.5 flex-shrink-0">
-              <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-450 border border-emerald-500/10">
+              <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-emerald-500/10">
                 ${v.numberInSurah}
               </span>
               <button onclick="window.playVerseFromUI(${index})" class="p-1.5 rounded-lg text-emerald-650 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 transition-colors cursor-pointer" title="Play Verse">
@@ -923,7 +923,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="text-right rtl font-amiri text-xl font-bold text-emerald-800 dark:text-emerald-400">
               <div class="flex items-center justify-between gap-2 mb-1 flex-row-reverse select-none">
                 <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">اردو ترجمہ</span>
-                <button onclick="window.playUrduAudioFromUI(this, ${index})" class="p-1 rounded text-emerald-600 dark:text-emerald-450 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Translation">
+                <button onclick="window.playUrduAudioFromUI(this, ${index})" class="p-1 rounded text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Translation">
                   <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                 </button>
               </div>
@@ -939,7 +939,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           <!-- Inline Collapsible Tafseer Area -->
           <div class="pl-9 pt-1.5 border-t border-slate-150 dark:border-slate-800/60">
-            <button onclick="window.toggleTafseerInline(${index})" class="flex items-center gap-1 text-[11px] font-bold text-emerald-650 dark:text-emerald-450 hover:underline">
+            <button onclick="window.toggleTafseerInline(${index})" class="flex items-center gap-1 text-[11px] font-bold text-emerald-650 dark:text-emerald-400 hover:underline">
               <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
               <span id="tafseer-toggle-btn-txt-${index}">Show Tafseer (Urdu)</span>
             </button>
@@ -947,7 +947,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="tafseer-inline-box-${index}" class="hidden mt-3 p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/80 text-right rtl font-amiri text-xl font-bold text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line space-y-2">
               <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-1.5 mb-1.5 flex-row-reverse select-none">
                 <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">تفسیر (تفہیم القرآن)</span>
-                <button onclick="window.speakText(this, ${index}, 'tafseer')" class="p-1 rounded text-emerald-600 dark:text-emerald-450 hover:bg-slate-200 dark:hover:bg-slate-800/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Tafseer">
+                <button onclick="window.speakText(this, ${index}, 'tafseer')" class="p-1 rounded text-emerald-600 dark:text-emerald-400 hover:bg-slate-200 dark:hover:bg-slate-800/30 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer focus:outline-none" title="Listen to Tafseer">
                   <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                 </button>
               </div>
@@ -1192,7 +1192,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (bookmarksListEl) {
         const bookmarks = JSON.parse(localStorage.getItem("quran_bookmarks") || "[]");
         if (bookmarks.length === 0) {
-          bookmarksListEl.innerHTML = `<div class="text-center py-6 text-slate-450 italic text-[10px]">No bookmarked verses yet.</div>`;
+          bookmarksListEl.innerHTML = `<div class="text-center py-6 text-slate-400 italic text-[10px]">No bookmarked verses yet.</div>`;
         } else {
           bookmarksListEl.innerHTML = "";
           bookmarks.forEach(b => {
@@ -1215,7 +1215,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (historyListEl) {
         const history = JSON.parse(localStorage.getItem("quran_history") || "[]");
         if (history.length === 0) {
-          historyListEl.innerHTML = `<div class="text-center py-6 text-slate-455 italic text-[10px]">No reading history yet.</div>`;
+          historyListEl.innerHTML = `<div class="text-center py-6 text-slate-400 italic text-[10px]">No reading history yet.</div>`;
         } else {
           historyListEl.innerHTML = "";
           history.forEach(h => {
@@ -1893,7 +1893,7 @@ function renderPrayerTimes(timings) {
       let rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-slate-50/50 dark:bg-slate-800/10 border-transparent text-slate-400 opacity-60 transition-all";
 
       if (isActive) {
-        rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/60 text-slate-850 dark:text-white shadow-sm font-semibold prayer-active-row";
+        rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/60 text-slate-800 dark:text-white shadow-sm font-semibold prayer-active-row";
       } else if (!isActive && isChecked) {
         rowClasses = "p-3.5 rounded-2xl flex items-center justify-between border bg-slate-50/50 dark:bg-slate-800/10 border-transparent text-slate-800 dark:text-slate-350 transition-all";
       } else if (!isActive && !isChecked) {
@@ -1904,7 +1904,7 @@ function renderPrayerTimes(timings) {
       row.innerHTML = `
         <div class="flex items-center gap-2.5">
           <input type="checkbox" id="chk-prayer-${p.name.toLowerCase()}" ${isChecked ? 'checked' : ''} 
-            class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-850 cursor-pointer"
+            class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 cursor-pointer"
             onclick="window.togglePrayerCheck('${p.name}')">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold uppercase tracking-wider">${p.name}</span>
@@ -1913,7 +1913,7 @@ function renderPrayerTimes(timings) {
         </div>
         <div class="flex items-center gap-2.5">
           <span class="text-sm font-semibold">${format12Hour(p.time)}</span>
-          <span id="chk-status-${p.name.toLowerCase()}" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-450 ${isChecked ? '' : 'invisible'}">✓</span>
+          <span id="chk-status-${p.name.toLowerCase()}" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 ${isChecked ? '' : 'invisible'}">✓</span>
         </div>
       `;
       dashList.appendChild(row);
@@ -2489,7 +2489,7 @@ window.renderTasbeehHistory = function () {
     <div class="flex justify-between py-1.5 text-[11px]">
       <span class="font-semibold text-slate-700 dark:text-slate-350">${escapeHTML(l.dhikr)}</span>
       <div class="flex gap-2">
-        <span class="font-mono text-emerald-600 dark:text-emerald-450 font-bold">${l.count}x</span>
+        <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">${l.count}x</span>
         <span class="text-slate-400 font-mono">${l.time}</span>
       </div>
     </div>
@@ -2677,7 +2677,7 @@ window.renderCalendar = async function () {
 
     cell.className = cellClasses;
     cell.innerHTML = `
-      <span class="text-xs font-bold text-slate-850 dark:text-slate-200 self-start">${day}</span>
+      <span class="text-xs font-bold text-slate-800 dark:text-slate-200 self-start">${day}</span>
       <span class="text-[9px] font-mono text-slate-400 self-end">${hijri.day}</span>
       ${holiday ? `
         <div class="tooltip-box bg-slate-950/90 text-white text-[9px] font-medium p-2 rounded-xl border border-slate-800 shadow-xl max-w-[150px] leading-tight text-center">
@@ -2691,7 +2691,7 @@ window.renderCalendar = async function () {
 
   if (eventsList) {
     if (eventsInThisMonth.length === 0) {
-      eventsList.innerHTML = '<div class="text-[10px] text-slate-450 text-center py-4">No events found in this Hijri month.</div>';
+      eventsList.innerHTML = '<div class="text-[10px] text-slate-400 text-center py-4">No events found in this Hijri month.</div>';
     } else {
       eventsInThisMonth.sort((a, b) => a.dayGreg - b.dayGreg);
       eventsList.innerHTML = eventsInThisMonth.map(e => `
@@ -2773,7 +2773,7 @@ window.renderBookshelf = function () {
 
         <div class="space-y-3">
           <div class="space-y-1">
-            <div class="flex justify-between text-[9px] font-bold text-slate-455 dark:text-slate-500">
+            <div class="flex justify-between text-[9px] font-bold text-slate-400 dark:text-slate-500">
               <span>Read: ${progressIndex + 1}/${b.chapters.length} Ch</span>
               <span>${progressPercent}%</span>
             </div>
@@ -2816,7 +2816,7 @@ window.openBookReader = function (bookId, chapterId) {
   if (menu) {
     menu.innerHTML = book.chapters.map((ch, idx) => `
       <button onclick="window.openBookReader('${book.id}', '${ch.id}')" 
-        class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer ${idx === activeChapterIndex ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+        class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer ${idx === activeChapterIndex ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}">
         ${ch.title.split(': ')[0]}
       </button>
     `).join('');
@@ -2887,7 +2887,7 @@ window.navigateBookChapter = function (direction) {
         if (idx === activeChapterIndex) {
           btn.className = "w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer bg-emerald-600 text-white shadow-sm";
         } else {
-          btn.className = "w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+          btn.className = "w-full text-left px-3 py-2 rounded-xl text-xs font-semibold truncate transition-all cursor-pointer text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
         }
       });
     }
@@ -2962,7 +2962,7 @@ window.searchHadith = function (immediate = false) {
       if (!keyword) return text;
       const escapedKwd = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       const regex = new RegExp(`(${escapedKwd})`, 'gi');
-      return text.replace(regex, '<mark class="bg-yellow-250 dark:bg-amber-900/60 rounded px-0.5 text-slate-900 dark:text-slate-100">$1</mark>');
+      return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-amber-900/60 rounded px-0.5 text-slate-900 dark:text-slate-100">$1</mark>');
     }
 
     container.innerHTML = results.map(h => {
@@ -2977,7 +2977,7 @@ window.searchHadith = function (immediate = false) {
         <div class="p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm space-y-4 flex flex-col justify-between">
           <div class="space-y-3">
             <div class="flex justify-between items-center">
-              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 text-[9px] font-bold uppercase tracking-wider">${h.topic}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold uppercase tracking-wider">${h.topic}</span>
               <span class="text-[10px] font-bold text-slate-400 font-mono">${highlightedRef}</span>
             </div>
             <div class="quran-text text-lg text-slate-800 dark:text-slate-200 leading-normal text-right select-all">${h.arabic}</div>
@@ -2988,10 +2988,10 @@ window.searchHadith = function (immediate = false) {
               ${h.tags.map(t => `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md uppercase tracking-wider truncate max-w-[60px]">${t}</span>`).join('')}
             </div>
             <div class="flex gap-2 justify-end w-full sm:w-auto">
-              <button onclick="window.speakHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-450 text-slate-500 cursor-pointer flex items-center justify-center" title="Read Aloud">
+              <button onclick="window.speakHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 cursor-pointer flex items-center justify-center" title="Read Aloud">
                 <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.5C3.12 7.5 2 8.62 2 10v4c0 1.38 1.12 2.5 2.5 2.5h1.94l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
               </button>
-              <button onclick="window.copyHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-450 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
+              <button onclick="window.copyHadith('${escapedRef}', '${escapedArabic}', '${escapedEnglish}', this)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
                 📋 Copy
               </button>
             </div>
@@ -3032,7 +3032,7 @@ window.copyHadith = function (ref, arabic, english, btnEl) {
       btnEl.className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
       setTimeout(() => {
         btnEl.innerHTML = originalText;
-        btnEl.className = "px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-450 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
+        btnEl.className = "px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-500 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1";
       }, 1500);
     }
   }).catch(e => {
@@ -3489,7 +3489,7 @@ function renderMosqueListAndMarkers(mosques) {
         <h5 class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate" title="${m.name}">${m.name}</h5>
         <span class="text-[9px] text-slate-400 font-mono">${m.distance.toFixed(2)} km away</span>
       </div>
-      <button type="button" onclick="window.focusMosque(${m.lat}, ${m.lng}, '${m.name.replace(/'/g, "\\'")}', ${m.distance})" class="px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-600 hover:text-white text-emerald-700 dark:text-emerald-450 text-[9px] font-bold transition-all cursor-pointer">
+      <button type="button" onclick="window.focusMosque(${m.lat}, ${m.lng}, '${m.name.replace(/'/g, "\\'")}', ${m.distance})" class="px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-600 hover:text-white text-emerald-700 dark:text-emerald-400 text-[9px] font-bold transition-all cursor-pointer">
         View
       </button>
     `;
@@ -3574,6 +3574,7 @@ window.switchMainSection = function(section) {
     zakat: document.getElementById("main-pane-zakat"),
     mosques: document.getElementById("main-pane-mosques"),
     salahguide: document.getElementById("main-pane-salahguide"),
+    azkar: document.getElementById("main-pane-azkar"),
     profile: document.getElementById("main-pane-profile"),
     settings: document.getElementById("main-pane-settings")
   };
@@ -3606,9 +3607,14 @@ window.switchMainSection = function(section) {
     window.switchSalahSteps('general');
   }
 
+  // If loading azkar companion, initialize list rendering
+  if (section === 'azkar') {
+    window.switchAzkarCategory('morning');
+  }
+
   // Update navigation button active styles
   const allNavs = [
-    'overview', 'tasbeeh', 'calendar', 'books', 'hadith', 'zakat', 'mosques', 'salahguide', 'profile', 'settings'
+    'overview', 'tasbeeh', 'calendar', 'books', 'hadith', 'zakat', 'mosques', 'salahguide', 'azkar', 'profile', 'settings'
   ];
 
   allNavs.forEach(nav => {
@@ -3616,9 +3622,9 @@ window.switchMainSection = function(section) {
     const sideBtn = document.getElementById(`side-nav-${nav}`);
     if (sideBtn) {
       if (nav === section) {
-        sideBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/20 text-left cursor-pointer transition-all focus:outline-none";
+        sideBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 text-left cursor-pointer transition-all focus:outline-none border-l-4 border-emerald-700 dark:border-emerald-500 pl-3";
       } else {
-        sideBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none";
+        sideBtn.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-left cursor-pointer transition-all focus:outline-none sidebar-btn";
       }
     }
 
@@ -3628,7 +3634,7 @@ window.switchMainSection = function(section) {
       if (nav === section) {
         mobileBtn.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-bold bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 cursor-pointer focus:outline-none";
       } else {
-        mobileBtn.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-650 dark:text-slate-305 hover:bg-slate-50 dark:hover:bg-slate-850/40 cursor-pointer focus:outline-none";
+        mobileBtn.className = "w-full text-left block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer focus:outline-none";
       }
     }
   });
@@ -3782,11 +3788,11 @@ window.switchSalahSteps = function (type) {
         <div class="space-y-4">
           ${step.recitations.map(r => `
             <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 space-y-3 flex flex-col items-center text-center shadow-sm">
-              <span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-450 uppercase tracking-wider">${r.name}</span>
+              <span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">${r.name}</span>
               <div class="quran-text text-xl sm:text-2xl text-slate-855 dark:text-slate-100 font-normal leading-loose select-all my-1.5">${r.arabic}</div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-2.5 border-t border-slate-100 dark:border-slate-800/40 w-full text-left">
                 <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Pronunciation</span><br/><span class="italic text-slate-700 dark:text-slate-300 font-semibold">${r.translit}</span></div>
-                <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Translation</span><br/><span class="text-slate-650 dark:text-slate-400 font-medium">"${r.meaning}"</span></div>
+                <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Translation</span><br/><span class="text-slate-600 dark:text-slate-400 font-medium">"${r.meaning}"</span></div>
               </div>
             </div>
           `).join('')}
@@ -3801,7 +3807,7 @@ window.switchSalahSteps = function (type) {
           ${step.arabic ? `<div class="quran-text text-xl sm:text-2xl text-slate-855 dark:text-slate-100 font-normal leading-loose select-all">${step.arabic}</div>` : ''}
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-2.5 border-t border-slate-100 dark:border-slate-800/40 w-full text-left">
             <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Pronunciation</span><span class="italic text-slate-700 dark:text-slate-300 font-semibold">${step.translit}</span></div>
-            <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Translation</span><span class="text-slate-655 dark:text-slate-400 font-medium">"${step.meaning}"</span></div>
+            <div><span class="font-bold text-slate-400 dark:text-slate-500 uppercase text-[8px] tracking-wider block mb-0.5">Translation</span><span class="text-slate-600 dark:text-slate-400 font-medium">"${step.meaning}"</span></div>
           </div>
         </div>
       `;
@@ -3814,7 +3820,7 @@ window.switchSalahSteps = function (type) {
 
     return `
       <div class="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 space-y-4">
-        <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-450 uppercase tracking-wider text-center border-b border-slate-200/50 dark:border-slate-700/50 pb-2">${step.title}</h4>
+        <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider text-center border-b border-slate-200/50 dark:border-slate-700/50 pb-2">${step.title}</h4>
         ${outlineHtml}
         ${directRecitationHtml}
         ${recitationsHtml}
@@ -4130,6 +4136,181 @@ window.addEventListener("resize", () => {
     }
   }, 150);
 });
+
+// ================= DAILY AZKAR COMPANION FEATURE =================
+
+// State helper to retrieve current count of an Azkar item
+window.getAzkarCount = function(id) {
+  return parseInt(localStorage.getItem(`azkar_count_${id}`) || "0", 10);
+};
+
+// State helper to set count of an Azkar item
+window.setAzkarCount = function(id, count) {
+  localStorage.setItem(`azkar_count_${id}`, count);
+};
+
+// Retrieve favorite Azkar list
+window.getAzkarFavorites = function() {
+  try {
+    return JSON.parse(localStorage.getItem("azkar_favorites") || "[]");
+  } catch (e) {
+    return [];
+  }
+};
+
+// Set favorite Azkar list
+window.setAzkarFavorites = function(favs) {
+  localStorage.setItem("azkar_favorites", JSON.stringify(favs));
+};
+
+// Category tabs active/inactive switching
+window.switchAzkarCategory = function(category) {
+  const categories = ['morning', 'evening', 'daily', 'favorites'];
+  
+  // Update buttons highlight
+  categories.forEach(cat => {
+    const btn = document.getElementById(`btn-azkar-${cat}`);
+    if (btn) {
+      if (cat === category) {
+        btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-emerald-600 text-white shadow-sm";
+      } else {
+        btn.className = "px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700/50 transition-all cursor-pointer";
+      }
+    }
+  });
+
+  // Filter items
+  let items = [];
+  if (category === 'favorites') {
+    const favs = window.getAzkarFavorites();
+    items = DAILY_AZKAR.filter(item => favs.includes(item.id));
+  } else {
+    items = DAILY_AZKAR.filter(item => item.categories.includes(category));
+  }
+
+  // Render cards
+  const container = document.getElementById("azkar-list-container");
+  if (!container) return;
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-500 dark:text-slate-400">
+        <p class="text-sm font-semibold">No Azkar found in this category.</p>
+        ${category === 'favorites' ? '<p class="text-xs text-slate-400 mt-1">Mark items as favorite to see them here.</p>' : ''}
+      </div>
+    `;
+    return;
+  }
+
+  const favs = window.getAzkarFavorites();
+  
+  container.innerHTML = items.map(item => {
+    const count = window.getAzkarCount(item.id);
+    const isCompleted = count >= item.targetCount;
+    const isFav = favs.includes(item.id);
+    
+    return `
+      <div class="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4 relative flex flex-col justify-between transition-all duration-300 hover:shadow-md ${isCompleted ? 'border-emerald-500/30 bg-emerald-50/5 dark:bg-emerald-950/5' : ''}">
+        <!-- Header -->
+        <div class="flex items-start justify-between gap-4">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">${item.title}</h3>
+          <button onclick="window.toggleAzkarFavorite('${item.id}', '${category}')" class="text-slate-400 hover:text-amber-500 transition-colors text-lg focus:outline-none" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">
+            ${isFav ? '★' : '☆'}
+          </button>
+        </div>
+        
+        <!-- Arabic -->
+        <div class="border-y border-slate-100 dark:border-slate-800/60 py-3 my-2">
+          <p class="quran-text text-right text-xl md:text-2xl text-emerald-800 dark:text-emerald-400 leading-relaxed">${item.arabic}</p>
+        </div>
+
+        <!-- Translation & Transliteration -->
+        <div class="space-y-2">
+          <p class="text-[11px] italic text-slate-500 dark:text-slate-400 font-medium leading-normal">${item.transliteration}</p>
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-sans">${item.english}</p>
+        </div>
+
+        <!-- Note -->
+        <p class="text-[10px] text-slate-400 leading-normal border-t border-dashed border-slate-100 dark:border-slate-800/40 pt-2">${item.explanation}</p>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-4 mt-2">
+          <!-- Text to Speech -->
+          <button onclick="window.speakAzkarTranslation('${item.id}')" class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-all focus:outline-none" title="Listen to Translation">
+            🔊
+          </button>
+
+          <!-- Counter Actions -->
+          <div class="flex items-center gap-3">
+            <button onclick="window.resetAzkarCount('${item.id}', '${category}')" class="text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors focus:outline-none">
+              Reset
+            </button>
+            <button onclick="window.incrementAzkarCount('${item.id}', '${category}')" id="counter-btn-${item.id}" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border focus:outline-none ${isCompleted ? 'bg-emerald-50 border-emerald-300 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800/40 dark:text-emerald-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-800/40 dark:border-slate-700/60 dark:text-slate-300'}">
+              <span>${count} / ${item.targetCount}</span>
+              ${isCompleted ? '<span class="text-emerald-600 dark:text-emerald-400 font-bold">✓</span>' : '<span class="text-slate-400">＋</span>'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+// Increment count
+window.incrementAzkarCount = function(id, category) {
+  const item = DAILY_AZKAR.find(i => i.id === id);
+  if (!item) return;
+
+  let count = window.getAzkarCount(id);
+  if (count < item.targetCount) {
+    count++;
+    window.setAzkarCount(id, count);
+    
+    // Play subtle sound or trigger vibration on completed
+    if (count === item.targetCount) {
+      if (typeof window.navigator.vibrate === "function") {
+        window.navigator.vibrate([100, 50, 100]); // vibrate on completion
+      }
+    }
+    
+    // Refresh category view
+    window.switchAzkarCategory(category);
+  }
+};
+
+// Reset count
+window.resetAzkarCount = function(id, category) {
+  window.setAzkarCount(id, 0);
+  window.switchAzkarCategory(category);
+};
+
+// Toggle favorites
+window.toggleAzkarFavorite = function(id, category) {
+  let favs = window.getAzkarFavorites();
+  if (favs.includes(id)) {
+    favs = favs.filter(fid => fid !== id);
+  } else {
+    favs.push(id);
+  }
+  window.setAzkarFavorites(favs);
+  window.switchAzkarCategory(category);
+};
+
+// Spoken Translation using Web Speech Synthesis API
+window.speakAzkarTranslation = function(id) {
+  const item = DAILY_AZKAR.find(i => i.id === id);
+  if (!item) return;
+
+  // Stop any current speaking
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    
+    // Speak Translation
+    const utterance = new SpeechSynthesisUtterance(item.english);
+    utterance.rate = 0.95; // slightly slower for clarity
+    window.speechSynthesis.speak(utterance);
+  }
+};
 
 
 
