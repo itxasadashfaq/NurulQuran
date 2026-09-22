@@ -1,15 +1,32 @@
 {
-  "name": "nurulquran-simple-server",
-  "version": "1.0.0",
-  "description": "Simplified backend server for NurulQuran companion sync and MongoDB integration.",
-  "main": "server.js",
+  "name": "nurulquran-mern-platform",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "dev": "concurrently \"npm --prefix server start\" \"vite\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "npm --prefix server start",
+    "client": "vite",
+    "start": "vite"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mongoose": "^8.3.1"
+    "axios": "^1.7.5",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.439.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "vite": "^5.4.2"
   }
 }

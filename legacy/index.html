@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NurulQuran – Complete Islamic Learning & Quran Companion</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Theme Initializer
+    (function() {
+      const savedTheme = localStorage.getItem("nqp_theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    })();
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#047857',
+              light: '#059669',
+              dark: '#064e3b',
+              deep: '#022c22',
+            },
+            gold: {
+              DEFAULT: '#d97706',
+              light: '#f59e0b',
+              dark: '#b45309',
+            },
+            islamic: {
+              bg: '#f8faf9',
+              'dark-bg': '#03130c',
+              'dark-card': '#082216',
+              'dark-border': '#113824',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom Styles Link -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-islamic-bg dark:bg-islamic-dark-bg text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- 1. STICKY NAVBAR -->
+  <header class="sticky top-0 z-40 w-full border-b border-emerald-500/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between gap-4">
+        
+        <!-- Logo -->
+        <div class="flex items-center gap-2">
+          <a href="index.html" class="flex items-center gap-2 group">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-md group-hover:scale-105 transition-transform duration-200">
+              <!-- Quran Open Book with Light Rays SVG -->
+              <svg width="22" height="22" class="w-5.5 h-5.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <!-- Inner glow shape representing Nur/Light -->
+                <path d="M12 3a3 3 0 0 0 0 6 3 3 0 0 0 0-6Z" fill="currentColor" stroke="none" class="text-amber-400" opacity="0.15"/>
+                <!-- Open Book Pages (Left & Right) -->
+                <path d="M12 19.5V8.5C10.5 7.5 6 7.5 3 9v10.5c3-1.5 7.5-1.5 9 0Z" class="text-amber-400 logo-book"/>
+                <path d="M12 19.5V8.5C13.5 7.5 18 7.5 21 9v10.5c-3-1.5-7.5-1.5-9 0Z" class="text-amber-400 logo-book"/>
+                <!-- Light rays rising from the book -->
+                <path d="M12 6V3M9.5 4.5l1.5 1.5M14.5 4.5L13 6" class="text-amber-400 logo-ray" opacity="0.85" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <span class="text-xl font-bold bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-600 dark:from-emerald-400 dark:via-emerald-500 dark:to-amber-500 bg-clip-text text-transparent">
+              NurulQuran
+            </span>
+          </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-6">
+          <a href="index.html" class="text-sm font-semibold text-emerald-700 dark:text-emerald-400 font-bold transition-colors">Home</a>
+          <a href="#quran" class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Quran Companion</a>
+          <a href="#learn" class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Learning Modules</a>
+          <a href="dashboard.html" id="nav-dashboard-link" class="hidden text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Dashboard</a>
+        </nav>
+
+        <!-- Auth Buttons -->
+        <div class="hidden md:flex items-center gap-4">
+          <div id="auth-loading" class="w-8 h-8 rounded-full border-2 border-emerald-500/30 border-t-emerald-600 animate-spin"></div>
+          
+          <!-- Not Logged In -->
+          <div id="auth-logged-out" class="hidden flex items-center gap-2">
+            <button onclick="openModal('login')" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+              Sign In
+            </button>
+            <button onclick="openModal('signup')" class="px-4 py-2 bg-gradient-to-r from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white rounded-xl text-sm font-semibold shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all active:scale-[0.98]">
+              Get Started
+            </button>
+          </div>
+
+          <!-- Logged In -->
+          <div id="auth-logged-in" class="hidden flex items-center gap-4">
+            <a href="dashboard.html" class="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              <div id="user-avatar" class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800/40">
+                U
+              </div>
+              <span id="user-name" class="text-sm font-medium text-slate-700 dark:text-slate-200 max-w-[120px] truncate">
+                Brother/Sister
+              </span>
+            </a>
+            <button id="btn-signout" class="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 dark:border-slate-800 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 rounded-xl text-sm font-semibold transition-all">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="flex md:hidden">
+          <button onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-100 dark:border-slate-800/60 bg-white dark:bg-slate-900 px-4 py-3 space-y-3 shadow-lg">
+      <a href="index.html" class="block px-3 py-2 rounded-xl text-base font-bold bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400">Home</a>
+      <a href="#quran" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40">Quran Companion</a>
+      <a href="#learn" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40">Learning Modules</a>
+      <a href="dashboard.html" id="mobile-dashboard-link" class="hidden block px-3 py-2 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40">Dashboard</a>
+      <hr class="border-slate-100 dark:border-slate-800 my-1">
+      <div id="mobile-auth-logged-out" class="grid grid-cols-2 gap-2 pt-2">
+        <button onclick="openModal('login')" class="px-4 py-2.5 text-center text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800">Sign In</button>
+        <button onclick="openModal('signup')" class="px-4 py-2.5 text-center bg-gradient-to-r from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white rounded-xl text-sm font-semibold shadow-md">Sign Up</button>
+      </div>
+      <div id="mobile-auth-logged-in" class="hidden space-y-2">
+        <div class="flex items-center gap-3 px-3 py-2">
+          <div id="mobile-user-avatar" class="flex items-center justify-center w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800/40">
+            U
+          </div>
+          <div>
+            <div id="mobile-user-name" class="text-sm font-semibold text-slate-800 dark:text-slate-100">Brother/Sister</div>
+            <div id="mobile-user-email" class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">email@domain.com</div>
+          </div>
+        </div>
+        <button id="mobile-btn-signout" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200/25 text-red-600 dark:text-red-400 hover:bg-red-100 rounded-xl text-sm font-semibold">
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. HERO SECTION -->
+  <section class="relative overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-900 to-islamic-bg dark:to-islamic-dark-bg text-white py-20 lg:py-28">
+    <div class="absolute inset-0 opacity-[0.035] pointer-events-none bg-repeat bg-[size:40px_40px]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 0 L26 14 L40 20 L26 26 L20 40 L14 26 L0 20 L14 14 Z M20 7 L24 16 L33 20 L24 24 L20 33 L16 24 L7 20 L16 16 Z' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E&quot;);"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Text -->
+        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/40 border border-emerald-500/30 text-amber-300 text-xs font-semibold tracking-wide animate-pulse-gold">
+            <span class="text-amber-400">✦</span>
+            <span>Now live: Companion Dashboards & Quran Sync</span>
+          </div>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+            A Complete Islamic Learning & <br />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500">
+              Quran Companion Platform
+            </span>
+          </h1>
+          <p class="text-lg text-emerald-100 max-w-2xl mx-auto lg:mx-0">
+            Immerse yourself in Quran study, track daily prayers, master Arabic, 
+            and memorize surahs with structured lessons and a personal tracking dashboard.
+          </p>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+            <a href="dashboard.html" id="hero-dashboard-btn" class="hidden w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 rounded-xl text-base font-bold shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              Go to Your Dashboard →
+            </a>
+            <div id="hero-auth-btns" class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+              <button onclick="openModal('signup')" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 rounded-xl text-base font-bold shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                Start Free Journey →
+              </button>
+              <button onclick="openModal('login')" class="w-full sm:w-auto px-8 py-3.5 bg-emerald-800/40 hover:bg-emerald-800/60 border border-emerald-500/40 rounded-xl text-base font-semibold transition-all">
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Cards -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+          
+          <!-- Daily Verse Card -->
+          <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 shadow-xl space-y-4">
+            <div class="flex items-center justify-between text-xs text-emerald-200">
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                DAILY VERSE
+              </span>
+              <span id="daily-verse-ref">Surah Al-Baqarah 2:256</span>
+            </div>
+            <div id="daily-verse-arabic" class="quran-text text-right text-2xl font-bold text-amber-200 py-2">
+              لَا إِكْرَاهَ فِي الدِّينِ ۖ قَد تَّبَيَّنَ الرُّشْدُ مِنَ الْغَيِّ ۚ
+            </div>
+            <div id="daily-verse-translation" class="text-sm text-emerald-50 font-medium leading-relaxed">
+              &ldquo;There is no compulsion in religion. Verily, the Right Path has become distinct from the wrong path.&rdquo;
+            </div>
+            <div class="pt-2 flex items-center justify-between text-xs text-emerald-300">
+              <button id="btn-play-daily" class="flex items-center gap-1 hover:text-white transition-colors cursor-pointer focus:outline-none"><span class="text-amber-400">▶</span> Play Recitation</button>
+              <button id="btn-bookmark-daily" class="flex items-center gap-1 hover:text-white transition-colors cursor-pointer focus:outline-none">✦ Bookmark</button>
+            </div>
+          </div>
+
+          <!-- Mini Prayer Times Card -->
+          <div class="p-6 rounded-2xl bg-slate-900/50 backdrop-blur-md border border-slate-800/50 shadow-xl space-y-4">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <span class="flex items-center gap-1.5 font-bold">
+                <svg class="w-3.5 h-3.5 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                PRAYER TIMES
+              </span>
+              <div class="flex items-center gap-2">
+                <span id="home-prayer-location" class="text-[10px] text-slate-350 italic max-w-[90px] truncate" title="Detecting...">Detecting...</span>
+                <button onclick="window.openPrayerSettingsModal()" class="p-1 rounded bg-slate-800/60 hover:bg-slate-700/80 text-slate-300 hover:text-white transition-all cursor-pointer focus:outline-none" title="Prayer Settings">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </button>
+              </div>
+            </div>
+            <div id="home-prayer-active-container" class="flex justify-end">
+              <span id="home-prayer-active-badge" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold uppercase tracking-wider text-[9px]">
+                Active: --
+              </span>
+            </div>
+            <div class="grid grid-cols-5 gap-1.5" id="home-prayer-times-grid">
+              <div id="home-fajr-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Fajr</span>
+                <span id="home-fajr-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
+              </div>
+              <div id="home-dhuhr-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Dhuhr</span>
+                <span id="home-dhuhr-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
+              </div>
+              <div id="home-asr-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Asr</span>
+                <span id="home-asr-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
+              </div>
+              <div id="home-maghrib-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Maghrib</span>
+                <span id="home-maghrib-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
+              </div>
+              <div id="home-isha-card" class="p-1.5 rounded-xl text-center bg-slate-800/30 border border-transparent text-slate-400 opacity-60 transition-all">
+                <span class="text-[9px] uppercase font-bold block">Isha</span>
+                <span id="home-isha-time" class="text-[11px] font-semibold block mt-0.5">--:--</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. INTERACTIVE QURAN COMPANION SECTION -->
+  <section id="quran" class="py-16 bg-white dark:bg-slate-900 border-b border-emerald-500/10 transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-10 space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+          Quran Companion
+        </h2>
+        <p class="text-3xl font-extrabold text-slate-800 dark:text-white sm:text-4xl">
+          Interactive Quran Reader
+        </p>
+        <p class="text-slate-500 dark:text-slate-400 text-sm">
+          Select a Surah, adjust font sizes, choose your preferred reciter, and read with Sahih International translations.
+        </p>
+      </div>
+
+      <!-- Main Reader Layout Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Sidebar: Tabbed Selector & Search / Bookmarks (4 Columns) -->
+        <div class="lg:col-span-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-3xl p-5 shadow-sm space-y-4">
+          <!-- Sidebar Tabs Header -->
+          <div class="flex border-b border-slate-200 dark:border-slate-700/60 pb-2">
+            <button id="sidebar-tab-surahs" class="flex-1 text-center py-1.5 text-xs font-bold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 focus:outline-none cursor-pointer">
+              Surahs
+            </button>
+            <button id="sidebar-tab-search" class="flex-1 text-center py-1.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer">
+              Search Text
+            </button>
+            <button id="sidebar-tab-bookmarks" class="flex-1 text-center py-1.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer">
+              Bookmarks
+            </button>
+          </div>
+
+          <!-- Container 1: Surah Selector (Active by default) -->
+          <div id="sidebar-container-surahs" class="space-y-4">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                id="surah-search"
+                placeholder="Search Surah (e.g. Al-Fatihah, 18, Ya-Sin)..."
+                class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 dark:text-slate-100"
+              />
+            </div>
+            <!-- Scrollable Surah list -->
+            <div id="surah-list" class="max-h-[460px] overflow-y-auto space-y-2 pr-1">
+              <!-- Loading Indicator -->
+              <div class="flex flex-col items-center justify-center py-10 space-y-2">
+                <div class="w-8 h-8 rounded-full border-2 border-emerald-500/30 border-t-emerald-600 animate-spin"></div>
+                <span class="text-xs text-slate-400">Loading Surahs...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Container 2: Search Quran Text (Hidden by default) -->
+          <div id="sidebar-container-search" class="hidden space-y-4">
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="quran-search-query"
+                placeholder="Search keywords (e.g. mercy, faith, صبر)..."
+                class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 dark:text-slate-100"
+              />
+              <button id="btn-trigger-quran-search" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer">
+                Search
+              </button>
+            </div>
+            <div id="quran-search-results" class="max-h-[460px] overflow-y-auto space-y-3 pr-1 text-slate-500 text-xs">
+              <div class="text-center py-10 text-slate-400">
+                Enter keywords in Arabic, English, or Urdu and click search.
+              </div>
+            </div>
+          </div>
+
+          <!-- Container 3: Bookmarks & History (Hidden by default) -->
+          <div id="sidebar-container-bookmarks" class="hidden space-y-4">
+            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bookmarked Verses</h4>
+            <div id="sidebar-bookmarks-list" class="max-h-[200px] overflow-y-auto space-y-2 pr-1 text-slate-500 text-xs">
+              <div class="text-center py-6 text-slate-400">No bookmarked verses yet.</div>
+            </div>
+            
+            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-2 border-t border-slate-100 dark:border-slate-800/80">Recently Read</h4>
+            <div id="sidebar-history-list" class="max-h-[200px] overflow-y-auto space-y-2 pr-1 text-slate-500 text-xs">
+              <div class="text-center py-6 text-slate-400">No reading history yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Text Viewer (8 Columns) -->
+        <div class="lg:col-span-8 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-3xl p-6 shadow-sm flex flex-col min-h-[570px] relative">
+          
+          <!-- Reader Options Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800/60 mb-6">
+            
+            <!-- Active Surah Title -->
+            <div id="active-surah-header" class="space-y-0.5">
+              <h3 id="reader-surah-title" class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                Surah Al-Fatihah
+              </h3>
+              <p id="reader-surah-meta" class="text-xs text-slate-500 dark:text-slate-400">
+                1: Al-Fatihah - The Opener (7 Verses, Meccan)
+              </p>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="flex items-center gap-3">
+
+              <!-- Font adjusters -->
+              <div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 overflow-hidden">
+                <button id="btn-font-decrease" title="Decrease Font Size" class="px-2.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700">-A</button>
+                <button id="btn-font-increase" title="Increase Font Size" class="px-2.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400">+A</button>
+              </div>
+              
+              <!-- Translation toggle -->
+              <button id="btn-toggle-translation" class="px-3.5 py-1.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 transition-colors">
+                Hide Translation
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Verses Rendering Panel -->
+          <div id="verses-container" class="flex-grow max-h-[480px] overflow-y-auto space-y-6 pr-2">
+            <!-- Loading Indicator -->
+            <div class="flex flex-col items-center justify-center py-24 space-y-3">
+              <div class="w-10 h-10 rounded-full border-3 border-emerald-500/30 border-t-emerald-600 animate-spin"></div>
+              <span class="text-sm text-slate-500">Loading Verses...</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. OTHER STRUCTURAL LEARNING MODULES -->
+  <section class="py-16 bg-slate-50 dark:bg-slate-900/40 border-b border-emerald-500/10 transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+          Islamic Platforms
+        </h2>
+        <p class="text-3xl font-extrabold text-slate-800 dark:text-white sm:text-4xl">
+          More Platform Capabilities
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <!-- Module 2: Learning -->
+        <div id="learn" class="group p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.485V5.132a2 2 0 011.082-1.789l6-3a2 2 0 011.836 0l6 3a2 2 0 011.082 1.789v10.353a2 2 0 01-1.082 1.789L15 20M9 20a2 2 0 004 0m-4 0V11m0 9h4" /></svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 dark:text-white mt-6 mb-3">
+              Learning Modules
+            </h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+              Structured classes covering Aqeedah, Fiqh, Seerah, Tajweed, and Quranic Arabic, complete with 
+              quizzes and graded certificates.
+            </p>
+          </div>
+          <div class="pt-6">
+            <a href="dashboard.html" class="inline-flex items-center gap-1 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:underline">
+              Start Lessons →
+            </a>
+          </div>
+        </div>
+
+        <!-- Module 3: Hifz -->
+        <div class="group p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 dark:text-white mt-6 mb-3">
+              Hifz Memorization Companion
+            </h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+              Smart memorization routines, review prompts, and virtual reciters that help you track and perfect 
+              your Hifz milestones.
+            </p>
+          </div>
+          <div class="pt-6">
+            <a href="dashboard.html" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+              Track Memorization →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 4. CTA / CLOUD SYNC SECTION -->
+  <section class="py-20 bg-emerald-950 text-white relative overflow-hidden">
+    <div class="absolute inset-0 opacity-5 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-8">
+      
+      <h2 class="text-3xl font-extrabold sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-400">
+        Never Lose Your Progress
+      </h2>
+      <p class="text-lg text-emerald-100 max-w-2xl mx-auto leading-relaxed">
+        By establishing a NurulQuran account, your reading logs, bookmarked verses, 
+        memorization milestones, and course progress are securely synchronized to your database profile in real-time.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-6 max-w-xl mx-auto text-left bg-slate-900/60 p-6 rounded-2xl border border-emerald-800/30">
+        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-900/50 flex items-center justify-center border border-emerald-700/30 text-amber-300">
+          <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-100 text-sm">Real-time Cloud Sync</h4>
+          <p class="text-xs text-slate-400 mt-1">
+            Connected with Firebase Auth and backed by a MongoDB cloud database to safeguard your study history.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-4">
+        <button onclick="openModal('signup')" class="px-8 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition-all inline-flex items-center gap-2 shadow-lg shadow-amber-500/10">
+          Register Your Profile →
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. FOOTER -->
+  <footer class="border-t border-emerald-500/10 bg-white dark:bg-slate-950 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <!-- About -->
+        <div class="md:col-span-2 space-y-4">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-800">
+              <svg class="w-4 h-4 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+            </div>
+            <span class="text-lg font-bold bg-gradient-to-r from-emerald-800 to-amber-600 dark:from-emerald-400 dark:to-amber-500 bg-clip-text text-transparent">
+              NurulQuran
+            </span>
+          </div>
+          <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
+            A premium, comprehensive platform for Quran study, memorization, and Islamic learning. 
+            Built to accompany you in your spiritual and educational journey.
+          </p>
+        </div>
+
+        <!-- Column 1 -->
+        <div>
+          <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Platform</h3>
+          <ul class="space-y-2.5">
+            <li><a href="#quran" class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400">Quran Companion</a></li>
+            <li><a href="#learn" class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400">Learning Modules</a></li>
+            <li><a href="dashboard.html" class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400">Dashboard</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 2 -->
+        <div>
+          <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Resources</h3>
+          <ul class="space-y-2.5">
+            <li><span class="text-sm text-slate-400 dark:text-slate-500">Prayer Times API</span></li>
+            <li><span class="text-sm text-slate-400 dark:text-slate-500">Islamic Guides</span></li>
+            <li><span class="text-sm text-slate-400 dark:text-slate-500">Help & FAQs</span></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="mt-12 pt-8 border-t border-slate-100 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          &copy; <span id="current-year">2026</span> NurulQuran. All rights reserved.
+        </p>
+        <div class="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+          <span>Made as a complete Islamic learning platform.</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= AUTH MODAL ================= -->
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div class="relative w-full max-w-md overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-emerald-500/20 max-h-[90vh] flex flex-col animate-slide-up">
+      
+      <!-- Decorative Border -->
+      <div class="h-2 bg-gradient-to-r from-emerald-600 via-yellow-500 to-emerald-800 w-full"></div>
+
+      <!-- Close Button -->
+      <button onclick="closeModal()" class="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+
+      <div class="p-8 overflow-y-auto">
+        <!-- Tab Headers -->
+        <div class="text-center mb-6">
+          <h2 id="modal-title" class="text-2xl font-bold text-slate-800 dark:text-white">Welcome Back</h2>
+          <p id="modal-subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Access your Quran companion dashboard</p>
+        </div>
+
+        <!-- Tab Toggle Buttons -->
+        <div class="flex border-b border-slate-100 dark:border-slate-800 mb-6">
+          <button id="tab-login-btn" onclick="switchTab('login')" class="flex-1 pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400">
+            Sign In
+          </button>
+          <button id="tab-signup-btn" onclick="switchTab('signup')" class="flex-1 pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-600">
+            Sign Up
+          </button>
+        </div>
+
+        <!-- Auth Alert Message -->
+        <div id="auth-alert" class="hidden mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-650 dark:text-red-400 text-xs rounded-lg font-medium">
+          Error message details
+        </div>
+
+        <!-- Forms -->
+        <form id="auth-form" class="space-y-4">
+          <!-- Name Field (Signup Only) -->
+          <div id="field-name" class="hidden">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Full Name</label>
+            <input type="text" id="auth-name" placeholder="Muhammad Ali" class="w-full px-4 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 dark:text-slate-100">
+          </div>
+
+          <!-- Email Field -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Email Address</label>
+            <input type="email" id="auth-email" required placeholder="name@domain.com" class="w-full px-4 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 dark:text-slate-100">
+          </div>
+
+          <!-- Password Field -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Password</label>
+            <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 dark:text-slate-100">
+          </div>
+
+          <button type="submit" id="auth-submit-btn" class="w-full py-2.5 px-4 mt-6 bg-gradient-to-r from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white rounded-xl text-sm font-semibold shadow-lg transition-all flex items-center justify-center gap-2">
+            Sign In
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <button id="auth-switch-prompt" onclick="toggleActiveTab()" class="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">
+            Don't have an account? Sign Up
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= PRAYER SETTINGS MODAL ================= -->
+  <div id="prayer-settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div class="relative w-full max-w-md overflow-hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-emerald-500/20 max-h-[90vh] flex flex-col animate-slide-up">
+      
+      <!-- Decorative Border -->
+      <div class="h-2 bg-gradient-to-r from-emerald-600 via-yellow-500 to-emerald-800 w-full"></div>
+
+      <!-- Close Button -->
+      <button onclick="window.closePrayerSettingsModal()" class="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none cursor-pointer">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+
+      <div class="p-8 overflow-y-auto space-y-6">
+        <div class="text-center">
+          <h2 class="text-xl font-bold text-slate-800 dark:text-white">Prayer & Location Settings</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Configure coordinates and calculation preferences</p>
+        </div>
+
+        <form id="prayer-settings-form" class="space-y-5">
+          <!-- Location Mode Toggle -->
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Location Detection</label>
+            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+              <button type="button" id="settings-loc-gps" class="py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none cursor-pointer">GPS (Auto)</button>
+              <button type="button" id="settings-loc-manual" class="py-1.5 text-xs font-bold rounded-lg transition-all focus:outline-none cursor-pointer">City (Manual)</button>
+            </div>
+          </div>
+
+          <!-- GPS Location status info -->
+          <div id="settings-gps-info" class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-150 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
+            <div class="flex justify-between"><span>GPS Status:</span> <span id="settings-gps-status" class="font-bold">Detecting...</span></div>
+            <div class="flex justify-between"><span>Latitude:</span> <span id="settings-gps-lat" class="font-mono">--</span></div>
+            <div class="flex justify-between"><span>Longitude:</span> <span id="settings-gps-lng" class="font-mono">--</span></div>
+          </div>
+
+          <!-- Manual selection details -->
+          <div id="settings-manual-info" class="space-y-3 hidden">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Preset City</label>
+              <select id="settings-city-preset" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+                <option value="karachi">Karachi, Pakistan</option>
+                <option value="makkah">Makkah, Saudi Arabia</option>
+                <option value="london">London, United Kingdom</option>
+                <option value="newyork">New York, USA</option>
+                <option value="cairo">Cairo, Egypt</option>
+                <option value="istanbul">Istanbul, Turkey</option>
+                <option value="dhaka">Dhaka, Bangladesh</option>
+                <option value="dubai">Dubai, UAE</option>
+                <option value="sydney">Sydney, Australia</option>
+                <option value="custom">-- Custom Coordinates --</option>
+              </select>
+            </div>
+
+            <!-- Custom Coordinates Row -->
+            <div id="settings-custom-coords-row" class="grid grid-cols-2 gap-3 hidden">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Latitude</label>
+                <input type="number" id="settings-manual-lat" step="any" placeholder="24.8607" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Longitude</label>
+                <input type="number" id="settings-manual-lng" step="any" placeholder="67.0011" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculation Method -->
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Calculation Method</label>
+            <select id="settings-calc-method" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              <option value="1">University of Islamic Sciences, Karachi</option>
+              <option value="2">Islamic Society of North America (ISNA)</option>
+              <option value="3" selected>Muslim World League (MWL)</option>
+              <option value="4">Umm Al-Qura University, Makkah</option>
+              <option value="5">Egyptian General Authority of Survey</option>
+              <option value="7">Institute of Geophysics, University of Tehran</option>
+              <option value="8">Gulf Region</option>
+              <option value="9">Kuwait</option>
+              <option value="12">Union Organization Islamique de France</option>
+              <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
+              <option value="14">Spiritual Administration of Muslims of Russia</option>
+            </select>
+          </div>
+
+          <!-- Asr Juristic School -->
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Asr Juristic Method (School)</label>
+            <select id="settings-asr-school" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-slate-200">
+              <option value="0">Standard (Shafi'i, Maliki, Hanbali, Ja'fari)</option>
+              <option value="1">Hanafi School</option>
+            </select>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer">
+            Save Settings & Sync
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= STICKY BOTTOM AUDIO PLAYER ================= -->
+  <div id="audio-player-bar" class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 shadow-2xl border-t border-emerald-500/10 backdrop-blur-md px-4 py-3.5 transition-all duration-300 transform translate-y-full">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Left: Active playing details -->
+      <div class="flex items-center gap-3 w-full md:w-1/3">
+        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+          <svg class="w-5 h-5 animate-pulse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+        </div>
+        <div class="overflow-hidden space-y-0.5">
+          <div id="player-title" class="text-sm font-bold text-slate-800 dark:text-white truncate">Surah Al-Fatihah</div>
+          <div id="player-subtitle" class="text-xs text-slate-400 dark:text-slate-500 truncate">Verse 1</div>
+        </div>
+      </div>
+
+      <!-- Center: Playback Controls & Progress -->
+      <div class="flex flex-col items-center gap-2 w-full md:w-1/3">
+        <!-- Buttons row -->
+        <div class="flex items-center gap-5">
+          <!-- Prev Verse -->
+          <button id="player-btn-prev" title="Previous Verse" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M8.445 14.834A1 1 0 0010 14v-2.764l3.555 3.598a1 1 0 001.445-.834V6c0-.895-.99-1.445-1.445-.834L10 8.764V6c0-.895-.99-1.445-1.445-.834L5 8.764v-1.528A1 1 0 003.555 6.4a1 1 0 00-1.445.834v5.528a1 1 0 001.445.834L8.445 14.834z"/></svg>
+          </button>
+          
+          <!-- Play / Pause -->
+          <button id="player-btn-play" class="w-10 h-10 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-md active:scale-95 transition-all">
+            <!-- Play SVG -->
+            <svg id="play-icon" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+            <!-- Pause SVG -->
+            <svg id="pause-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          </button>
+
+          <!-- Next Verse -->
+          <button id="player-btn-next" title="Next Verse" class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M11.555 14.834L15 12.07v1.528a1 1 0 001.445-.834V6c0-.895-.99-1.445-1.445-.834L11.555 8.764v-2.764a1 1 0 00-1.445-.834L6.5 8.764v-1.528A1 1 0 005.055 6.4a1 1 0 00-1.445.834v5.528a1 1 0 001.445.834L11.555 14.834z"/></svg>
+          </button>
+        </div>
+
+        <!-- Slider Row -->
+        <div class="flex items-center gap-2.5 w-full">
+          <span id="player-time-current" class="text-[10px] font-semibold text-slate-400 w-8 text-right">00:00</span>
+          <input type="range" id="player-slider" min="0" max="100" value="0" class="flex-grow h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+          <span id="player-time-total" class="text-[10px] font-semibold text-slate-400 w-8 text-left">00:00</span>
+        </div>
+      </div>
+
+      <!-- Right: Reciter & Volume controls -->
+      <div class="flex items-center justify-end gap-4 w-full md:w-1/3">
+        <!-- Reciter dropdown select -->
+        <div class="relative max-w-[150px]">
+          <select id="player-reciter-select" class="w-full text-xs font-semibold py-1.5 pl-2 pr-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none">
+            <option value="ar.alafasy">Mishary Alafasy</option>
+            <option value="ar.abdulsamad">Abdul Basit (Mujawwad)</option>
+            <option value="ar.shaatree">Abu Bakr al-Shatri</option>
+            <option value="ar.hudhaify">Ali Al-Hudhaify</option>
+            <option value="ar.husary">Mahmoud Al-Husary</option>
+          </select>
+        </div>
+
+        <!-- Volume slider -->
+        <div class="flex items-center gap-1.5">
+          <button id="player-btn-mute" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+            <svg id="volume-high-icon" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+            <svg id="volume-muted-icon" class="hidden w-4 h-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zm11.95-6.05l-4.24 4.24m0-4.24l4.24 4.24" /></svg>
+          </button>
+          <input type="range" id="player-volume" min="0" max="100" value="80" class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+        </div>
+
+        <!-- Close Button -->
+        <button id="player-btn-close" title="Close Player" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Audio Element -->
+  <audio id="quran-audio-element" class="hidden"></audio>
+
+  <!-- Import Firebase configuration & app scripts -->
+
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+      }
+    }
+  </script>
+  
+  <script type="module" src="app.js?v=3"></script>
+  
+  <script>
+    // Local Page Helper Code
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Toggle Mobile menu
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    // Modal Helpers
+    window.activeTab = 'login';
+
+    function openModal(tab = 'login') {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.remove('hidden');
+      switchTab(tab);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.add('hidden');
+    }
+
+    function switchTab(tab) {
+      window.activeTab = tab;
+      const title = document.getElementById('modal-title');
+      const subtitle = document.getElementById('modal-subtitle');
+      const nameField = document.getElementById('field-name');
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const switchPrompt = document.getElementById('auth-switch-prompt');
+      const tabLogin = document.getElementById('tab-login-btn');
+      const tabSignup = document.getElementById('tab-signup-btn');
+      const alertDiv = document.getElementById('auth-alert');
+      
+      alertDiv.classList.add('hidden');
+
+      if (tab === 'login') {
+        title.textContent = 'Welcome Back';
+        subtitle.textContent = 'Access your Quran companion dashboard';
+        nameField.classList.add('hidden');
+        submitBtn.textContent = 'Sign In';
+        switchPrompt.textContent = "Don't have an account? Sign Up";
+        tabLogin.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400";
+        tabSignup.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-600";
+        document.getElementById('auth-name').removeAttribute('required');
+      } else {
+        title.textContent = 'Create Account';
+        subtitle.textContent = 'Join NurulQuran & start learning today';
+        nameField.classList.remove('hidden');
+        submitBtn.textContent = 'Create Account';
+        switchPrompt.textContent = "Already have an account? Sign In";
+        tabSignup.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400";
+        tabLogin.className = "flex-1 pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-600";
+        document.getElementById('auth-name').setAttribute('required', 'true');
+      }
+    }
+
+    function toggleActiveTab() {
+      switchTab(window.activeTab === 'login' ? 'signup' : 'login');
+    }
+  </script>
+</body>
+</html>
